@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เรียนรู้หุ่นยนต์ สพฐ. ระดับกลาง ระดับสูง</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <!-- 
+  <link href="materialdesignicons.min.css" rel="stylesheet">
+  -->
+  <link href="vuetify.min.css" rel="stylesheet">
+  <script src="vue.js"></script>
+  <script src="vuetify.js"></script>
+
+  <link rel="manifest" href="manifest.json">
+  <style>
+    .fixed-number {
+      font-family: 'Roboto Mono', monospace;
+      letter-spacing: 0.05em;
+
+    }
+    .fullscreen-time {
+      font-size:  25vh !important;
+      line-height: 1;
+      text-align: center;
+      margin-top:200px;
+      margin-bottom:50px;
+    }
+    .grid-cell {
+      aspect-ratio: 1/1;  /* Each cell is a perfect square */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      height: 100%;  /* Ensure full height within the row */
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);  /* 8 equal columns */
+      grid-template-rows: repeat(4, 1fr);     /* 4 equal rows */
+      gap: 4px;
+      height: 20vh;  /* Set a fixed height to maintain aspect ratio */
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      place-items: center;
+    }
+    .grid-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+    .wheel-container {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      cursor: pointer;
+    }
+    #wheelCanvas {
+      width: 100%;
+      height: auto;
+    }
+    .wheel-pointer {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 30px solid red;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-app-bar app color="primary" dark>
+        <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+        <v-toolbar-title>เรียนรู้หุ่นยนต์ระดับกลาง</v-toolbar-title>
+        <v-spacer></v-spacer> จิรัฎฐ์ สุดใจ :
+        iam.geradt@gmail.com
+        <v-btn icon @click="toggleFullscreen">
+          <v-icon>mdi-fullscreen</v-icon>
+        </v-btn>
+      </v-app-bar>
+
+      <v-navigation-drawer 
+        v-model="drawer" 
+        app 
+        :mobile-breakpoint="600" 
+        :width="280"
+      >
+        <v-list nav dense>
+          <!-- หน้าแรก -->
+          <v-list-item @click="tab = 'home'" :class="{'v-list-item--active primary--text': tab === 'home'}">
+            <v-list-item-icon>
+              <v-icon :color="tab === 'home' ? 'primary' : ''">mdi-home</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>หน้าแรก</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <!-- สุ่มตัวเลข -->
+          <v-list-item @click="tab = 'random'" :class="{'v-list-item--active primary--text': tab === 'random'}">
+            <v-list-item-icon>
+              <v-icon :color="tab === 'random' ? 'primary' : ''">mdi-dice-multiple</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>สุ่มตัวเลข</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <!-- จับเวลา -->
+          <v-list-item @click="tab = 'timer'" :class="{'v-list-item--active primary--text': tab === 'timer'}">
+            <v-list-item-icon>
+              <v-icon :color="tab === 'timer' ? 'primary' : ''">mdi-timer</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>จับเวลา</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <!-- นับถอยหลัง -->
+          <v-list-item @click="tab = 'countdown'" :class="{'v-list-item--active primary--text': tab === 'countdown'}">
+            <v-list-item-icon>
+              <v-icon :color="tab === 'countdown' ? 'primary' : ''">mdi-timer-outline</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>นับถอยหลัง</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+            <!-- ระดับกลาง -->
+            <v-list-group
+              :value="expandedMid"
+              @click="expandedMid = !expandedMid"
+              no-action
+            >
+              <template v-slot:activator>
+                <v-list-item-icon>
+                  <v-icon>mdi-robot</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>ระดับกลาง</v-list-item-title>
+                </v-list-item-content>
+              </template>
+
+              <v-list-item @click="tab = 'mid-rules'" :class="{'v-list-item--active primary--text': tab === 'mid-rules'}">
+                <v-list-item-icon>
+                  <v-icon :color="tab === 'mid-rules' ? 'primary' : ''">mdi-file-document</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>กติกา</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-list-item @click="tab = 'mid-field'" :class="{'v-list-item--active primary--text': tab === 'mid-field'}">
+                <v-list-item-icon>
+                  <v-icon :color="tab === 'mid-field' ? 'primary' : ''">mdi-grid</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>สุ่มสนาม</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-list-item @click="tab = 'mid-timer'" :class="{'v-list-item--active primary--text': tab === 'mid-timer'}">
+                <v-list-item-icon>
+                  <v-icon :color="tab === 'mid-timer' ? 'primary' : ''">mdi-clock-fast</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>จับเวลา 3 นาที</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-list-item @click="tab = 'mid-teams'" :class="{'v-list-item--active primary--text': tab === 'mid-teams'}">
+                <v-list-item-icon>
+                  <v-icon :color="tab === 'mid-teams' ? 'primary' : ''">mdi-account-group</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>ตั้งค่าทีม</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-list-item @click="tab = 'mid-results'" :class="{'v-list-item--active primary--text': tab === 'mid-results'}">
+                <v-list-item-icon>
+                  <v-icon :color="tab === 'mid-results' ? 'primary' : ''">mdi-trophy</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>ผลการแข่งขัน</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-group>
+
+            <!-- ระดับสูง -->
+            <v-list-group
+              :value="expandedHigh"
+              @click="expandedHigh = !expandedHigh"
+              no-action
+            >
+              <template v-slot:activator>
+                <v-list-item-icon>
+                  <v-icon>mdi-robot-industrial</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>ระดับสูง</v-list-item-title>
+                </v-list-item-content>
+              </template>
+
+              <v-list-item @click="tab = 'high-rules'" :class="{'v-list-item--active primary--text': tab === 'high-rules'}">
+                <v-list-item-icon>
+                  <v-icon :color="tab === 'high-rules' ? 'primary' : ''">mdi-file-document</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>กติกา</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-list-item @click="tab = 'high-field'" :class="{'v-list-item--active primary--text': tab === 'high-field'}">
+                <v-list-item-icon>
+                  <v-icon :color="tab === 'high-field' ? 'primary' : ''">mdi-grid</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>สุ่มสนาม</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-list-item @click="tab = 'high-timer'" :class="{'v-list-item--active primary--text': tab === 'high-timer'}">
+                <v-list-item-icon>
+                  <v-icon :color="tab === 'high-timer' ? 'primary' : ''">mdi-clock-fast</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>จับเวลา 5 นาที</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-list-item @click="tab = 'high-teams'" :class="{'v-list-item--active primary--text': tab === 'high-teams'}">
+                <v-list-item-icon>
+                  <v-icon :color="tab === 'high-teams' ? 'primary' : ''">mdi-account-group</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>ตั้งค่าทีม</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-list-item @click="tab = 'high-results'" :class="{'v-list-item--active primary--text': tab === 'high-results'}">
+                <v-list-item-icon>
+                  <v-icon :color="tab === 'high-results' ? 'primary' : ''">mdi-trophy</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>ผลการแข่งขัน</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-group>
+        </v-list>
+      </v-navigation-drawer>
+
+      <v-main>
+        <v-container fluid>
+          <!-- หน้าแรก -->
+          <v-sheet v-if="tab === 'home'" class="d-flex flex-column align-center justify-center fill-height pa-4">
+            <v-container>
+              <v-row justify="center">
+                <v-col cols="12" md="8">
+                  <v-card class="pa-8">
+                    <v-card-title class="text-h3 justify-center mb-4">
+                      <v-icon large color="primary" class="mr-3">mdi-robot</v-icon>
+                      เรียนรู้หุ่นยนต์ สพฐ.
+                    </v-card-title>
+                    <v-card-subtitle class="text-h5 text-center mb-6">
+                      ระบบจัดการการแข่งขันหุ่นยนต์ระดับกลางและระดับสูง
+                    </v-card-subtitle>
+                    <v-divider class="mb-6"></v-divider>
+                    <v-card-text class="text-h6">
+                      <p class="mb-4">ยินดีต้อนรับสู่ระบบจัดการการแข่งขันหุ่นยนต์</p>
+                      <p class="mb-2">คุณสมบัติ:</p>
+                      <ul>
+                        <li>จับเวลาและนับถอยหลัง</li>
+                        <li>สุ่มสนามการแข่งขัน</li>
+                        <li>จัดการข้อมูลทีม</li>
+                        <li>บันทึกผลการแข่งขัน</li>
+                      </ul>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-sheet>
+
+          <!-- สุ่มตัวเลข -->
+          <v-sheet v-if="tab === 'random'" class="pa-4">
+            <v-container fluid>
+              <v-row justify="center" class="mb-4">
+                <v-col cols="12" class="text-center">
+                  <h2 class="text-h4 mb-4">สุ่มตัวเลข 1-32</h2>
+                  <v-btn 
+                    color="purple" 
+                    @click="shuffleWheelNumbers"
+                    :disabled="isRandomRunning"
+                    outlined
+                  >
+                    <v-icon left>mdi-shuffle</v-icon>
+                    สลับเลขบนวงล้อ
+                  </v-btn>
+                </v-col>
+              </v-row>
+
+              <v-row justify="center" align="center">
+                <!-- วงล้อหมุน -->
+                <v-col cols="12" md="6" class="d-flex flex-column align-center">
+                  <div class="wheel-container" @click="startRoulette">
+                    <div class="wheel-pointer"></div>
+                    <canvas 
+                      id="wheelCanvas" 
+                      width="400" 
+                      height="400"
+                      ref="wheelCanvas"
+                    ></canvas>
+                  </div>
+                  <div class="text-center mt-4">
+                    <div class="text-h3 red--text font-weight-bold" v-if="rouletteNumber">
+                      เลขที่: {{ rouletteNumber }}
+                    </div>
+                    <div class="text-subtitle-1 grey--text" v-if="!isRandomRunning">
+                      คลิกที่วงล้อเพื่อสุ่ม
+                    </div>
+                    <div class="text-subtitle-1 primary--text" v-else>
+                      กำลังสุ่ม...
+                    </div>
+                  </div>
+                </v-col>
+
+                <!-- Grid แสดงผลตัวเลขที่สุ่มได้ -->
+                <v-col cols="12" md="6" class="d-flex justify-center align-center">
+                  <div class="grid-container">
+                    <v-card 
+                      v-for="cell in grid" 
+                      :key="cell"
+                      :color="getRouletteColor(cell)"
+                      class="grid-cell"
+                      :class="{'elevation-8': selectedNumbers.includes(cell)}"
+                    >
+                      {{ cell }}
+                    </v-card>
+                  </div>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-sheet>
+
+          <!-- จับเวลา -->
+          <v-sheet v-if="tab === 'timer'" class="d-flex flex-column align-center justify-center fill-height pa-4">
+            <div class="text-center">
+              <div 
+                contenteditable="true"
+                @blur="updateFullscreenText"
+                @input="onTimerTextInput"
+                @focus="onTimerTextFocus"
+                class="mb-4 grey--text text--darken-1"
+                :style="isFullScreen ? 'font-size: 3rem; outline: none; min-height: 3.5rem;' : 'font-size: 1.2rem; outline: none; min-height: 1.5rem;'"
+                style="cursor: text;"
+                ref="editableTimerText"
+              >{{ fullscreenText || 'คลิกเพื่อใส่ข้อความ' }}</div>
+              
+              <div 
+                v-if="isPreparing"
+                :class="isFullScreen ? 'display-1' : 'headline'"
+                class="orange--text text--darken-2 font-weight-bold mb-4"
+                :style="isFullScreen ? 'font-size: 15vh;' : 'font-size: 5rem;'"
+              >
+                {{ timerPrepareCountdown }}
+              </div>
+              
+              <div :class="['fixed-number', isFullScreen ? 'fullscreen-time' : 'display-3']">
+                {{ formattedTime }}
+              </div>
+              <v-btn-group>
+                <v-btn 
+                  color="green" 
+                  @click="toggleTimer"
+                >
+                  {{ timerRunning ? 'หยุด' : 'เริ่ม' }}
+                </v-btn>
+                <v-btn 
+                  color="red" 
+                  @click="resetTimer"
+                >
+                  รีเซ็ต
+                </v-btn>
+              </v-btn-group>
+              <p class="font-weight-thin" style="margin-top:20px">
+                กด SPACE BAR เพื่อเริ่ม หรือ หยุด<br>กด 0 เพื่อ รีเซ็ต
+              </p>
+            </div>
+          </v-sheet>
+
+          <!-- นับถอยหลัง -->
+          <v-sheet v-if="tab === 'countdown'" class="d-flex flex-column align-center justify-center fill-height pa-4" style="position: relative;">
+            <div class="text-center">
+              <div 
+                contenteditable="true"
+                @blur="updateFullscreenText2"
+                @input="onTextInput"
+                @focus="onTextFocus"
+                class="mb-4 grey--text text--darken-1"
+                :style="isFullScreen ? 'font-size: 3rem; outline: none; min-height: 3.5rem;' : 'font-size: 1.2rem; outline: none; min-height: 1.5rem;'"
+                style="cursor: text;"
+                ref="editableText"
+              >{{ fullscreenText2 || 'คลิกเพื่อใส่ข้อความ' }}</div>
+              
+              <div 
+                v-if="isTimeUp && isBlinking"
+                :class="isFullScreen ? 'display-2' : 'display-1'"
+                class="red--text font-weight-bold mb-4"
+                :style="isFullScreen ? 'font-size: 5rem;' : ''"
+              >
+                หมดเวลา
+              </div>
+              
+              <div 
+                v-if="isCountdownPreparing"
+                :class="isFullScreen ? 'display-1' : 'headline'"
+                class="orange--text text--darken-2 font-weight-bold mb-4"
+                :style="isFullScreen ? 'font-size: 15vh;' : 'font-size: 5rem;'"
+              >
+                {{ countdownPrepareCountdown }}
+              </div>
+              
+              <div 
+                :class="['fixed-number', isFullScreen ? 'fullscreen-time' : 'display-3', countdownColor]"
+              >
+                {{ countdownTime }}
+              </div>
+              
+              <v-btn 
+                icon 
+                @click="showTimeInputs = !showTimeInputs"
+                class="mt-2"
+                :large="isFullScreen"
+                :x-large="isFullScreen"
+              >
+                <v-icon :style="isFullScreen ? 'font-size: 3rem;' : ''">
+                  {{ showTimeInputs ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                </v-icon>
+              </v-btn>
+              
+              <v-row v-if="showTimeInputs" justify="center" :class="isFullScreen ? 'mt-4' : 'mt-4'">
+                <v-col cols="auto">
+                  <v-text-field
+                    v-model.number="inputHours"
+                    label="ชั่วโมง"
+                    type="number"
+                    min="0"
+                    max="23"
+                    outlined
+                    :dense="!isFullScreen"
+                    :style="isFullScreen ? 'width: 200px; font-size: 2rem;' : 'width: 100px;'"
+                    :class="isFullScreen ? 'text-h4' : ''"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="auto">
+                  <v-text-field
+                    v-model.number="inputMinutes"
+                    label="นาที"
+                    type="number"
+                    min="0"
+                    max="59"
+                    outlined
+                    :dense="!isFullScreen"
+                    :style="isFullScreen ? 'width: 200px; font-size: 2rem;' : 'width: 100px;'"
+                    :class="isFullScreen ? 'text-h4' : ''"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              
+              <v-btn-group v-if="showTimeInputs">
+                <v-btn 
+                  color="green" 
+                  @click="startCountdownFromInput"
+                  :large="isFullScreen"
+                  :x-large="isFullScreen"
+                >
+                  เริ่ม
+                </v-btn>
+                <v-btn 
+                  color="red" 
+                  @click="resetCountdown"
+                  :large="isFullScreen"
+                  :x-large="isFullScreen"
+                >
+                  รีเซ็ต
+                </v-btn>
+              </v-btn-group>
+            </div>
+            
+            <!-- Progress Bar ด้านล่าง -->
+            <div 
+              v-if="totalCountdownSeconds > 0 && !isCountdownPreparing"
+              :style="isFullScreen ? 'position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;' : 'position: absolute; bottom: 0; left: 0; right: 0;'"
+            >
+              <v-progress-linear
+                :value="countdownProgress"
+                :color="countdownProgressColor"
+                height="30"
+                striped
+                reverse
+              >
+                <template v-slot:default>
+                  <strong :style="isFullScreen ? 'font-size: 1.2rem;' : ''">
+                    {{ Math.round(countdownProgress) }}%
+                  </strong>
+                </template>
+              </v-progress-linear>
+            </div>
+          </v-sheet>
+
+          <!-- กติการะดับกลาง -->
+          <v-sheet v-if="tab === 'mid-rules'" class="pa-4">
+            <v-container>
+              <v-card class="pa-6">
+                <v-card-title class="text-h4">
+                  <v-icon large color="primary" class="mr-3">mdi-file-document</v-icon>
+                  กติกาการแข่งขันระดับกลาง
+                </v-card-title>
+                <v-divider class="my-4"></v-divider>
+                <v-card-text class="text-h6">
+                  <p>เนื้อหากติกาการแข่งขันระดับกลาง...</p>
+                </v-card-text>
+              </v-card>
+            </v-container>
+          </v-sheet>
+
+          <!-- สุ่มสนามระดับกลาง -->
+          <v-sheet v-if="tab === 'mid-field'" class="pa-4">
+            <v-row justify="center" class="mb-4">
+              <v-col cols="12" class="d-flex justify-center align-center">
+                <v-btn 
+                  color="primary" 
+                  @click="startRandom" 
+                  :disabled="isRandomRunning"
+                  large
+                >
+                  เริ่มสุ่ม
+                </v-btn>
+                <v-slider
+                  v-model="randomSpeed"
+                  label="ความเร็ว"
+                  :min="100"
+                  :max="1000"
+                  :step="100"
+                  class="ml-4"
+                  style="max-width: 300px;"
+                ></v-slider>
+              </v-col>
+            </v-row>
+
+            <div class="grid-container">
+              <v-card 
+                v-for="cell in grid" 
+                :key="cell"
+                :color="getCellColor(cell)"
+                class="grid-cell"
+                :class="{'elevation-4': current === cell || highlighted === cell}"
+              >
+                {{ cell }}
+              </v-card>
+            </div>
+
+            <v-dialog v-model="dialog" max-width="500">
+              <v-card>
+                <v-card-title class="headline green--text">
+                  ยินดีด้วย!
+                </v-card-title>
+                <v-card-text class="text-center">
+                  <div class="display-1 red--text font-weight-bold">
+                    {{ highlighted }}
+                  </div>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" @click="dialog = false">
+                    ปิด
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </v-sheet>
+
+          <!-- จับเวลา 3 นาทีระดับกลาง -->
+          <v-sheet v-if="tab === 'mid-timer'" class="d-flex flex-column align-center justify-center fill-height pa-4">
+            <v-container>
+              <v-card class="pa-6">
+                <v-card-title class="text-h4 justify-center">
+                  <v-icon large color="primary" class="mr-3">mdi-clock-fast</v-icon>
+                  จับเวลา 3 นาที (ระดับกลาง)
+                </v-card-title>
+                <v-card-text class="text-center">
+                  <p class="text-h6">หน้านี้จะใช้ระบบจับเวลาพร้อมตั้งเวลาล่วงหน้าที่ 3 นาที</p>
+                </v-card-text>
+              </v-card>
+            </v-container>
+          </v-sheet>
+
+          <!-- ตั้งค่าทีมระดับกลาง -->
+          <v-sheet v-if="tab === 'mid-teams'" class="pa-4">
+            <v-container>
+              <v-card class="pa-6">
+                <v-card-title class="text-h4">
+                  <v-icon large color="primary" class="mr-3">mdi-account-group</v-icon>
+                  ตั้งค่าทีม (ระดับกลาง)
+                </v-card-title>
+                <v-divider class="my-4"></v-divider>
+                <v-card-text class="text-h6">
+                  <p>หน้าจัดการข้อมูลทีมระดับกลาง...</p>
+                </v-card-text>
+              </v-card>
+            </v-container>
+          </v-sheet>
+
+          <!-- ผลการแข่งขันระดับกลาง -->
+          <v-sheet v-if="tab === 'mid-results'" class="pa-4">
+            <v-container>
+              <v-card class="pa-6">
+                <v-card-title class="text-h4">
+                  <v-icon large color="primary" class="mr-3">mdi-trophy</v-icon>
+                  ผลการแข่งขัน (ระดับกลาง)
+                </v-card-title>
+                <v-divider class="my-4"></v-divider>
+                <v-card-text class="text-h6">
+                  <p>หน้าแสดงผลการแข่งขันระดับกลาง...</p>
+                </v-card-text>
+              </v-card>
+            </v-container>
+          </v-sheet>
+
+          <!-- กติการะดับสูง -->
+          <v-sheet v-if="tab === 'high-rules'" class="pa-4">
+            <v-container>
+              <v-card class="pa-6">
+                <v-card-title class="text-h4">
+                  <v-icon large color="primary" class="mr-3">mdi-file-document</v-icon>
+                  กติกาการแข่งขันระดับสูง
+                </v-card-title>
+                <v-divider class="my-4"></v-divider>
+                <v-card-text class="text-h6">
+                  <p>เนื้อหากติกาการแข่งขันระดับสูง...</p>
+                </v-card-text>
+              </v-card>
+            </v-container>
+          </v-sheet>
+
+          <!-- สุ่มสนามระดับสูง -->
+          <v-sheet v-if="tab === 'high-field'" class="pa-4">
+            <v-container>
+              <v-card class="pa-6">
+                <v-card-title class="text-h4 justify-center">
+                  <v-icon large color="primary" class="mr-3">mdi-grid</v-icon>
+                  สุ่มสนาม (ระดับสูง)
+                </v-card-title>
+                <v-card-text class="text-center">
+                  <p class="text-h6">หน้านี้จะใช้ระบบสุ่มสนามสำหรับระดับสูง</p>
+                </v-card-text>
+              </v-card>
+            </v-container>
+          </v-sheet>
+
+          <!-- จับเวลา 5 นาทีระดับสูง -->
+          <v-sheet v-if="tab === 'high-timer'" class="d-flex flex-column align-center justify-center fill-height pa-4">
+            <v-container>
+              <v-card class="pa-6">
+                <v-card-title class="text-h4 justify-center">
+                  <v-icon large color="primary" class="mr-3">mdi-clock-fast</v-icon>
+                  จับเวลา 5 นาที (ระดับสูง)
+                </v-card-title>
+                <v-card-text class="text-center">
+                  <p class="text-h6">หน้านี้จะใช้ระบบจับเวลาพร้อมตั้งเวลาล่วงหน้าที่ 5 นาที</p>
+                </v-card-text>
+              </v-card>
+            </v-container>
+          </v-sheet>
+
+          <!-- ตั้งค่าทีมระดับสูง -->
+          <v-sheet v-if="tab === 'high-teams'" class="pa-4">
+            <v-container>
+              <v-card class="pa-6">
+                <v-card-title class="text-h4">
+                  <v-icon large color="primary" class="mr-3">mdi-account-group</v-icon>
+                  ตั้งค่าทีม (ระดับสูง)
+                </v-card-title>
+                <v-divider class="my-4"></v-divider>
+                <v-card-text class="text-h6">
+                  <p>หน้าจัดการข้อมูลทีมระดับสูง...</p>
+                </v-card-text>
+              </v-card>
+            </v-container>
+          </v-sheet>
+
+          <!-- ผลการแข่งขันระดับสูง -->
+          <v-sheet v-if="tab === 'high-results'" class="pa-4">
+            <v-container>
+              <v-card class="pa-6">
+                <v-card-title class="text-h4">
+                  <v-icon large color="primary" class="mr-3">mdi-trophy</v-icon>
+                  ผลการแข่งขัน (ระดับสูง)
+                </v-card-title>
+                <v-divider class="my-4"></v-divider>
+                <v-card-text class="text-h6">
+                  <p>หน้าแสดงผลการแข่งขันระดับสูง...</p>
+                </v-card-text>
+              </v-card>
+            </v-container>
+          </v-sheet>
+        </v-container>
+      </v-main>
+    </v-app>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data() {
+        return {
+          drawer: true,
+          tab: 'home',
+          expandedMid: false,
+          expandedHigh: false,
+          grid: Array.from({ length: 32 }, (_, i) => i + 1),
+          current: null,
+          highlighted: null,
+          timer: null,
+          dialog: false,
+          isRandomRunning: false,
+          randomSpeed: 500,
+          timerRunning: false,
+          time: 0,
+          fullscreenText: "",
+          fullscreenText2: "",
+          isFullScreen: false,
+          timerPrepareCountdown: 0,
+          isPreparing: false,
+          countdown: null,
+          countdownValue: 0,
+          inputHours: 0,
+          inputMinutes: 30,
+          showTimeInputs: true,
+          isTimeUp: false,
+          isBlinking: false,
+          totalCountdownSeconds: 0,
+          countdownPrepareCountdown: 0,
+          isCountdownPreparing: false,
+          rouletteNumber: null,
+          selectedNumbers: [],
+          wheelAngle: 0,
+          wheelCanvas: null,
+          wheelCtx: null,
+          spinAnimation: null,
+          wheelNumbers: Array.from({ length: 32 }, (_, i) => i + 1),
+          lastSliceIndex: -1,
+          audioContext: null
+        };
+      },
+      computed: {
+        formattedTime() {
+          const minutes = String(Math.floor(this.time / 6000)).padStart(2, "0");
+          const seconds = String(Math.floor((this.time % 6000) / 100)).padStart(2, "0");
+          const milliseconds = String(this.time % 100).padStart(2, "0");
+          return `${minutes}:${seconds}:${milliseconds}`;
+        },
+        countdownTime() {
+          const hours = String(Math.floor(this.countdownValue / 3600)).padStart(2, "0");
+          const minutes = String(Math.floor((this.countdownValue % 3600) / 60)).padStart(2, "0");
+          const seconds = String(this.countdownValue % 60).padStart(2, "0");
+          return `${hours}:${minutes}:${seconds}`;
+        },
+        countdownColor() {
+          if (this.isTimeUp) return 'red--text';
+          if (this.totalCountdownSeconds === 0) return '';
+          
+          const percentage = (this.countdownValue / this.totalCountdownSeconds) * 100;
+          
+          if (percentage <= 3) {
+            return 'deep-orange--text text--darken-4'; // สีส้มเข้ม
+          } else if (percentage <= 10) {
+            return 'purple--text text--darken-2'; // สีม่วง
+          } else if (percentage <= 50) {
+            return 'blue--text text--darken-4'; // สีน้ำเงินเข้ม
+          }
+          
+          return ''; // สีปกติ
+        },
+        countdownProgress() {
+          if (this.totalCountdownSeconds === 0) return 0;
+          return (this.countdownValue / this.totalCountdownSeconds) * 100;
+        },
+        countdownProgressColor() {
+          const percentage = this.countdownProgress;
+          
+          if (percentage <= 3) {
+            return 'deep-orange darken-4'; // สีส้มเข้ม
+          } else if (percentage <= 10) {
+            return 'purple darken-2'; // สีม่วง
+          } else if (percentage <= 50) {
+            return 'blue darken-4'; // สีน้ำเงินเข้ม
+          }
+          
+          return 'green'; // สีเขียวปกติ
+        }
+      },
+      methods: {
+        getRouletteColor(cell) {
+          if (this.selectedNumbers.includes(cell)) return 'red lighten-1';
+          return 'grey lighten-3';
+        },
+        getCellColor(cell) {
+          if (this.highlighted === cell) return 'green lighten-1';
+          if (this.current === cell) return 'yellow lighten-1';
+          return 'grey lighten-3';
+        },
+        startRandom() {
+          if (this.isRandomRunning) return;
+          
+          this.isRandomRunning = true;
+          this.highlighted = null;
+          this.current = null;
+          
+          let count = 0;
+          const maxCount = 30;
+          
+          this.timer = setInterval(() => {
+            this.current = this.grid[Math.floor(Math.random() * this.grid.length)];
+            count++;
+            
+            if (count >= maxCount) {
+              clearInterval(this.timer);
+              this.highlighted = this.current;
+              this.dialog = true;
+              this.isRandomRunning = false;
+            }
+          }, this.randomSpeed);
+        },
+        initWheel() {
+          this.wheelCanvas = this.$refs.wheelCanvas;
+          if (!this.wheelCanvas) return;
+          
+          this.wheelCtx = this.wheelCanvas.getContext('2d');
+          this.drawWheel();
+        },
+        drawWheel() {
+          if (!this.wheelCtx) return;
+          
+          const ctx = this.wheelCtx;
+          const canvas = this.wheelCanvas;
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height / 2;
+          const radius = canvas.width / 2 - 10;
+          const numbers = 32;
+          const anglePerSlice = (Math.PI * 2) / numbers;
+          
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          // สีสำหรับแต่ละช่อง (สลับสี)
+          const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#FFD93D'];
+          
+          for (let i = 0; i < numbers; i++) {
+            // เริ่มจากด้านบน (90 องศา) และหมุนตามเข็มนาฬิกา
+            const startAngle = this.wheelAngle + (i * anglePerSlice) - Math.PI / 2;
+            const endAngle = startAngle + anglePerSlice;
+            
+            // วาดส่วนของวงกลม
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+            ctx.closePath();
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // วาดตัวเลข - ใช้เลขจาก wheelNumbers array
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(startAngle + anglePerSlice / 2 + Math.PI / 2);
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText(this.wheelNumbers[i], 0, -radius + 30);
+            ctx.restore();
+          }
+          
+          // วาดวงกลมตรงกลาง
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, 30, 0, Math.PI * 2);
+          ctx.fillStyle = '#333';
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        },
+        startRoulette() {
+          if (this.isRandomRunning) return;
+          
+          // ถ้ามีผลการสุ่มอยู่แล้ว ให้ล้างผลเก่าก่อน (แค่เอาสีและข้อความออก)
+          if (this.rouletteNumber !== null) {
+            this.rouletteNumber = null;
+            this.selectedNumbers = [];
+          }
+          
+          this.isRandomRunning = true;
+          
+          // สุ่มเลขที่จะได้ก่อน (1-32)
+          const targetNumber = Math.floor(Math.random() * 32) + 1;
+          
+          // หา index ของเลขนั้นใน wheelNumbers array
+          const targetIndex = this.wheelNumbers.indexOf(targetNumber);
+          
+          // คำนวณมุมของช่องนั้น
+          const anglePerSlice = (Math.PI * 2) / 32;
+          
+          // คำนวณมุมปัจจุบันที่ normalize แล้ว (ให้อยู่ในช่วง 0 ถึง 2π)
+          const currentNormalizedAngle = ((this.wheelAngle % (Math.PI * 2)) + (Math.PI * 2)) % (Math.PI * 2);
+          
+          // มุมเป้าหมายที่ต้องการให้ลูกศรชี้ (ชี้ตรงกลางของช่อง targetIndex)
+          // ช่อง index 0 อยู่ที่ตำแหน่ง 0, ช่อง index 1 อยู่ที่ anglePerSlice, ...
+          const targetAngle = -(targetIndex * anglePerSlice) - (anglePerSlice / 2);
+          const normalizedTargetAngle = ((targetAngle % (Math.PI * 2)) + (Math.PI * 2)) % (Math.PI * 2);
+          
+          // คำนวณระยะทางที่ต้องหมุนเพิ่มจากตำแหน่งปัจจุบัน
+          let rotationNeeded = normalizedTargetAngle - currentNormalizedAngle;
+          if (rotationNeeded > 0) {
+            rotationNeeded -= Math.PI * 2; // หมุนทวนเข็มนาฬิกา
+          }
+          
+          // เพิ่มการหมุนหลายรอบ (5-8 รอบ)
+          const spins = 5 + Math.floor(Math.random() * 4);
+          const totalRotation = (spins * Math.PI * 2) + rotationNeeded;
+          
+          const duration = 4000; // 4 วินาที
+          const startTime = Date.now();
+          const startAngle = this.wheelAngle;
+          this.lastSliceIndex = -1; // รีเซ็ตการติดตามช่อง
+          
+          const animate = () => {
+            const currentTime = Date.now();
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Easing function (ease out cubic)
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            
+            this.wheelAngle = startAngle + totalRotation * easeOut;
+            
+            // ตรวจสอบว่าผ่านขีดหรือไม่ (เปลี่ยนช่อง)
+            const currentNormalized = ((this.wheelAngle % (Math.PI * 2)) + (Math.PI * 2)) % (Math.PI * 2);
+            const currentSliceIndex = Math.floor(currentNormalized / anglePerSlice);
+            
+            if (this.lastSliceIndex !== -1 && currentSliceIndex !== this.lastSliceIndex) {
+              this.playTickSound();
+            }
+            this.lastSliceIndex = currentSliceIndex;
+            
+            this.drawWheel();
+            
+            if (progress < 1) {
+              this.spinAnimation = requestAnimationFrame(animate);
+            } else {
+              // ตั้งค่าเลขที่ได้
+              this.rouletteNumber = targetNumber;
+              
+              if (!this.selectedNumbers.includes(targetNumber)) {
+                this.selectedNumbers.push(targetNumber);
+              }
+              
+              this.isRandomRunning = false;
+              this.lastSliceIndex = -1;
+            }
+          };
+          
+          animate();
+        },
+        shuffleWheelNumbers() {
+          // สุ่มเรียงเลขใหม่แบบ Fisher-Yates shuffle
+          const shuffled = [...this.wheelNumbers];
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+          }
+          this.wheelNumbers = shuffled;
+          this.drawWheel();
+        },
+        resetRoulette() {
+          if (this.spinAnimation) {
+            cancelAnimationFrame(this.spinAnimation);
+          }
+          this.rouletteNumber = null;
+          this.selectedNumbers = [];
+          this.isRandomRunning = false;
+          this.wheelAngle = 0;
+          this.wheelNumbers = Array.from({ length: 32 }, (_, i) => i + 1);
+          this.drawWheel();
+        },
+        toggleTimer() {
+          if (this.timerRunning || this.isPreparing) {
+            // หยุดจับเวลาหรือยกเลิกการเตรียม
+            clearInterval(this.timer);
+            this.timerRunning = false;
+            this.isPreparing = false;
+          } else {
+            // เริ่มนับถอยหลัง 5 วินาที
+            this.isPreparing = true;
+            this.timerPrepareCountdown = 5;
+            
+            // เปิด fullscreen อัตโนมัติ
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen();
+              this.isFullScreen = true;
+            }
+            
+            // นับถอยหลัง 5 วินาที
+            this.timer = setInterval(() => {
+              if (this.timerPrepareCountdown > 0) {
+                this.timerPrepareCountdown--;
+                
+                if (this.timerPrepareCountdown > 0) {
+                  this.playCountdownBeep(); // เสียง beep ที่ 4, 3, 2, 1
+                } else {
+                  // เมื่อเป็น 0 แล้ว เล่นเสียงสูงและเริ่มจับเวลาเลย
+                  this.playStartBeep();
+                  clearInterval(this.timer);
+                  this.isPreparing = false;
+                  this.timerRunning = true;
+                  this.timer = setInterval(() => {
+                    this.time++;
+                  }, 10);
+                }
+              }
+            }, 1000);
+          }
+        },
+        resetTimer() {
+          clearInterval(this.timer);
+          this.time = 0;
+          this.timerRunning = false;
+          this.isPreparing = false;
+          this.timerPrepareCountdown = 0;
+        },
+        toggleFullscreen() {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            this.isFullScreen = true;
+            drawer = false;
+          } else {
+            document.exitFullscreen();
+            this.isFullScreen = false;
+          }
+        },
+        startCountdown(seconds) {
+          if (this.countdown) clearInterval(this.countdown);
+          this.countdownValue = seconds;
+          this.totalCountdownSeconds = seconds;
+          this.isTimeUp = false;
+          this.isBlinking = false;
+          
+          // บันทึกเวลาเริ่มต้นจริงๆ
+          const startTime = Date.now();
+          const endTime = startTime + (seconds * 1000);
+          let lastSecond = seconds;
+          
+          this.countdown = setInterval(() => {
+            const now = Date.now();
+            const remainingMs = endTime - now;
+            
+            if (remainingMs > 0) {
+              const remainingSeconds = Math.ceil(remainingMs / 1000);
+              this.countdownValue = remainingSeconds;
+              
+              // ตรวจจับการเปลี่ยนวินาที
+              if (remainingSeconds !== lastSecond) {
+                // เสียงนับถอยหลัง 5 วินาทีแรก (5, 4, 3, 2, 1)
+                if (remainingSeconds <= 5 && remainingSeconds > 0) {
+                  this.playCountdownBeep();
+                }
+                
+                // เสียงสูงมากเมื่อเข้าสู่เวลาที่ตั้งจริง
+                if (remainingSeconds === 0 && seconds > 5) {
+                  this.playStartBeep();
+                }
+                
+                lastSecond = remainingSeconds;
+              }
+            } else if (!this.isTimeUp) {
+              // หมดเวลา
+              this.countdownValue = 0;
+              clearInterval(this.countdown);
+              this.countdown = null;
+              this.isTimeUp = true;
+              // เล่นเสียงเตือนเมื่อหมดเวลา
+              this.playAlarmSound();
+            }
+          }, 100); // เช็คทุก 100ms เพื่อความแม่นยำ
+        },
+        playCountdownBeep() {
+          // เสียง beep สั้นๆ สำหรับนับถอยหลัง
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.frequency.value = 600;
+          oscillator.type = 'sine';
+          
+          gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.2);
+        },
+        playStartBeep() {
+          // เสียงสูงมากเมื่อเริ่มจับเวลาจริง
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.frequency.value = 1500; // เสียงสูงมาก
+          oscillator.type = 'sine';
+          
+          gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.8);
+        },
+        playAlarmSound() {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          let beepCount = 0;
+          const totalBeeps = 10;
+          
+          const playBeep = () => {
+            if (beepCount >= totalBeeps) return;
+            
+            // กระพริบข้อความ
+            this.isBlinking = true;
+            setTimeout(() => {
+              this.isBlinking = false;
+            }, 400);
+            
+            // สร้างเสียง beep
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+            
+            beepCount++;
+            
+            if (beepCount < totalBeeps) {
+              setTimeout(playBeep, 800);
+            }
+          };
+          
+          playBeep();
+        },
+        playTickSound() {
+          // เสียง tick สั้นๆ คมๆ เมื่อผ่านขีด
+          if (!this.audioContext) return;
+          
+          try {
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.02);
+            
+            oscillator.start(this.audioContext.currentTime);
+            oscillator.stop(this.audioContext.currentTime + 0.02);
+          } catch (e) {
+            console.error('Error playing tick sound:', e);
+          }
+        },
+        startCountdownFromInput() {
+          const totalSeconds = (this.inputHours * 3600) + (this.inputMinutes * 60);
+          
+          // เริ่มนับถอยหลัง 5 วินาที
+          this.isCountdownPreparing = true;
+          this.countdownPrepareCountdown = 5;
+          
+          // เปิดโหมด fullscreen อัตโนมัติ
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            this.isFullScreen = true;
+          }
+          
+          // นับถอยหลัง 5 วินาที
+          this.countdown = setInterval(() => {
+            if (this.countdownPrepareCountdown > 0) {
+              this.countdownPrepareCountdown--;
+              
+              if (this.countdownPrepareCountdown > 0) {
+                this.playCountdownBeep(); // เสียง beep ที่ 4, 3, 2, 1
+              } else {
+                // เมื่อเป็น 0 แล้ว เล่นเสียงสูงและเริ่มนับถอยหลังจริง
+                this.playStartBeep();
+                clearInterval(this.countdown);
+                this.isCountdownPreparing = false;
+                this.startCountdown(totalSeconds);
+              }
+            }
+          }, 1000);
+        },
+        resetCountdown() {
+          // เคลียร์สถานะก่อน
+          this.isTimeUp = false;
+          this.isBlinking = false;
+          this.isCountdownPreparing = false;
+          
+          // หยุด interval
+          if (this.countdown) {
+            clearInterval(this.countdown);
+            this.countdown = null;
+          }
+          
+          // รีเซ็ตค่า
+          this.countdownValue = 0;
+          this.totalCountdownSeconds = 0;
+          this.countdownPrepareCountdown = 0;
+        },
+        updateFullscreenText2(event) {
+          const text = event.target.innerText;
+          if (text === 'คลิกเพื่อใส่ข้อความ') {
+            this.fullscreenText2 = '';
+            event.target.innerText = '';
+          } else {
+            this.fullscreenText2 = text;
+          }
+        },
+        onTextInput(event) {
+          const text = event.target.innerText;
+          if (text !== 'คลิกเพื่อใส่ข้อความ') {
+            this.fullscreenText2 = text;
+          }
+        },
+        onTextFocus(event) {
+          if (event.target.innerText === 'คลิกเพื่อใส่ข้อความ') {
+            event.target.innerText = '';
+            this.fullscreenText2 = '';
+          }
+        },
+        updateFullscreenText(event) {
+          const text = event.target.innerText;
+          if (text === 'คลิกเพื่อใส่ข้อความ') {
+            this.fullscreenText = '';
+            event.target.innerText = '';
+          } else {
+            this.fullscreenText = text;
+          }
+        },
+        onTimerTextInput(event) {
+          const text = event.target.innerText;
+          if (text !== 'คลิกเพื่อใส่ข้อความ') {
+            this.fullscreenText = text;
+          }
+        },
+        onTimerTextFocus(event) {
+          if (event.target.innerText === 'คลิกเพื่อใส่ข้อความ') {
+            event.target.innerText = '';
+            this.fullscreenText = '';
+          }
+        }
+      },
+      mounted() {
+        // สร้าง AudioContext ครั้งเดียวตอน mounted
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // รอให้ DOM โหลดเสร็จก่อน
+        this.$nextTick(() => {
+          if (this.tab === 'random') {
+            this.initWheel();
+          }
+        });
+        
+        window.addEventListener("keydown", (e) => {
+          if (this.tab === 'timer') {
+            if (e.code === "Space") {
+              e.preventDefault();
+              this.toggleTimer();
+            } else if (e.code === "Numpad0") {
+              this.resetTimer();
+            } else if (e.code === "NumpadAdd") {
+              this.toggleFullscreen();
+            }
+          }
+        });
+      },
+      watch: {
+        tab(newTab) {
+          // เมื่อเปลี่ยนไปหน้าสุ่มตัวเลข ให้ init วงล้อ
+          if (newTab === 'random') {
+            this.$nextTick(() => {
+              this.initWheel();
+            });
+          }
+        }
+      }
+    });
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>
