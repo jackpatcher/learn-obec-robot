@@ -229,6 +229,24 @@
       border-bottom: 4px solid #000;
     }
     
+    .block-border-top-right-bottom {
+      border-top: 4px solid #000;
+      border-right: 4px solid #000;
+      border-bottom: 4px solid #000;
+    }
+    
+    .block-border-top-right-left {
+      border-top: 4px solid #000;
+      border-right: 4px solid #000;
+      border-left: 4px solid #000;
+    }
+    
+    .block-border-bottom-right-left {
+      border-bottom: 4px solid #000;
+      border-right: 4px solid #000;
+      border-left: 4px solid #000;
+    }
+    
     .block-border-left-right {
       border-left: 4px solid #000;
       border-right: 4px solid #000;
@@ -251,6 +269,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
       box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+      pointer-events: none;
     }
     
     .checkpoint-block.block-placed {
@@ -963,7 +982,7 @@
                     @click="rotateCheckpointBlock(index)"
                     @dragstart="startDrag($event, index, 'checkpoint')"
                     @dragend="endDrag"
-                    :draggable="!block.placed"
+                    draggable="true"
                   >
                     <span class="block-number">{{ block.id }}</span>
                   </div>
@@ -977,7 +996,7 @@
                     @click="rotateObstacleBlock(index)"
                     @dragstart="startDrag($event, index, 'obstacle')"
                     @dragend="endDrag"
-                    :draggable="!block.placed"
+                    draggable="true"
                   >
                     <span class="block-number" style="color: white; font-size: 11px;">{{ block.id }}</span>
                   </div>
@@ -991,7 +1010,7 @@
                     @click="rotateBallBlock(index)"
                     @dragstart="startDrag($event, index, 'ball')"
                     @dragend="endDrag"
-                    :draggable="!block.placed"
+                    draggable="true"
                   >
                     <span class="block-number">{{ block.id }}</span>
                   </div>
@@ -1005,7 +1024,7 @@
                     :style="{ backgroundColor: block.color }"
                     @dragstart="startDrag($event, index, 'zone')"
                     @dragend="endDrag"
-                    :draggable="!block.placed"
+                    draggable="true"
                   >
                     <span class="block-number">{{ block.id }}</span>
                     <span class="zone-label">{{ block.name }}</span>
@@ -1227,7 +1246,7 @@
                     @click="rotateCheckpointBlock(index)"
                     @dragstart="startDrag($event, index, 'checkpoint')"
                     @dragend="endDrag"
-                    :draggable="!block.placed"
+                    draggable="true"
                   >
                     <span class="block-number">{{ block.id }}</span>
                   </div>
@@ -1241,7 +1260,7 @@
                     @click="rotateObstacleBlock(index)"
                     @dragstart="startDrag($event, index, 'obstacle')"
                     @dragend="endDrag"
-                    :draggable="!block.placed"
+                    draggable="true"
                   >
                     <span class="block-number" style="color: white; font-size: 11px;">{{ block.id }}</span>
                   </div>
@@ -1255,7 +1274,7 @@
                     @click="rotateBallBlock(index)"
                     @dragstart="startDrag($event, index, 'ball')"
                     @dragend="endDrag"
-                    :draggable="!block.placed"
+                    draggable="true"
                   >
                     <span class="block-number">{{ block.id }}</span>
                   </div>
@@ -1269,7 +1288,7 @@
                     :style="{ backgroundColor: block.color }"
                     @dragstart="startDrag($event, index, 'zone')"
                     @dragend="endDrag"
-                    :draggable="!block.placed"
+                    draggable="true"
                   >
                     <span class="block-number">{{ block.id }}</span>
                     <span class="zone-label">{{ block.name }}</span>
@@ -1977,6 +1996,8 @@
           } else {
             this.fullscreenText = text;
           }
+
+
         },
         onTimerTextInput(event) {
           const text = event.target.innerText;
@@ -1994,13 +2015,15 @@
         // Field Grid Methods
         rotateBlock(index) {
           const block = this.fieldBlocks[index];
-          block.rotation = (block.rotation + 1) % 4;
+          const newRotation = (block.rotation + 1) % 4;
+          this.$set(this.fieldBlocks[index], 'rotation', newRotation);
         },
         rotateCheckpointBlock(index) {
           const block = this.checkpointBlocks[index];
-          if (!block.placed) {
-            block.rotation = (block.rotation + 1) % 4;
-          }
+          console.log('Rotating checkpoint:', block.id, 'from rotation:', block.rotation);
+          const newRotation = (block.rotation + 1) % 4;
+          this.$set(this.checkpointBlocks[index], 'rotation', newRotation);
+          console.log('New rotation:', newRotation);
         },
         rotateObstacleBlock(index) {
           const block = this.obstacleBlocks[index];
@@ -2288,6 +2311,15 @@
                 case 'top-left-bottom':
                   borderStyle += 'border-top: 4px solid #000; border-left: 4px solid #000; border-bottom: 4px solid #000;';
                   break;
+                case 'top-right-bottom':
+                  borderStyle += 'border-top: 4px solid #000; border-right: 4px solid #000; border-bottom: 4px solid #000;';
+                  break;
+                case 'top-right-left':
+                  borderStyle += 'border-top: 4px solid #000; border-right: 4px solid #000; border-left: 4px solid #000;';
+                  break;
+                case 'bottom-right-left':
+                  borderStyle += 'border-bottom: 4px solid #000; border-right: 4px solid #000; border-left: 4px solid #000;';
+                  break;
                 case 'top-bottom':
                   borderStyle += 'border-top: 4px solid #000; border-bottom: 4px solid #000;';
                   break;
@@ -2379,3 +2411,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+

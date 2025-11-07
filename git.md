@@ -1,3 +1,3 @@
 git add .
-git commit -m "first"
+git commit -m "ปรับ checkpoint3 rotate"
 git push origin main
