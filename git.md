@@ -1,3 +1,3 @@
 git add .
-git commit -m "ปรับ checkpoint3 rotate"
+git commit -m "แก้จับเวลา "
 git push origin main

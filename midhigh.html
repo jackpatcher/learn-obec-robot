@@ -18,7 +18,7 @@
     .fixed-number {
       font-family: 'Roboto Mono', monospace;
       letter-spacing: 0.05em;
-
+      transition: font-size 0.5s ease-in-out, color 0.3s ease;
     }
     .fullscreen-time {
       font-size:  25vh !important;
@@ -26,6 +26,21 @@
       text-align: center;
       margin-top:200px;
       margin-bottom:50px;
+    }
+    .fullscreen-millisecond {
+      font-size: 15vh !important;
+    }
+    .timer-text-label {
+      transition: font-size 0.5s ease-in-out, margin 0.5s ease-in-out, padding 0.5s ease-in-out;
+    }
+    .v-card-text {
+      transition: padding 0.5s ease-in-out;
+    }
+    .v-progress-linear {
+      transition: height 0.3s ease-in-out;
+    }
+    .v-progress-linear__determinate {
+      transition: width 0.1s linear !important;
     }
     .grid-cell {
       aspect-ratio: 1/1;  /* Each cell is a perfect square */
@@ -88,8 +103,8 @@
       display: flex;
     }
     .field-grid-cell {
-      width: 60px;
-      height: 60px;
+      width: 100px;
+      height: 100px;
       border: 1px solid #999;
       background: white;
       position: relative;
@@ -147,8 +162,8 @@
     }
     
     .field-block {
-      width: 50px;
-      height: 50px;
+      width: 40px;
+      height: 40px;
       background: white;
       cursor: pointer;
       display: flex;
@@ -282,29 +297,24 @@
       box-shadow: 0 0 15px rgba(255, 165, 0, 0.7);
     }
     
-    /* Black Hole (Obstacle) styles - มีการเว้าเข้ามาด้านในทั้งสองข้าง แบบที่เห็นชัดเจน */
+    /* Black Hole (Obstacle) styles - พื้นหลังขาวมีแถบดำเต็มความสูงตรงกลาง */
     .blackhole-block {
-      background: radial-gradient(ellipse 80% 100% at 50% 50%, #1a1a1a 0%, #000 100%) !important;
+      background: white !important;
       position: relative;
       border: none !important;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 
-        inset -8px 0 15px -5px rgba(0, 0, 0, 0.8),
-        inset 8px 0 15px -5px rgba(0, 0, 0, 0.8),
-        inset 0 0 10px rgba(255, 255, 255, 0.1);
+      border-radius: 0px;
+      overflow: visible;
     }
     
     .blackhole-block::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
-      width: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
       height: 100%;
-      background: 
-        radial-gradient(ellipse 15% 40% at 8% 50%, rgba(50, 50, 50, 0.6) 0%, transparent 70%),
-        radial-gradient(ellipse 15% 40% at 92% 50%, rgba(50, 50, 50, 0.6) 0%, transparent 70%);
+      background: #000;
       pointer-events: none;
     }
     
@@ -324,49 +334,45 @@
       opacity: 0.5;
     }
     
-    /* Ball (Stick) styles - มีการเว้าเข้ามาด้านในและมี 7 เส้น แบบที่เห็นชัดเจน */
+    /* Ball (Stick) styles - พื้นหลางขาวมีพื้นที่ตรงกลางที่มี 7 เส้นส้มแนวตั้งเท่ากัน */
     .ball-block {
+      background: white !important;
       position: relative;
-      background: radial-gradient(ellipse 80% 100% at 50% 50%, #fff 0%, #e8e8e8 100%) !important;
       border: none !important;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 
-        inset -8px 0 15px -5px rgba(0, 0, 0, 0.3),
-        inset 8px 0 15px -5px rgba(0, 0, 0, 0.3),
-        inset 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 0px;
+      overflow: visible;
     }
     
     .ball-block::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
-      width: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
       height: 100%;
-      background: 
-        radial-gradient(ellipse 15% 40% at 8% 50%, rgba(200, 200, 200, 0.6) 0%, transparent 70%),
-        radial-gradient(ellipse 15% 40% at 92% 50%, rgba(200, 200, 200, 0.6) 0%, transparent 70%);
+      background: repeating-linear-gradient(
+        90deg,
+        #FF6600 0px,
+        #FF6600 2px,
+        transparent 2px,
+        transparent 8px
+      );
+      background-size: 56px 100%;
+      background-position: center;
       pointer-events: none;
       z-index: 0;
     }
     
-    /* 7 horizontal lines for stick */
+    /* Label for ball block */
     .ball-block::after {
-      content: '';
+      content: 'S';
       position: absolute;
-      top: 15%;
-      left: 25%;
-      right: 25%;
-      bottom: 15%;
-      background: repeating-linear-gradient(
-        to bottom,
-        transparent 0px,
-        transparent 4px,
-        #FF8C00 4px,
-        #FF8C00 6px
-      );
-      background-size: 100% 100%;
+      font-size: 10px;
+      font-weight: bold;
+      color: #FF6600;
+      top: 5px;
+      left: 5px;
       z-index: 1;
     }
     
@@ -374,7 +380,52 @@
       opacity: 0.4;
     }
     
-    /* Rotation classes for obstacle and ball */
+    /* Bridge Block styles - 3 ช่องติดกัน มีเส้น 2 ข้างยาว */
+    .bridge-block {
+      background: white !important;
+      position: relative;
+      border: none !important;
+      border-radius: 0px;
+      overflow: visible;
+      width: 120px !important; /* 3 ช่อง x 40px */
+      height: 40px !important;
+    }
+    
+    .bridge-block::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-top: 4px solid #000;
+      border-bottom: 4px solid #000;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .bridge-block::after {
+      content: 'BR1';
+      position: absolute;
+      font-size: 10px;
+      font-weight: bold;
+      color: #000;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+    
+    .bridge-block.block-placed {
+      opacity: 0.4;
+    }
+    
+    /* Rotation classes for checkpoint, obstacle and ball */
+    .checkpoint-rotate-0 { transform: rotate(0deg) !important; }
+    .checkpoint-rotate-1 { transform: rotate(90deg) !important; }
+    .checkpoint-rotate-2 { transform: rotate(180deg) !important; }
+    .checkpoint-rotate-3 { transform: rotate(270deg) !important; }
+    
     .blackhole-rotate-0 { transform: rotate(0deg); }
     .blackhole-rotate-1 { transform: rotate(90deg); }
     .blackhole-rotate-2 { transform: rotate(180deg); }
@@ -385,12 +436,37 @@
     .ball-rotate-2 { transform: rotate(180deg); }
     .ball-rotate-3 { transform: rotate(270deg); }
     
+    .bridge-rotate-0 { transform: rotate(0deg); }
+    .bridge-rotate-1 { transform: rotate(90deg); }
+    .bridge-rotate-2 { transform: rotate(180deg); }
+    .bridge-rotate-3 { transform: rotate(270deg); }
+    
+    .zone-rotate-0 { transform: rotate(0deg); }
+    .zone-rotate-1 { transform: rotate(90deg); }
+    .zone-rotate-2 { transform: rotate(180deg); }
+    .zone-rotate-3 { transform: rotate(270deg); }
+    
     /* Zone Color styles - ไม่มีขอบมน */
     .zone-block {
       position: relative;
-      border: 2px solid #333 !important;
       opacity: 0.8;
       border-radius: 0 !important;
+      overflow: hidden;
+    }
+    
+    /* Border styles for zones */
+    .zone-block.zone-border-left {
+      border: none;
+      border-left: 4px solid #000 !important;
+    }
+    
+    .zone-block.zone-border-three-sides {
+      border: 4px solid #000 !important;
+      border-right: none !important;
+    }
+    
+    .zone-block.zone-border-all {
+      border: 4px solid #000 !important;
     }
     
     .zone-block:hover {
@@ -404,11 +480,46 @@
     .zone-label {
       position: absolute;
       bottom: 1px;
+      left: 2px;
       font-size: 8px;
       font-weight: bold;
       color: #333;
       text-shadow: 1px 1px 2px white;
+      z-index: 1;
     }
+    
+    /* START block - สีเทาบางๆ */
+    .start-block {
+      position: relative;
+      background-color: #CCCCCC;
+      opacity: 0.5;
+      border: 2px solid #999 !important;
+      border-radius: 0 !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .start-block:hover {
+      opacity: 0.7;
+    }
+    
+    .start-block.block-placed {
+      opacity: 0.3;
+    }
+    
+    .start-label {
+      position: absolute;
+      font-size: 12px;
+      font-weight: bold;
+      color: #333;
+      z-index: 1;
+    }
+    
+    .start-rotate-0 { transform: rotate(0deg); }
+    .start-rotate-1 { transform: rotate(90deg); }
+    .start-rotate-2 { transform: rotate(180deg); }
+    .start-rotate-3 { transform: rotate(270deg); }
     
     .field-grid-wrapper {
       display: flex;
@@ -422,7 +533,7 @@
     <v-app>
       <v-app-bar app color="primary" dark>
         <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-        <v-toolbar-title>เรียนรู้หุ่นยนต์ระดับกลาง</v-toolbar-title>
+        <v-toolbar-title>เรียนรู้หุ่นยนต์ สพฐ ระดับกลางและระดับสูง </v-toolbar-title>
         <v-spacer></v-spacer> จิรัฎฐ์ สุดใจ :
         iam.geradt@gmail.com
         <v-btn icon @click="toggleFullscreen">
@@ -506,7 +617,7 @@
                   <v-icon :color="tab === 'mid-field' ? 'primary' : ''">mdi-grid</v-icon>
                 </v-list-item-icon>
                 <v-list-item-content>
-                  <v-list-item-title>สุ่มสนาม</v-list-item-title>
+                  <v-list-item-title>สร้างสนาม</v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
 
@@ -567,7 +678,7 @@
                   <v-icon :color="tab === 'high-field' ? 'primary' : ''">mdi-grid</v-icon>
                 </v-list-item-icon>
                 <v-list-item-content>
-                  <v-list-item-title>สุ่มสนาม</v-list-item-title>
+                  <v-list-item-title>สร้างสนาม</v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
 
@@ -936,16 +1047,16 @@
                 <div class="d-flex justify-space-between align-center mb-2">
                   <div>
                     <h3 class="text-subtitle-1 mb-1">
-                      🎯 บล๊อคทั้งหมด 
+                      🎯 บล๊อคทั้งหมด (ระดับกลาง)
                       <span class="text-caption grey--text">
-                        (CP: <strong :class="checkpointCount >= maxCheckpoints ? 'red--text' : 'green--text'">{{ checkpointCount }}/{{ maxCheckpoints }}</strong>)
+                        (CP: <strong :class="midCheckpointCount >= maxCheckpoints ? 'red--text' : 'green--text'">{{ midCheckpointCount }}/{{ maxCheckpoints }}</strong>)
                       </span>
                     </h3>
                     <p class="text-caption grey--text mb-0" style="font-size: 10px;">
                       💡 คลิกซ้าย=หมุน | คลิกขวา=ลบ | ลาก=วาง
                     </p>
                   </div>
-                  <v-btn x-small color="warning" @click="resetField">
+                  <v-btn x-small color="warning" @click="resetField('mid')">
                     <v-icon x-small left>mdi-refresh</v-icon>
                     รีเซ็ต
                   </v-btn>
@@ -955,15 +1066,15 @@
                 <div class="blocks-container" style="flex-wrap: wrap; gap: 4px;">
                   <!-- Field Blocks (10) -->
                   <div 
-                    v-for="(block, index) in fieldBlocks" 
+                    v-for="(block, index) in midFieldBlocks" 
                     :key="index"
                     class="field-block"
                     :class="[
                       'block-border-' + getRotatedBorders(block.borders, block.rotation),
                       {'block-placed': block.placed}
                     ]"
-                    @click="rotateBlock(index)"
-                    @dragstart="startDrag($event, index, 'field')"
+                    @click="rotateBlock(index, 'mid')"
+                    @dragstart="startDrag($event, index, 'field', 'mid')"
                     @dragend="endDrag"
                     draggable="true"
                   >
@@ -972,15 +1083,15 @@
 
                   <!-- Checkpoint Blocks (4) -->
                   <div 
-                    v-for="(block, index) in checkpointBlocks" 
+                    v-for="(block, index) in midCheckpointBlocks" 
                     :key="'cp-' + index"
                     class="field-block checkpoint-block"
                     :class="[
                       'block-border-' + getRotatedBorders(block.borders, block.rotation),
                       {'block-placed': block.placed}
                     ]"
-                    @click="rotateCheckpointBlock(index)"
-                    @dragstart="startDrag($event, index, 'checkpoint')"
+                    @click="rotateCheckpointBlock(index, 'mid')"
+                    @dragstart="startDrag($event, index, 'checkpoint', 'mid')"
                     @dragend="endDrag"
                     draggable="true"
                   >
@@ -989,12 +1100,12 @@
 
                   <!-- Black Hole (1) -->
                   <div 
-                    v-for="(block, index) in obstacleBlocks" 
+                    v-for="(block, index) in midObstacleBlocks" 
                     :key="'obs-' + index"
                     class="field-block blackhole-block"
                     :class="['blackhole-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateObstacleBlock(index)"
-                    @dragstart="startDrag($event, index, 'obstacle')"
+                    @click="rotateObstacleBlock(index, 'mid')"
+                    @dragstart="startDrag($event, index, 'obstacle', 'mid')"
                     @dragend="endDrag"
                     draggable="true"
                   >
@@ -1003,31 +1114,65 @@
 
                   <!-- Stick (1) -->
                   <div 
-                    v-for="(block, index) in ballBlocks" 
+                    v-for="(block, index) in midBallBlocks" 
                     :key="'ball-' + index"
                     class="field-block ball-block"
                     :class="['ball-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateBallBlock(index)"
-                    @dragstart="startDrag($event, index, 'ball')"
+                    @click="rotateBallBlock(index, 'mid')"
+                    @dragstart="startDrag($event, index, 'ball', 'mid')"
                     @dragend="endDrag"
                     draggable="true"
                   >
                     <span class="block-number">{{ block.id }}</span>
                   </div>
 
+                  <!-- Bridge (1) - 3 ช่องติดกัน -->
+                  <div 
+                    v-for="(block, index) in midBridgeBlocks" 
+                    :key="'bridge-' + index"
+                    class="bridge-block"
+                    :class="['bridge-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                    @click="rotateBridgeBlock(index, 'mid')"
+                    @dragstart="startDrag($event, index, 'bridge', 'mid')"
+                    @dragend="endDrag"
+                    draggable="true"
+                  >
+                  </div>
+
                   <!-- Zone Colors (4) -->
                   <div 
-                    v-for="(block, index) in zoneBlocks" 
+                    v-for="(block, index) in midZoneBlocks" 
                     :key="'zone-' + index"
                     class="field-block zone-block"
-                    :class="{'block-placed': block.placed}"
-                    :style="{ backgroundColor: block.color }"
-                    @dragstart="startDrag($event, index, 'zone')"
+                    :class="[
+                      {'block-placed': block.placed}, 
+                      'zone-rotate-' + block.rotation,
+                      block.border ? 'zone-border-' + block.border : ''
+                    ]"
+                    :style="block.shape === 'half-left' ? 
+                      { background: 'linear-gradient(to right, ' + block.color + ' 0%, ' + block.color + ' 50%, white 50%, white 100%)' } : 
+                      { backgroundColor: block.color }"
+                    @click="rotateZoneBlock(index, 'mid')"
+                    @dragstart="startDrag($event, index, 'zone', 'mid')"
                     @dragend="endDrag"
                     draggable="true"
                   >
                     <span class="block-number">{{ block.id }}</span>
                     <span class="zone-label">{{ block.name }}</span>
+                  </div>
+
+                  <!-- START Block (1) -->
+                  <div 
+                    v-for="(block, index) in midStartBlock" 
+                    :key="'start-' + index"
+                    class="field-block start-block"
+                    :class="['start-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                    @click="rotateStartBlock(index, 'mid')"
+                    @dragstart="startDrag($event, index, 'start', 'mid')"
+                    @dragend="endDrag"
+                    draggable="true"
+                  >
+                    <span class="start-label">{{ block.name }}</span>
                   </div>
                 </div>
               </v-card>
@@ -1036,7 +1181,7 @@
               <v-card class="pa-2">
                 <v-card-title class="text-subtitle-1 justify-center mb-2 py-2">
                   <v-icon color="primary" class="mr-2">mdi-grid</v-icon>
-                  สนามแข่งขัน 4x8
+                  สนามแข่งขัน 4x8 (ระดับกลาง)
                 </v-card-title>
                 
                 <div class="field-grid-wrapper">
@@ -1050,24 +1195,32 @@
                         v-for="col in 8"
                         :key="'cell-' + row + '-' + col"
                         class="field-grid-cell"
-                        :class="{'cell-occupied': isCellOccupied(row - 1, col - 1)}"
-                        :style="getCellStyle(row - 1, col - 1)"
-                        @click="rotateBlockInGrid(row - 1, col - 1)"
-                        @contextmenu.prevent="removeBlockFromGrid(row - 1, col - 1)"
+                        :class="{'cell-occupied': isCellOccupied(row - 1, col - 1, 'mid')}"
+                        :style="getCellStyle(row - 1, col - 1, 'mid')"
+                        @click="rotateBlockInGrid(row - 1, col - 1, 'mid')"
+                        @contextmenu.prevent="removeBlockFromGrid(row - 1, col - 1, 'mid')"
                         @dragover.prevent
-                        @drop="dropBlock($event, row - 1, col - 1)"
+                        @drop="dropBlock($event, row - 1, col - 1, 'mid')"
                       >
                         <span class="cell-label">{{ (row - 1) * 8 + col }}</span>
-                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'checkpoint'" 
+                        <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'checkpoint'" 
                              style="position: absolute; width: 20px; height: 20px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
                         </div>
-                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'ball'" 
+                        <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'ball'" 
                              style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
-                          {{ ballBlocks[fieldGrid[row - 1][col - 1].index].name }}
+                          {{ midBallBlocks[midFieldGrid[row - 1][col - 1].index].name }}
                         </div>
-                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'zone'" 
+                        <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'bridge'" 
+                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
+                          สะพาน
+                        </div>
+                        <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'zone'" 
                              style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); font-size: 12px;">
-                          {{ zoneBlocks[fieldGrid[row - 1][col - 1].index].name }}
+                          {{ midZoneBlocks[midFieldGrid[row - 1][col - 1].index].name }}
+                        </div>
+                        <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'start'" 
+                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 12px;">
+                          START
                         </div>
                       </div>
                     </div>
@@ -1078,18 +1231,103 @@
           </v-sheet>
 
           <!-- จับเวลา 3 นาทีระดับกลาง -->
-          <v-sheet v-if="tab === 'mid-timer'" class="d-flex flex-column align-center justify-center fill-height pa-4">
+          <v-sheet v-if="tab === 'mid-timer'" class="d-flex flex-column align-center justify-center fill-height pa-4" style="position: relative;">
             <v-container>
               <v-card class="pa-6">
-                <v-card-title class="text-h4 justify-center">
-                  <v-icon large color="primary" class="mr-3">mdi-clock-fast</v-icon>
+                <v-card-title class="text-h4 justify-center mb-2">
+                  <v-icon large color="primary" class="mr-3">mdi-timer</v-icon>
                   จับเวลา 3 นาที (ระดับกลาง)
                 </v-card-title>
-                <v-card-text class="text-center">
-                  <p class="text-h6">หน้านี้จะใช้ระบบจับเวลาพร้อมตั้งเวลาล่วงหน้าที่ 3 นาที</p>
+                
+                <!-- เวลาที่ใช้ไป - แสดงทั้ง 2 รูปแบบ ใช้ v-show และ transition -->
+                <v-card-subtitle v-show="!midTimerIsPreparing && midTimerRunning" class="text-center pb-0" style="transition: all 0.5s ease-in-out;">
+                  <span class="text-h5" style="color: #1976D2; font-weight: bold;">
+                    เวลาที่ใช้ไป: {{ String(midTimerElapsedMinutes).padStart(2, '0') }}:{{ String(midTimerElapsedSeconds).padStart(2, '0') }}.{{ String(midTimerElapsedMilliseconds).padStart(2, '0') }}
+                  </span>
+                </v-card-subtitle>
+                
+                <!-- เวลาที่ใช้ไป (ใหญ่) - แสดงตอนหยุด ใช้ v-show -->
+                <v-card-text v-show="!midTimerIsPreparing && !midTimerRunning" class="text-center pt-4 pb-0">
+                  <p class="timer-text-label grey--text mb-1" 
+                     :style="isFullScreen ? 'font-weight: 300; font-size: 5rem;' : 'font-weight: 300; font-size: 3rem;'">
+                    เวลาที่ใช้ไป
+                  </p>
+                  <div :class="['fixed-number', isFullScreen ? 'fullscreen-time' : '']"
+                       :style="isFullScreen ? { color: '#1976D2' } : { fontSize: '8rem', lineHeight: '1', color: '#1976D2' }">
+                    {{ String(midTimerElapsedMinutes).padStart(2, '0') }}:{{ String(midTimerElapsedSeconds).padStart(2, '0') }}<span class="fixed-number" :class="isFullScreen ? 'fullscreen-millisecond' : ''" :style="isFullScreen ? {} : { fontSize: '5rem' }">.{{ String(midTimerElapsedMilliseconds).padStart(2, '0') }}</span>
+                  </div>
+                </v-card-text>
+                
+                <!-- การนับถอยหลัง 5 วินาที (แสดงทับบนเวลา) -->
+                <v-card-text v-if="midTimerIsPreparing" class="text-center pt-8">
+                  <p class="text-h5" style="color: orange;">
+                    เตรียมพร้อม... <span :class="['fixed-number', isFullScreen ? 'display-1' : 'headline']" 
+                       :style="isFullScreen ? 'font-size: 20vh;' : 'font-size: 8rem;'"
+                       style="color: orange; font-weight: bold;">{{ midTimerPrepareCountdown }}</span>
+                  </p>
+                </v-card-text>
+
+                <!-- เวลาคงเหลือ (นับถอยหลัง) - ใหญ่ตอนกำลังนับ, เล็กตอนหยุด -->
+                <v-card-text class="text-center" :style="midTimerRunning || midTimerIsPreparing ? 'padding-top: 2rem;' : 'padding-top: 1rem; padding-bottom: 0.5rem;'">
+                  <div :class="['fixed-number', isFullScreen && (midTimerRunning || midTimerIsPreparing) ? 'fullscreen-time' : '']" 
+                       class="mb-2" 
+                       :style="midTimerRunning || midTimerIsPreparing ? (isFullScreen ? {fontSize: '25vh'} : {fontSize: '8rem'}) : {fontSize: '3rem'}">
+                    {{ String(midTimerMinutes).padStart(2, '0') }}:{{ String(midTimerSeconds).padStart(2, '0') }}<span :class="['fixed-number', (midTimerRunning || midTimerIsPreparing) && isFullScreen ? 'fullscreen-millisecond' : '']" :style="midTimerRunning || midTimerIsPreparing ? (isFullScreen ? {} : {fontSize: '5rem'}) : {fontSize: '2rem'}">.{{ String(midTimerMilliseconds).padStart(2, '0') }}</span>
+                  </div>
+                  <p :class="['timer-text-label', midTimerRunning || midTimerIsPreparing ? 'text-h6' : 'body-2']" class="grey--text">เวลาคงเหลือ</p>
+                </v-card-text>
+
+                <!-- ปุ่มควบคุม -->
+                <v-card-actions class="justify-center mb-4">
+                  <v-btn
+                    v-if="!midTimerRunning && !midTimerIsPreparing"
+                    color="success"
+                    x-large
+                    @click="startMidTimer"
+                  >
+                    <v-icon left>mdi-play</v-icon>
+                    เริ่ม
+                  </v-btn>
+                  <v-btn
+                    v-if="midTimerRunning"
+                    color="warning"
+                    x-large
+                    @click="pauseMidTimer"
+                  >
+                    <v-icon left>mdi-pause</v-icon>
+                    หยุดชั่วคราว
+                  </v-btn>
+                  <v-btn
+                    color="error"
+                    x-large
+                    @click="resetMidTimer"
+                    class="ml-4"
+                    :disabled="midTimerIsPreparing"
+                  >
+                    <v-icon left>mdi-refresh</v-icon>
+                    รีเซ็ต
+                  </v-btn>
+                </v-card-actions>
+
+                <!-- คีย์ลัด -->
+                <v-divider v-if="!midTimerIsPreparing" class="my-4"></v-divider>
+                <v-card-text v-if="!midTimerIsPreparing" class="text-center">
+                  <p class="caption grey--text">
+                    <v-icon small>mdi-keyboard</v-icon>
+                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>Num 0</strong> เพื่อรีเซ็ต | <strong>Num +</strong> เพื่อเต็มจอ
+                  </p>
                 </v-card-text>
               </v-card>
             </v-container>
+            
+            <!-- Progress Bar - ด้านล่างสุดของจอ -->
+            <v-progress-linear
+              v-if="!midTimerIsPreparing"
+              :value="((midTimerElapsedMinutes * 60 + midTimerElapsedSeconds) / 180) * 100"
+              height="25"
+              :color="midTimerMinutes === 0 && midTimerSeconds <= 10 ? 'red' : 'primary'"
+              style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;"
+            ></v-progress-linear>
           </v-sheet>
 
           <!-- ตั้งค่าทีมระดับกลาง -->
@@ -1200,16 +1438,16 @@
                 <div class="d-flex justify-space-between align-center mb-2">
                   <div>
                     <h3 class="text-subtitle-1 mb-1">
-                      🎯 บล๊อคทั้งหมด 
+                      🎯 บล๊อคทั้งหมด (ระดับสูง)
                       <span class="text-caption grey--text">
-                        (CP: <strong :class="checkpointCount >= maxCheckpoints ? 'red--text' : 'green--text'">{{ checkpointCount }}/{{ maxCheckpoints }}</strong>)
+                        (CP: <strong :class="highCheckpointCount >= maxCheckpoints ? 'red--text' : 'green--text'">{{ highCheckpointCount }}/{{ maxCheckpoints }}</strong>)
                       </span>
                     </h3>
                     <p class="text-caption grey--text mb-0" style="font-size: 10px;">
                       💡 คลิกซ้าย=หมุน | คลิกขวา=ลบ | ลาก=วาง
                     </p>
                   </div>
-                  <v-btn x-small color="warning" @click="resetField">
+                  <v-btn x-small color="warning" @click="resetField('high')">
                     <v-icon x-small left>mdi-refresh</v-icon>
                     รีเซ็ต
                   </v-btn>
@@ -1219,15 +1457,15 @@
                 <div class="blocks-container" style="flex-wrap: wrap; gap: 4px;">
                   <!-- Field Blocks (10) -->
                   <div 
-                    v-for="(block, index) in fieldBlocks" 
+                    v-for="(block, index) in highFieldBlocks" 
                     :key="index"
                     class="field-block"
                     :class="[
                       'block-border-' + getRotatedBorders(block.borders, block.rotation),
                       {'block-placed': block.placed}
                     ]"
-                    @click="rotateBlock(index)"
-                    @dragstart="startDrag($event, index, 'field')"
+                    @click="rotateBlock(index, 'high')"
+                    @dragstart="startDrag($event, index, 'field', 'high')"
                     @dragend="endDrag"
                     draggable="true"
                   >
@@ -1236,15 +1474,15 @@
 
                   <!-- Checkpoint Blocks (4) -->
                   <div 
-                    v-for="(block, index) in checkpointBlocks" 
+                    v-for="(block, index) in highCheckpointBlocks" 
                     :key="'cp-' + index"
                     class="field-block checkpoint-block"
                     :class="[
                       'block-border-' + getRotatedBorders(block.borders, block.rotation),
                       {'block-placed': block.placed}
                     ]"
-                    @click="rotateCheckpointBlock(index)"
-                    @dragstart="startDrag($event, index, 'checkpoint')"
+                    @click="rotateCheckpointBlock(index, 'high')"
+                    @dragstart="startDrag($event, index, 'checkpoint', 'high')"
                     @dragend="endDrag"
                     draggable="true"
                   >
@@ -1253,12 +1491,12 @@
 
                   <!-- Black Hole (1) -->
                   <div 
-                    v-for="(block, index) in obstacleBlocks" 
+                    v-for="(block, index) in highObstacleBlocks" 
                     :key="'obs-' + index"
                     class="field-block blackhole-block"
                     :class="['blackhole-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateObstacleBlock(index)"
-                    @dragstart="startDrag($event, index, 'obstacle')"
+                    @click="rotateObstacleBlock(index, 'high')"
+                    @dragstart="startDrag($event, index, 'obstacle', 'high')"
                     @dragend="endDrag"
                     draggable="true"
                   >
@@ -1267,31 +1505,65 @@
 
                   <!-- Stick (1) -->
                   <div 
-                    v-for="(block, index) in ballBlocks" 
+                    v-for="(block, index) in highBallBlocks" 
                     :key="'ball-' + index"
                     class="field-block ball-block"
                     :class="['ball-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateBallBlock(index)"
-                    @dragstart="startDrag($event, index, 'ball')"
+                    @click="rotateBallBlock(index, 'high')"
+                    @dragstart="startDrag($event, index, 'ball', 'high')"
                     @dragend="endDrag"
                     draggable="true"
                   >
                     <span class="block-number">{{ block.id }}</span>
                   </div>
 
+                  <!-- Bridge (1) - 3 ช่องติดกัน -->
+                  <div 
+                    v-for="(block, index) in highBridgeBlocks" 
+                    :key="'bridge-' + index"
+                    class="bridge-block"
+                    :class="['bridge-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                    @click="rotateBridgeBlock(index, 'high')"
+                    @dragstart="startDrag($event, index, 'bridge', 'high')"
+                    @dragend="endDrag"
+                    draggable="true"
+                  >
+                  </div>
+
                   <!-- Zone Colors (4) -->
                   <div 
-                    v-for="(block, index) in zoneBlocks" 
+                    v-for="(block, index) in highZoneBlocks" 
                     :key="'zone-' + index"
                     class="field-block zone-block"
-                    :class="{'block-placed': block.placed}"
-                    :style="{ backgroundColor: block.color }"
-                    @dragstart="startDrag($event, index, 'zone')"
+                    :class="[
+                      {'block-placed': block.placed}, 
+                      'zone-rotate-' + block.rotation,
+                      block.border ? 'zone-border-' + block.border : ''
+                    ]"
+                    :style="block.shape === 'half-left' ? 
+                      { background: 'linear-gradient(to right, ' + block.color + ' 0%, ' + block.color + ' 50%, white 50%, white 100%)' } : 
+                      { backgroundColor: block.color }"
+                    @click="rotateZoneBlock(index, 'high')"
+                    @dragstart="startDrag($event, index, 'zone', 'high')"
                     @dragend="endDrag"
                     draggable="true"
                   >
                     <span class="block-number">{{ block.id }}</span>
                     <span class="zone-label">{{ block.name }}</span>
+                  </div>
+
+                  <!-- START Block (1) -->
+                  <div 
+                    v-for="(block, index) in highStartBlock" 
+                    :key="'start-' + index"
+                    class="field-block start-block"
+                    :class="['start-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                    @click="rotateStartBlock(index, 'high')"
+                    @dragstart="startDrag($event, index, 'start', 'high')"
+                    @dragend="endDrag"
+                    draggable="true"
+                  >
+                    <span class="start-label">{{ block.name }}</span>
                   </div>
                 </div>
               </v-card>
@@ -1300,7 +1572,7 @@
               <v-card class="pa-2">
                 <v-card-title class="text-subtitle-1 justify-center mb-2 py-2">
                   <v-icon color="primary" class="mr-2">mdi-grid</v-icon>
-                  สนามแข่งขัน 4x8
+                  สนามแข่งขัน 4x8 (ระดับสูง)
                 </v-card-title>
                 
                 <div class="field-grid-wrapper">
@@ -1314,24 +1586,32 @@
                         v-for="col in 8"
                         :key="'cell-' + row + '-' + col"
                         class="field-grid-cell"
-                        :class="{'cell-occupied': isCellOccupied(row - 1, col - 1)}"
-                        :style="getCellStyle(row - 1, col - 1)"
-                        @click="rotateBlockInGrid(row - 1, col - 1)"
-                        @contextmenu.prevent="removeBlockFromGrid(row - 1, col - 1)"
+                        :class="{'cell-occupied': isCellOccupied(row - 1, col - 1, 'high')}"
+                        :style="getCellStyle(row - 1, col - 1, 'high')"
+                        @click="rotateBlockInGrid(row - 1, col - 1, 'high')"
+                        @contextmenu.prevent="removeBlockFromGrid(row - 1, col - 1, 'high')"
                         @dragover.prevent
-                        @drop="dropBlock($event, row - 1, col - 1)"
+                        @drop="dropBlock($event, row - 1, col - 1, 'high')"
                       >
                         <span class="cell-label">{{ (row - 1) * 8 + col }}</span>
-                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'checkpoint'" 
+                        <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'checkpoint'" 
                              style="position: absolute; width: 20px; height: 20px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
                         </div>
-                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'ball'" 
+                        <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'ball'" 
                              style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
-                          {{ ballBlocks[fieldGrid[row - 1][col - 1].index].name }}
+                          {{ highBallBlocks[highFieldGrid[row - 1][col - 1].index].name }}
                         </div>
-                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'zone'" 
+                        <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'bridge'" 
+                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
+                          สะพาน
+                        </div>
+                        <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'zone'" 
                              style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); font-size: 12px;">
-                          {{ zoneBlocks[fieldGrid[row - 1][col - 1].index].name }}
+                          {{ highZoneBlocks[highFieldGrid[row - 1][col - 1].index].name }}
+                        </div>
+                        <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'start'" 
+                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 12px;">
+                          START
                         </div>
                       </div>
                     </div>
@@ -1342,18 +1622,103 @@
           </v-sheet>
 
           <!-- จับเวลา 5 นาทีระดับสูง -->
-          <v-sheet v-if="tab === 'high-timer'" class="d-flex flex-column align-center justify-center fill-height pa-4">
+          <v-sheet v-if="tab === 'high-timer'" class="d-flex flex-column align-center justify-center fill-height pa-4" style="position: relative;">
             <v-container>
               <v-card class="pa-6">
-                <v-card-title class="text-h4 justify-center">
-                  <v-icon large color="primary" class="mr-3">mdi-clock-fast</v-icon>
+                <v-card-title class="text-h4 justify-center mb-2">
+                  <v-icon large color="orange" class="mr-3">mdi-timer</v-icon>
                   จับเวลา 5 นาที (ระดับสูง)
                 </v-card-title>
-                <v-card-text class="text-center">
-                  <p class="text-h6">หน้านี้จะใช้ระบบจับเวลาพร้อมตั้งเวลาล่วงหน้าที่ 5 นาที</p>
+                
+                <!-- เวลาที่ใช้ไป - แสดงทั้ง 2 รูปแบบ ใช้ v-show และ transition -->
+                <v-card-subtitle v-show="!highTimerIsPreparing && highTimerRunning" class="text-center pb-0" style="transition: all 0.5s ease-in-out;">
+                  <span class="text-h5" style="color: #FF6F00; font-weight: bold;">
+                    เวลาที่ใช้ไป: {{ String(highTimerElapsedMinutes).padStart(2, '0') }}:{{ String(highTimerElapsedSeconds).padStart(2, '0') }}.{{ String(highTimerElapsedMilliseconds).padStart(2, '0') }}
+                  </span>
+                </v-card-subtitle>
+                
+                <!-- เวลาที่ใช้ไป (ใหญ่) - แสดงตอนหยุด ใช้ v-show -->
+                <v-card-text v-show="!highTimerIsPreparing && !highTimerRunning" class="text-center pt-4 pb-0">
+                  <p class="timer-text-label grey--text mb-1" 
+                     :style="isFullScreen ? 'font-weight: 300; font-size: 5rem;' : 'font-weight: 300; font-size: 3rem;'">
+                    เวลาที่ใช้ไป
+                  </p>
+                  <div :class="['fixed-number', isFullScreen ? 'fullscreen-time' : '']"
+                       :style="isFullScreen ? { color: '#FF6F00' } : { fontSize: '8rem', lineHeight: '1', color: '#FF6F00' }">
+                    {{ String(highTimerElapsedMinutes).padStart(2, '0') }}:{{ String(highTimerElapsedSeconds).padStart(2, '0') }}<span class="fixed-number" :class="isFullScreen ? 'fullscreen-millisecond' : ''" :style="isFullScreen ? {} : { fontSize: '5rem' }">.{{ String(highTimerElapsedMilliseconds).padStart(2, '0') }}</span>
+                  </div>
+                </v-card-text>
+                
+                <!-- การนับถอยหลัง 5 วินาที (แสดงทับบนเวลา) -->
+                <v-card-text v-if="highTimerIsPreparing" class="text-center pt-8">
+                  <p class="text-h5" style="color: #FF9800;">
+                    เตรียมพร้อม... <span :class="['fixed-number', isFullScreen ? 'display-1' : 'headline']" 
+                       :style="isFullScreen ? 'font-size: 20vh;' : 'font-size: 8rem;'"
+                       style="color: #FF9800; font-weight: bold;">{{ highTimerPrepareCountdown }}</span>
+                  </p>
+                </v-card-text>
+
+                <!-- เวลาคงเหลือ (นับถอยหลัง) - ใหญ่ตอนกำลังนับ, เล็กตอนหยุด -->
+                <v-card-text class="text-center" :style="highTimerRunning || highTimerIsPreparing ? 'padding-top: 2rem;' : 'padding-top: 1rem; padding-bottom: 0.5rem;'">
+                  <div :class="['fixed-number', isFullScreen && (highTimerRunning || highTimerIsPreparing) ? 'fullscreen-time' : '']" 
+                       class="mb-2" 
+                       :style="highTimerRunning || highTimerIsPreparing ? (isFullScreen ? {fontSize: '25vh'} : {fontSize: '8rem'}) : {fontSize: '3rem'}">
+                    {{ String(highTimerMinutes).padStart(2, '0') }}:{{ String(highTimerSeconds).padStart(2, '0') }}<span :class="['fixed-number', (highTimerRunning || highTimerIsPreparing) && isFullScreen ? 'fullscreen-millisecond' : '']" :style="highTimerRunning || highTimerIsPreparing ? (isFullScreen ? {} : {fontSize: '5rem'}) : {fontSize: '2rem'}">.{{ String(highTimerMilliseconds).padStart(2, '0') }}</span>
+                  </div>
+                  <p :class="['timer-text-label', highTimerRunning || highTimerIsPreparing ? 'text-h6' : 'body-2']" class="grey--text">เวลาคงเหลือ</p>
+                </v-card-text>
+
+                <!-- ปุ่มควบคุม -->
+                <v-card-actions class="justify-center mb-4">
+                  <v-btn
+                    v-if="!highTimerRunning && !highTimerIsPreparing"
+                    color="orange"
+                    x-large
+                    @click="startHighTimer"
+                  >
+                    <v-icon left>mdi-play</v-icon>
+                    เริ่ม
+                  </v-btn>
+                  <v-btn
+                    v-if="highTimerRunning"
+                    color="warning"
+                    x-large
+                    @click="pauseHighTimer"
+                  >
+                    <v-icon left>mdi-pause</v-icon>
+                    หยุดชั่วคราว
+                  </v-btn>
+                  <v-btn
+                    color="error"
+                    x-large
+                    @click="resetHighTimer"
+                    class="ml-4"
+                    :disabled="highTimerIsPreparing"
+                  >
+                    <v-icon left>mdi-refresh</v-icon>
+                    รีเซ็ต
+                  </v-btn>
+                </v-card-actions>
+
+                <!-- คีย์ลัด -->
+                <v-divider v-if="!highTimerIsPreparing" class="my-4"></v-divider>
+                <v-card-text v-if="!highTimerIsPreparing" class="text-center">
+                  <p class="caption grey--text">
+                    <v-icon small>mdi-keyboard</v-icon>
+                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>Num 0</strong> เพื่อรีเซ็ต | <strong>Num +</strong> เพื่อเต็มจอ
+                  </p>
                 </v-card-text>
               </v-card>
             </v-container>
+            
+            <!-- Progress Bar - ด้านล่างสุดของจอ (สีส้ม) -->
+            <v-progress-linear
+              v-if="!highTimerIsPreparing"
+              :value="((highTimerElapsedMinutes * 60 + highTimerElapsedSeconds) / 300) * 100"
+              height="25"
+              :color="highTimerMinutes === 0 && highTimerSeconds <= 10 ? 'red' : 'orange'"
+              style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;"
+            ></v-progress-linear>
           </v-sheet>
 
           <!-- ตั้งค่าทีมระดับสูง -->
@@ -1436,50 +1801,116 @@
           lastSliceIndex: -1,
           audioContext: null,
           
-          // Field Grid Data
-          fieldGrid: Array(4).fill(null).map(() => Array(8).fill(null)),
-          draggedBlockIndex: null,
-          draggedBlockType: null,
-          fieldBlocks: [
-            // 10 blocks - แต่ละ block เป็นสี่เหลี่ยว 1 เซลล์ แต่มีขอบต่างกัน
-            { id: 1, borders: 'all', placed: false, position: null, rotation: 0 }, // Block 1: ขอบทั้ง 4 ด้าน
-            { id: 2, borders: 'bottom', placed: false, position: null, rotation: 0 }, // Block 2: ขอบด้านล่าง
-            { id: 3, borders: 'right', placed: false, position: null, rotation: 0 }, // Block 3: ขอบด้านขวา
-            { id: 4, borders: 'top-right', placed: false, position: null, rotation: 0 }, // Block 4: ขอบด้านบนและขวา
-            { id: 5, borders: 'bottom-right', placed: false, position: null, rotation: 0 }, // Block 5: ขอบด้านล่างและขวา
-            { id: 6, borders: 'left', placed: false, position: null, rotation: 0 }, // Block 6: ขอบด้านซ้าย
-            { id: 7, borders: 'top-left', placed: false, position: null, rotation: 0 }, // Block 7: ขอบด้านบนและซ้าย
-            { id: 8, borders: 'bottom-left', placed: false, position: null, rotation: 0 }, // Block 8: ขอบด้านล่างและซ้าย
-            { id: 9, borders: 'top', placed: false, position: null, rotation: 0 }, // Block 9: ขอบด้านบน
-            { id: 10, borders: 'top-bottom', placed: false, position: null, rotation: 0 } // Block 10: ขอบด้านบนและล่าง
-          ],
-          checkpointBlocks: [
-            // 4 checkpoint blocks - วางได้เพียง 2 จาก 4
-            { id: 'C1', borders: 'none', placed: false, position: null, rotation: 0, hasCheckpoint: true }, // ไม่มีขอบ
-            { id: 'C2', borders: 'bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true }, // ขอบด้านล่าง
-            { id: 'C3', borders: 'top-left-bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true }, // ขอบ 3 ด้าน
-            { id: 'C4', borders: 'top-bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true } // ขอบบนและล่าง
-          ],
-          maxCheckpoints: 2, // จำกัดจำนวน checkpoint ที่วางได้
-          checkpointCount: 0, // นับจำนวน checkpoint ที่วางแล้ว
+          // Mid Timer (3 minutes)
+          midTimerRunning: false,
+          midTimerMinutes: 3,
+          midTimerSeconds: 0,
+          midTimerMilliseconds: 0,
+          midTimerElapsedMinutes: 0,
+          midTimerElapsedSeconds: 0,
+          midTimerElapsedMilliseconds: 0,
+          midTimerInterval: null,
+          midTimerPrepareCountdown: 0,
+          midTimerIsPreparing: false,
           
-          // Obstacle Block (หลุมดำ - Black Hole) - เพียง 1 อัน
-          obstacleBlocks: [
+          // High Timer (5 minutes)
+          highTimerRunning: false,
+          highTimerMinutes: 5,
+          highTimerSeconds: 0,
+          highTimerMilliseconds: 0,
+          highTimerElapsedMinutes: 0,
+          highTimerElapsedSeconds: 0,
+          highTimerElapsedMilliseconds: 0,
+          highTimerInterval: null,
+          highTimerPrepareCountdown: 0,
+          highTimerIsPreparing: false,
+          
+          // Field Grid Data - แยกระดับกลางและระดับสูง
+          // ระดับกลาง (Mid Level)
+          midFieldGrid: Array(4).fill(null).map(() => Array(8).fill(null)),
+          midFieldBlocks: [
+            { id: 1, borders: 'all', placed: false, position: null, rotation: 0 },
+            { id: 2, borders: 'bottom', placed: false, position: null, rotation: 0 },
+            { id: 3, borders: 'right', placed: false, position: null, rotation: 0 },
+            { id: 4, borders: 'top-right', placed: false, position: null, rotation: 0 },
+            { id: 5, borders: 'bottom-right', placed: false, position: null, rotation: 0 },
+            { id: 6, borders: 'left', placed: false, position: null, rotation: 0 },
+            { id: 7, borders: 'top-left', placed: false, position: null, rotation: 0 },
+            { id: 8, borders: 'bottom-left', placed: false, position: null, rotation: 0 },
+            { id: 9, borders: 'top', placed: false, position: null, rotation: 0 },
+            { id: 10, borders: 'top-bottom', placed: false, position: null, rotation: 0 }
+          ],
+          midCheckpointBlocks: [
+            { id: 'C1', borders: 'none', placed: false, position: null, rotation: 0, hasCheckpoint: true },
+            { id: 'C2', borders: 'bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true },
+            { id: 'C3', borders: 'top-left-bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true },
+            { id: 'C4', borders: 'top-bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true }
+          ],
+          midObstacleBlocks: [
             { id: 'H1', type: 'blackhole', placed: false, position: null, rotation: 0 }
           ],
-          
-          // Ball Block (ลูกระนาด - Stick) - เพียง 1 อัน
-          ballBlocks: [
+          midBallBlocks: [
             { id: 'B1', color: 'orange', name: 'Stick', placed: false, position: null, rotation: 0 }
           ],
+          midBridgeBlocks: [
+            { id: 'BR1', placed: false, position: null, rotation: 0, size: 3 }
+          ],
+          midZoneBlocks: [
+            { id: 'Z1', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'left', placed: false, position: null, rotation: 0 },
+            { id: 'Z2', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'left', placed: false, position: null, rotation: 0 },
+            { id: 'Z3', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
+            { id: 'Z4', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 }
+          ],
+          midStartBlock: [
+            { id: 'START', color: '#CCCCCC', name: 'START', placed: false, position: null, rotation: 0 }
+          ],
           
-          // Zone Colors (สีพื้นที่) - 4 อัน
-          zoneBlocks: [
-            { id: 'Z1', color: '#FF6B6B', name: 'แดง', placed: false, position: null },
-            { id: 'Z2', color: '#4ECDC4', name: 'ฟ้า', placed: false, position: null },
-            { id: 'Z3', color: '#95E1D3', name: 'เขียว', placed: false, position: null },
-            { id: 'Z4', color: '#FFE66D', name: 'เหลือง', placed: false, position: null }
-          ]
+          // ระดับสูง (High Level)
+          highFieldGrid: Array(4).fill(null).map(() => Array(8).fill(null)),
+          highFieldBlocks: [
+            { id: 1, borders: 'all', placed: false, position: null, rotation: 0 },
+            { id: 2, borders: 'bottom', placed: false, position: null, rotation: 0 },
+            { id: 3, borders: 'right', placed: false, position: null, rotation: 0 },
+            { id: 4, borders: 'top-right', placed: false, position: null, rotation: 0 },
+            { id: 5, borders: 'bottom-right', placed: false, position: null, rotation: 0 },
+            { id: 6, borders: 'left', placed: false, position: null, rotation: 0 },
+            { id: 7, borders: 'top-left', placed: false, position: null, rotation: 0 },
+            { id: 8, borders: 'bottom-left', placed: false, position: null, rotation: 0 },
+            { id: 9, borders: 'top', placed: false, position: null, rotation: 0 },
+            { id: 10, borders: 'top-bottom', placed: false, position: null, rotation: 0 }
+          ],
+          highCheckpointBlocks: [
+            { id: 'C1', borders: 'none', placed: false, position: null, rotation: 0, hasCheckpoint: true },
+            { id: 'C2', borders: 'bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true },
+            { id: 'C3', borders: 'top-left-bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true },
+            { id: 'C4', borders: 'top-bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true }
+          ],
+          highObstacleBlocks: [
+            { id: 'H1', type: 'blackhole', placed: false, position: null, rotation: 0 }
+          ],
+          highBallBlocks: [
+            { id: 'B1', color: 'orange', name: 'Stick', placed: false, position: null, rotation: 0 }
+          ],
+          highBridgeBlocks: [
+            { id: 'BR1', placed: false, position: null, rotation: 0, size: 3 }
+          ],
+          highZoneBlocks: [
+            { id: 'Z1', color: '#FF0000', name: 'แดง', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
+            { id: 'Z2', color: '#0066FF', name: 'น้ำเงิน', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
+            { id: 'Z3', color: '#FFD700', name: 'เหลือง', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
+            { id: 'Z4', color: '#00CC66', name: 'เขียว', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 }
+          ],
+          highStartBlock: [
+            { id: 'START', color: '#CCCCCC', name: 'START', placed: false, position: null, rotation: 0 }
+          ],
+          
+          // Shared variables
+          draggedBlockIndex: null,
+          draggedBlockType: null,
+          draggedLevel: null,
+          maxCheckpoints: 2,
+          midCheckpointCount: 0,
+          highCheckpointCount: 0
         };
       },
       computed: {
@@ -1920,6 +2351,37 @@
             console.error('Error playing tick sound:', e);
           }
         },
+        playBeepSound(count = 1) {
+          // เล่นเสียง beep หลายครั้งเมื่อหมดเวลา
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          let beepIndex = 0;
+          
+          const playBeep = () => {
+            if (beepIndex >= count) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+            
+            beepIndex++;
+            if (beepIndex < count) {
+              setTimeout(playBeep, 500);
+            }
+          };
+          
+          playBeep();
+        },
         startCountdownFromInput() {
           const totalSeconds = (this.inputHours * 3600) + (this.inputMinutes * 60);
           
@@ -2012,71 +2474,436 @@
           }
         },
         
+        // Mid Timer Methods (3 minutes)
+        startMidTimer() {
+          this.midTimerIsPreparing = true;
+          this.midTimerPrepareCountdown = 5;
+          
+          // เปิด fullscreen อัตโนมัติ
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            this.isFullScreen = true;
+          }
+          
+          // นับถอยหลัง 5 วินาที
+          const prepareInterval = setInterval(() => {
+            if (this.midTimerPrepareCountdown > 0) {
+              this.midTimerPrepareCountdown--;
+              
+              if (this.midTimerPrepareCountdown > 0) {
+                this.playCountdownBeep(); // เสียง beep ที่ 4, 3, 2, 1
+              } else {
+                // เมื่อเป็น 0 แล้ว เล่นเสียงสูงและเริ่มจับเวลาเลย
+                this.playStartBeep();
+                clearInterval(prepareInterval);
+                this.midTimerIsPreparing = false;
+                this.midTimerRunning = true;
+                
+                // เริ่มจับเวลาจริง
+                this.midTimerInterval = setInterval(() => {
+                  // นับถอยหลัง (เวลาคงเหลือ) - ลด 10 milliseconds (1 centisecond)
+                  if (this.midTimerMilliseconds === 0) {
+                    if (this.midTimerSeconds === 0) {
+                      if (this.midTimerMinutes === 0) {
+                        // หมดเวลา
+                        this.pauseMidTimer();
+                        this.playBeepSound(3); // เสียงเตือน 3 ครั้ง
+                        return;
+                      }
+                      this.midTimerMinutes--;
+                      this.midTimerSeconds = 59;
+                      this.midTimerMilliseconds = 99;
+                      
+                      // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
+                      if (this.midTimerMinutes === 0 && this.midTimerSeconds < 10) {
+                        this.playCountdownBeep();
+                      }
+                    } else {
+                      this.midTimerSeconds--;
+                      this.midTimerMilliseconds = 99;
+                      
+                      // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
+                      if (this.midTimerMinutes === 0 && this.midTimerSeconds < 10) {
+                        this.playCountdownBeep();
+                      }
+                    }
+                  } else {
+                    this.midTimerMilliseconds--;
+                  }
+                  
+                  // นับเพิ่ม (เวลาที่ใช้ไป)
+                  this.midTimerElapsedMilliseconds++;
+                  if (this.midTimerElapsedMilliseconds >= 100) {
+                    this.midTimerElapsedMilliseconds = 0;
+                    this.midTimerElapsedSeconds++;
+                    if (this.midTimerElapsedSeconds >= 60) {
+                      this.midTimerElapsedSeconds = 0;
+                      this.midTimerElapsedMinutes++;
+                    }
+                  }
+                }, 10); // 10ms = 1 centisecond
+              }
+            }
+          }, 1000);
+        },
+        pauseMidTimer() {
+          this.midTimerRunning = false;
+          if (this.midTimerInterval) {
+            clearInterval(this.midTimerInterval);
+            this.midTimerInterval = null;
+          }
+        },
+        resetMidTimer() {
+          this.pauseMidTimer();
+          this.midTimerMinutes = 3;
+          this.midTimerSeconds = 0;
+          this.midTimerMilliseconds = 0;
+          this.midTimerElapsedMinutes = 0;
+          this.midTimerElapsedSeconds = 0;
+          this.midTimerElapsedMilliseconds = 0;
+          this.midTimerIsPreparing = false;
+          this.midTimerPrepareCountdown = 0;
+        },
+        getTimerDisplayStyle() {
+          const isTimeUp = this.midTimerMinutes === 0 && this.midTimerSeconds === 0;
+          const color = isTimeUp ? 'red' : 'black';
+          
+          if (this.isFullScreen && this.midTimerRunning) {
+            return { color: color };
+          } else if (this.midTimerRunning) {
+            // กำลังนับ - ใหญ่
+            return { fontSize: '8rem', lineHeight: '1', color: color };
+          } else {
+            // หยุด - เล็ก
+            return { fontSize: '3rem', lineHeight: '1', color: color };
+          }
+        },
+        getMillisecondClass() {
+          if (this.isFullScreen && this.midTimerRunning) {
+            return 'fullscreen-millisecond';
+          }
+          return '';
+        },
+        getMillisecondStyle() {
+          if (this.isFullScreen && this.midTimerRunning) {
+            return {};
+          } else if (this.midTimerRunning) {
+            return { fontSize: '5rem' }; // ใหญ่ขึ้นจาก 4rem เป็น 5rem (ครึ่งหนึ่งของ 8-10rem)
+          } else {
+            return { fontSize: '2rem' }; // ใหญ่ขึ้นจาก 1.5rem เป็น 2rem (ครึ่งหนึ่งของ 3-4rem)
+          }
+        },
+        
+        // High Timer Methods (5 minutes)
+        startHighTimer() {
+          this.highTimerIsPreparing = true;
+          this.highTimerPrepareCountdown = 5;
+          
+          // เปิด fullscreen อัตโนมัติ
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            this.isFullScreen = true;
+          }
+          
+          // นับถอยหลัง 5 วินาที
+          const prepareInterval = setInterval(() => {
+            if (this.highTimerPrepareCountdown > 0) {
+              this.highTimerPrepareCountdown--;
+              
+              if (this.highTimerPrepareCountdown > 0) {
+                this.playCountdownBeep();
+              } else {
+                this.playStartBeep();
+                clearInterval(prepareInterval);
+                this.highTimerIsPreparing = false;
+                this.highTimerRunning = true;
+                
+                // เริ่มจับเวลาจริง
+                this.highTimerInterval = setInterval(() => {
+                  if (this.highTimerMilliseconds === 0) {
+                    if (this.highTimerSeconds === 0) {
+                      if (this.highTimerMinutes === 0) {
+                        this.pauseHighTimer();
+                        this.playBeepSound(3);
+                        return;
+                      }
+                      this.highTimerMinutes--;
+                      this.highTimerSeconds = 59;
+                      this.highTimerMilliseconds = 99;
+                      
+                      if (this.highTimerMinutes === 0 && this.highTimerSeconds < 10) {
+                        this.playCountdownBeep();
+                      }
+                    } else {
+                      this.highTimerSeconds--;
+                      this.highTimerMilliseconds = 99;
+                      
+                      if (this.highTimerMinutes === 0 && this.highTimerSeconds < 10) {
+                        this.playCountdownBeep();
+                      }
+                    }
+                  } else {
+                    this.highTimerMilliseconds--;
+                  }
+                  
+                  this.highTimerElapsedMilliseconds++;
+                  if (this.highTimerElapsedMilliseconds >= 100) {
+                    this.highTimerElapsedMilliseconds = 0;
+                    this.highTimerElapsedSeconds++;
+                    if (this.highTimerElapsedSeconds >= 60) {
+                      this.highTimerElapsedSeconds = 0;
+                      this.highTimerElapsedMinutes++;
+                    }
+                  }
+                }, 10);
+              }
+            }
+          }, 1000);
+        },
+        pauseHighTimer() {
+          this.highTimerRunning = false;
+          if (this.highTimerInterval) {
+            clearInterval(this.highTimerInterval);
+            this.highTimerInterval = null;
+          }
+        },
+        resetHighTimer() {
+          this.pauseHighTimer();
+          this.highTimerMinutes = 5;
+          this.highTimerSeconds = 0;
+          this.highTimerMilliseconds = 0;
+          this.highTimerElapsedMinutes = 0;
+          this.highTimerElapsedSeconds = 0;
+          this.highTimerElapsedMilliseconds = 0;
+          this.highTimerIsPreparing = false;
+          this.highTimerPrepareCountdown = 0;
+        },
+        getHighTimerDisplayStyle() {
+          const isTimeUp = this.highTimerMinutes === 0 && this.highTimerSeconds === 0;
+          const color = isTimeUp ? 'red' : '#FF6F00';
+          
+          if (this.isFullScreen && this.highTimerRunning) {
+            return { color: color };
+          } else if (this.highTimerRunning) {
+            return { fontSize: '8rem', lineHeight: '1', color: color };
+          } else {
+            return { fontSize: '3rem', lineHeight: '1', color: color };
+          }
+        },
+        getHighMillisecondClass() {
+          if (this.isFullScreen && this.highTimerRunning) {
+            return 'fullscreen-millisecond';
+          }
+          return '';
+        },
+        getHighMillisecondStyle() {
+          if (this.isFullScreen && this.highTimerRunning) {
+            return {};
+          } else if (this.highTimerRunning) {
+            return { fontSize: '5rem' }; // ใหญ่ขึ้นจาก 4rem เป็น 5rem
+          } else {
+            return { fontSize: '2rem' }; // ใหญ่ขึ้นจาก 1.5rem เป็น 2rem
+          }
+        },
+        
         // Field Grid Methods
-        rotateBlock(index) {
-          const block = this.fieldBlocks[index];
+        // ฟังก์ชันกลางสำหรับหมุน block ทุกประเภท
+        rotateBlockGeneric(blocks, index) {
+          const block = blocks[index];
           const newRotation = (block.rotation + 1) % 4;
-          this.$set(this.fieldBlocks[index], 'rotation', newRotation);
+          this.$set(blocks, index, { ...block, rotation: newRotation });
         },
-        rotateCheckpointBlock(index) {
-          const block = this.checkpointBlocks[index];
-          console.log('Rotating checkpoint:', block.id, 'from rotation:', block.rotation);
-          const newRotation = (block.rotation + 1) % 4;
-          this.$set(this.checkpointBlocks[index], 'rotation', newRotation);
-          console.log('New rotation:', newRotation);
+        
+        rotateBlock(index, level = 'mid') {
+          const blocks = level === 'mid' ? this.midFieldBlocks : this.highFieldBlocks;
+          this.rotateBlockGeneric(blocks, index);
         },
-        rotateObstacleBlock(index) {
-          const block = this.obstacleBlocks[index];
+        rotateCheckpointBlock(index, level = 'mid') {
+          const blocks = level === 'mid' ? this.midCheckpointBlocks : this.highCheckpointBlocks;
+          this.rotateBlockGeneric(blocks, index);
+        },
+        rotateObstacleBlock(index, level = 'mid') {
+          const blocks = level === 'mid' ? this.midObstacleBlocks : this.highObstacleBlocks;
+          this.rotateBlockGeneric(blocks, index);
+        },
+        rotateBallBlock(index, level = 'mid') {
+          const blocks = level === 'mid' ? this.midBallBlocks : this.highBallBlocks;
+          this.rotateBlockGeneric(blocks, index);
+        },
+        rotateZoneBlock(index, level = 'mid') {
+          const blocks = level === 'mid' ? this.midZoneBlocks : this.highZoneBlocks;
+          this.rotateBlockGeneric(blocks, index);
+        },
+        rotateStartBlock(index, level = 'mid') {
+          const blocks = level === 'mid' ? this.midStartBlock : this.highStartBlock;
+          this.rotateBlockGeneric(blocks, index);
+        },
+        rotateBridgeBlock(index, level = 'mid') {
+          const blocks = level === 'mid' ? this.midBridgeBlocks : this.highBridgeBlocks;
+          const block = blocks[index];
+          
+          // ถ้า bridge ยังไม่ได้วางในสนาม ให้หมุนตามปกติ
           if (!block.placed) {
-            block.rotation = (block.rotation + 1) % 4;
+            this.rotateBlockGeneric(blocks, index);
+            return;
           }
-        },
-        rotateBallBlock(index) {
-          const block = this.ballBlocks[index];
-          if (!block.placed) {
-            block.rotation = (block.rotation + 1) % 4;
-          }
-        },
-        rotateBlockInGrid(row, col) {
-          const cellData = this.fieldGrid[row][col];
-          if (cellData !== null) {
-            if (cellData.type === 'field') {
-              this.rotateBlock(cellData.index);
-            } else if (cellData.type === 'checkpoint') {
-              this.rotateCheckpointBlock(cellData.index);
-            } else if (cellData.type === 'obstacle') {
-              this.rotateObstacleBlock(cellData.index);
-            } else if (cellData.type === 'ball') {
-              this.rotateBallBlock(cellData.index);
+          
+          // ถ้า bridge วางในสนามแล้ว ต้องจัดการการหมุนแบบพิเศษ
+          const grid = level === 'mid' ? this.midFieldGrid : this.highFieldGrid;
+          const { row, col } = block.position;
+          const oldRotation = block.rotation;
+          const newRotation = (oldRotation + 1) % 4;
+          
+          // ลบ bridge ออกจาก grid (3 ช่องเก่า)
+          if (oldRotation % 2 === 0) { // เดิมเป็นแนวนอน
+            for (let c = col; c < col + 3 && c < 8; c++) {
+              grid[row][c] = null;
+            }
+          } else { // เดิมเป็นแนวตั้ง
+            for (let r = row; r < row + 3 && r < 4; r++) {
+              grid[r][col] = null;
             }
           }
+          
+          // ตรวจสอบว่าทิศทางใหม่มีพื้นที่เพียงพอหรือไม่
+          let canRotate = true;
+          if (newRotation % 2 === 0) { // จะเป็นแนวนอน
+            if (col + 3 > 8) {
+              canRotate = false;
+            } else {
+              // ตรวจสอบว่าช่องทั้ง 3 ว่างหรือไม่
+              for (let c = col; c < col + 3; c++) {
+                if (grid[row][c] !== null) {
+                  canRotate = false;
+                  break;
+                }
+              }
+            }
+          } else { // จะเป็นแนวตั้ง
+            if (row + 3 > 4) {
+              canRotate = false;
+            } else {
+              // ตรวจสอบว่าช่องทั้ง 3 ว่างหรือไม่
+              for (let r = row; r < row + 3; r++) {
+                if (grid[r][col] !== null) {
+                  canRotate = false;
+                  break;
+                }
+              }
+            }
+          }
+          
+          if (canRotate) {
+            // หมุนได้ - อัพเดท rotation และวางในทิศทางใหม่
+            this.$set(blocks, index, { ...block, rotation: newRotation });
+            
+            if (newRotation % 2 === 0) { // แนวนอน
+              for (let c = col; c < col + 3; c++) {
+                grid[row][c] = { type: 'bridge', index: index };
+              }
+            } else { // แนวตั้ง
+              for (let r = row; r < row + 3; r++) {
+                grid[r][col] = { type: 'bridge', index: index };
+              }
+            }
+          } else {
+            // หมุนไม่ได้ - วางกลับที่เดิม
+            if (oldRotation % 2 === 0) { // วางกลับแนวนอน
+              for (let c = col; c < col + 3 && c < 8; c++) {
+                grid[row][c] = { type: 'bridge', index: index };
+              }
+            } else { // วางกลับแนวตั้ง
+              for (let r = row; r < row + 3 && r < 4; r++) {
+                grid[r][col] = { type: 'bridge', index: index };
+              }
+            }
+            alert('ไม่สามารถหมุนได้ เนื่องจากไม่มีพื้นที่เพียงพอ');
+          }
         },
-        removeBlockFromGrid(row, col) {
-          const cellData = this.fieldGrid[row][col];
+        rotateBlockInGrid(row, col, level = 'mid') {
+          const grid = level === 'mid' ? this.midFieldGrid : this.highFieldGrid;
+          const cellData = grid[row][col];
           if (cellData !== null) {
             if (cellData.type === 'field') {
-              const block = this.fieldBlocks[cellData.index];
-              block.placed = false;
-              block.position = null;
+              this.rotateBlock(cellData.index, level);
             } else if (cellData.type === 'checkpoint') {
-              const block = this.checkpointBlocks[cellData.index];
-              block.placed = false;
-              block.position = null;
-              this.checkpointCount--;
+              this.rotateCheckpointBlock(cellData.index, level);
             } else if (cellData.type === 'obstacle') {
-              const block = this.obstacleBlocks[cellData.index];
-              block.placed = false;
-              block.position = null;
+              this.rotateObstacleBlock(cellData.index, level);
             } else if (cellData.type === 'ball') {
-              const block = this.ballBlocks[cellData.index];
-              block.placed = false;
-              block.position = null;
+              this.rotateBallBlock(cellData.index, level);
             } else if (cellData.type === 'zone') {
-              const block = this.zoneBlocks[cellData.index];
+              this.rotateZoneBlock(cellData.index, level);
+            } else if (cellData.type === 'start') {
+              this.rotateStartBlock(cellData.index, level);
+            } else if (cellData.type === 'bridge') {
+              this.rotateBridgeBlock(cellData.index, level);
+            }
+          }
+        },
+        removeBlockFromGrid(row, col, level = 'mid') {
+          const grid = level === 'mid' ? this.midFieldGrid : this.highFieldGrid;
+          const cellData = grid[row][col];
+          if (cellData !== null) {
+            if (cellData.type === 'field') {
+              const blocks = level === 'mid' ? this.midFieldBlocks : this.highFieldBlocks;
+              const block = blocks[cellData.index];
+              block.placed = false;
+              block.position = null;
+            } else if (cellData.type === 'checkpoint') {
+              const blocks = level === 'mid' ? this.midCheckpointBlocks : this.highCheckpointBlocks;
+              const block = blocks[cellData.index];
+              block.placed = false;
+              block.position = null;
+              if (level === 'mid') {
+                this.midCheckpointCount--;
+              } else {
+                this.highCheckpointCount--;
+              }
+            } else if (cellData.type === 'obstacle') {
+              const blocks = level === 'mid' ? this.midObstacleBlocks : this.highObstacleBlocks;
+              const block = blocks[cellData.index];
+              block.placed = false;
+              block.position = null;
+            } else if (cellData.type === 'ball') {
+              const blocks = level === 'mid' ? this.midBallBlocks : this.highBallBlocks;
+              const block = blocks[cellData.index];
+              block.placed = false;
+              block.position = null;
+            } else if (cellData.type === 'bridge') {
+              const blocks = level === 'mid' ? this.midBridgeBlocks : this.highBridgeBlocks;
+              const block = blocks[cellData.index];
+              
+              // ใช้ตำแหน่งเริ่มต้นจาก block.position แทนที่จะใช้ row, col ที่คลิก
+              const startRow = block.position.row;
+              const startCol = block.position.col;
+              
+              // Clear all 3 cells occupied by bridge
+              if (block.rotation % 2 === 0) { // horizontal (0 or 180)
+                for (let c = startCol; c < startCol + 3 && c < 8; c++) {
+                  grid[startRow][c] = null;
+                }
+              } else { // vertical (90 or 270)
+                for (let r = startRow; r < startRow + 3 && r < 4; r++) {
+                  grid[r][startCol] = null;
+                }
+              }
+              
+              block.placed = false;
+              block.position = null;
+              return; // Return early since we've already cleared grid cells
+            } else if (cellData.type === 'zone') {
+              const blocks = level === 'mid' ? this.midZoneBlocks : this.highZoneBlocks;
+              const block = blocks[cellData.index];
+              block.placed = false;
+              block.position = null;
+            } else if (cellData.type === 'start') {
+              const blocks = level === 'mid' ? this.midStartBlock : this.highStartBlock;
+              const block = blocks[cellData.index];
               block.placed = false;
               block.position = null;
             }
-            this.fieldGrid[row][col] = null;
+            grid[row][col] = null;
           }
         },
         countPlacedCheckpoints() {
@@ -2108,48 +2935,87 @@
           }
           return borders;
         },
-        startDrag(event, index, type) {
+        startDrag(event, index, type, level = 'mid') {
           this.draggedBlockType = type;
           this.draggedBlockIndex = index;
+          this.draggedLevel = level; // เพิ่ม level เก็บไว้
+          
+          const grid = level === 'mid' ? this.midFieldGrid : this.highFieldGrid;
           
           if (type === 'field') {
-            const block = this.fieldBlocks[index];
+            const blocks = level === 'mid' ? this.midFieldBlocks : this.highFieldBlocks;
+            const block = blocks[index];
             if (block.placed) {
               const { row, col } = block.position;
-              this.fieldGrid[row][col] = null;
+              grid[row][col] = null;
               block.placed = false;
               block.position = null;
             }
           } else if (type === 'checkpoint') {
-            const block = this.checkpointBlocks[index];
+            const blocks = level === 'mid' ? this.midCheckpointBlocks : this.highCheckpointBlocks;
+            const block = blocks[index];
             if (block.placed) {
               const { row, col } = block.position;
-              this.fieldGrid[row][col] = null;
+              grid[row][col] = null;
               block.placed = false;
               block.position = null;
-              this.checkpointCount--;
+              if (level === 'mid') {
+                this.midCheckpointCount--;
+              } else {
+                this.highCheckpointCount--;
+              }
             }
           } else if (type === 'obstacle') {
-            const block = this.obstacleBlocks[index];
+            const blocks = level === 'mid' ? this.midObstacleBlocks : this.highObstacleBlocks;
+            const block = blocks[index];
             if (block.placed) {
               const { row, col } = block.position;
-              this.fieldGrid[row][col] = null;
+              grid[row][col] = null;
               block.placed = false;
               block.position = null;
             }
           } else if (type === 'ball') {
-            const block = this.ballBlocks[index];
+            const blocks = level === 'mid' ? this.midBallBlocks : this.highBallBlocks;
+            const block = blocks[index];
             if (block.placed) {
               const { row, col } = block.position;
-              this.fieldGrid[row][col] = null;
+              grid[row][col] = null;
+              block.placed = false;
+              block.position = null;
+            }
+          } else if (type === 'bridge') {
+            const blocks = level === 'mid' ? this.midBridgeBlocks : this.highBridgeBlocks;
+            const block = blocks[index];
+            if (block.placed) {
+              const { row, col } = block.position;
+              // Clear all 3 cells
+              if (block.rotation % 2 === 0) { // horizontal
+                for (let c = col; c < col + 3 && c < 8; c++) {
+                  grid[row][c] = null;
+                }
+              } else { // vertical
+                for (let r = row; r < row + 3 && r < 4; r++) {
+                  grid[r][col] = null;
+                }
+              }
               block.placed = false;
               block.position = null;
             }
           } else if (type === 'zone') {
-            const block = this.zoneBlocks[index];
+            const blocks = level === 'mid' ? this.midZoneBlocks : this.highZoneBlocks;
+            const block = blocks[index];
             if (block.placed) {
               const { row, col } = block.position;
-              this.fieldGrid[row][col] = null;
+              grid[row][col] = null;
+              block.placed = false;
+              block.position = null;
+            }
+          } else if (type === 'start') {
+            const blocks = level === 'mid' ? this.midStartBlock : this.highStartBlock;
+            const block = blocks[index];
+            if (block.placed) {
+              const { row, col } = block.position;
+              grid[row][col] = null;
               block.placed = false;
               block.position = null;
             }
@@ -2160,83 +3026,215 @@
         endDrag() {
           this.draggedBlockIndex = null;
           this.draggedBlockType = null;
+          this.draggedLevel = null;
         },
-        dropBlock(event, row, col) {
+        dropBlock(event, row, col, level = 'mid') {
           event.preventDefault();
           if (this.draggedBlockIndex === null || this.draggedBlockType === null) return;
           
+          // ต้องลากใน level เดียวกัน
+          if (this.draggedLevel !== level) {
+            this.draggedBlockIndex = null;
+            this.draggedBlockType = null;
+            this.draggedLevel = null;
+            return;
+          }
+          
+          const grid = level === 'mid' ? this.midFieldGrid : this.highFieldGrid;
           let block, blocks;
           
           if (this.draggedBlockType === 'field') {
-            blocks = this.fieldBlocks;
-            block = this.fieldBlocks[this.draggedBlockIndex];
+            blocks = level === 'mid' ? this.midFieldBlocks : this.highFieldBlocks;
+            block = blocks[this.draggedBlockIndex];
           } else if (this.draggedBlockType === 'checkpoint') {
-            blocks = this.checkpointBlocks;
-            block = this.checkpointBlocks[this.draggedBlockIndex];
+            blocks = level === 'mid' ? this.midCheckpointBlocks : this.highCheckpointBlocks;
+            block = blocks[this.draggedBlockIndex];
             
+            const currentCount = level === 'mid' ? this.midCheckpointCount : this.highCheckpointCount;
             // ตรวจสอบจำนวน checkpoint ที่วางแล้ว
-            if (!block.placed && this.checkpointCount >= this.maxCheckpoints) {
+            if (!block.placed && currentCount >= this.maxCheckpoints) {
               alert(`วางได้สูงสุด ${this.maxCheckpoints} จุดเท่านั้น!`);
               this.draggedBlockIndex = null;
               this.draggedBlockType = null;
+              this.draggedLevel = null;
               return;
             }
           } else if (this.draggedBlockType === 'obstacle') {
-            blocks = this.obstacleBlocks;
-            block = this.obstacleBlocks[this.draggedBlockIndex];
+            blocks = level === 'mid' ? this.midObstacleBlocks : this.highObstacleBlocks;
+            block = blocks[this.draggedBlockIndex];
           } else if (this.draggedBlockType === 'ball') {
-            blocks = this.ballBlocks;
-            block = this.ballBlocks[this.draggedBlockIndex];
+            blocks = level === 'mid' ? this.midBallBlocks : this.highBallBlocks;
+            block = blocks[this.draggedBlockIndex];
+          } else if (this.draggedBlockType === 'bridge') {
+            blocks = level === 'mid' ? this.midBridgeBlocks : this.highBridgeBlocks;
+            block = blocks[this.draggedBlockIndex];
+            
+            // Check if 3 cells are available based on rotation
+            const rotation = block.rotation;
+            if (rotation % 2 === 0) { // horizontal (0 or 180)
+              if (col + 3 > 8) {
+                alert('ไม่มีพื้นที่เพียงพอสำหรับสะพาน (ต้องการ 3 ช่องแนวนอน)');
+                this.draggedBlockIndex = null;
+                this.draggedBlockType = null;
+                this.draggedLevel = null;
+                return;
+              }
+              // Check if all 3 cells are available or occupied by same bridge
+              for (let c = col; c < col + 3; c++) {
+                const cellData = grid[row][c];
+                if (cellData !== null && !(cellData.type === 'bridge' && cellData.index === this.draggedBlockIndex)) {
+                  alert('ตำแหน่งนี้มีบล็อกอื่นอยู่แล้ว');
+                  this.draggedBlockIndex = null;
+                  this.draggedBlockType = null;
+                  this.draggedLevel = null;
+                  return;
+                }
+              }
+            } else { // vertical (90 or 270)
+              if (row + 3 > 4) {
+                alert('ไม่มีพื้นที่เพียงพอสำหรับสะพาน (ต้องการ 3 ช่องแนวตั้ง)');
+                this.draggedBlockIndex = null;
+                this.draggedBlockType = null;
+                this.draggedLevel = null;
+                return;
+              }
+              // Check if all 3 cells are available or occupied by same bridge
+              for (let r = row; r < row + 3; r++) {
+                const cellData = grid[r][col];
+                if (cellData !== null && !(cellData.type === 'bridge' && cellData.index === this.draggedBlockIndex)) {
+                  alert('ตำแหน่งนี้มีบล็อกอื่นอยู่แล้ว');
+                  this.draggedBlockIndex = null;
+                  this.draggedBlockType = null;
+                  this.draggedLevel = null;
+                  return;
+                }
+              }
+            }
           } else if (this.draggedBlockType === 'zone') {
-            blocks = this.zoneBlocks;
-            block = this.zoneBlocks[this.draggedBlockIndex];
+            blocks = level === 'mid' ? this.midZoneBlocks : this.highZoneBlocks;
+            block = blocks[this.draggedBlockIndex];
+          } else if (this.draggedBlockType === 'start') {
+            blocks = level === 'mid' ? this.midStartBlock : this.highStartBlock;
+            block = blocks[this.draggedBlockIndex];
           }
           
           // ถ้าเซลล์มี block อื่นอยู่แล้ว ให้เอา block นั้นออก
-          const existingCellData = this.fieldGrid[row][col];
+          const existingCellData = grid[row][col];
           if (existingCellData !== null) {
             if (existingCellData.type === 'field') {
-              const existingBlock = this.fieldBlocks[existingCellData.index];
+              const existingBlocks = level === 'mid' ? this.midFieldBlocks : this.highFieldBlocks;
+              const existingBlock = existingBlocks[existingCellData.index];
               existingBlock.placed = false;
               existingBlock.position = null;
             } else if (existingCellData.type === 'checkpoint') {
-              const existingBlock = this.checkpointBlocks[existingCellData.index];
+              const existingBlocks = level === 'mid' ? this.midCheckpointBlocks : this.highCheckpointBlocks;
+              const existingBlock = existingBlocks[existingCellData.index];
               existingBlock.placed = false;
               existingBlock.position = null;
-              this.checkpointCount--;
+              if (level === 'mid') {
+                this.midCheckpointCount--;
+              } else {
+                this.highCheckpointCount--;
+              }
             } else if (existingCellData.type === 'obstacle') {
-              const existingBlock = this.obstacleBlocks[existingCellData.index];
+              const existingBlocks = level === 'mid' ? this.midObstacleBlocks : this.highObstacleBlocks;
+              const existingBlock = existingBlocks[existingCellData.index];
               existingBlock.placed = false;
               existingBlock.position = null;
             } else if (existingCellData.type === 'ball') {
-              const existingBlock = this.ballBlocks[existingCellData.index];
+              const existingBlocks = level === 'mid' ? this.midBallBlocks : this.highBallBlocks;
+              const existingBlock = existingBlocks[existingCellData.index];
               existingBlock.placed = false;
               existingBlock.position = null;
+            } else if (existingCellData.type === 'bridge') {
+              const existingBlocks = level === 'mid' ? this.midBridgeBlocks : this.highBridgeBlocks;
+              const existingBlock = existingBlocks[existingCellData.index];
+              existingBlock.placed = false;
+              existingBlock.position = null;
+              // Clear all 3 cells occupied by bridge
+              const bridgeRow = existingBlock.position.row;
+              const bridgeCol = existingBlock.position.col;
+              if (existingBlock.rotation % 2 === 0) { // horizontal
+                for (let c = bridgeCol; c < bridgeCol + 3 && c < 8; c++) {
+                  grid[bridgeRow][c] = null;
+                }
+              } else { // vertical
+                for (let r = bridgeRow; r < bridgeRow + 3 && r < 4; r++) {
+                  grid[r][bridgeCol] = null;
+                }
+              }
             } else if (existingCellData.type === 'zone') {
-              const existingBlock = this.zoneBlocks[existingCellData.index];
+              const existingBlocks = level === 'mid' ? this.midZoneBlocks : this.highZoneBlocks;
+              const existingBlock = existingBlocks[existingCellData.index];
+              existingBlock.placed = false;
+              existingBlock.position = null;
+            } else if (existingCellData.type === 'start') {
+              const existingBlocks = level === 'mid' ? this.midStartBlock : this.highStartBlock;
+              const existingBlock = existingBlocks[existingCellData.index];
               existingBlock.placed = false;
               existingBlock.position = null;
             }
           }
           
-          // Place the block (1 cell only)
-          this.fieldGrid[row][col] = { type: this.draggedBlockType, index: this.draggedBlockIndex };
-          
-          if (!block.placed && this.draggedBlockType === 'checkpoint') {
-            this.checkpointCount++;
+          // Place the block
+          if (this.draggedBlockType === 'bridge') {
+            // Clear old bridge position if it was placed before
+            if (block.placed && block.position) {
+              const oldRow = block.position.row;
+              const oldCol = block.position.col;
+              const oldRotation = block.rotation;
+              if (oldRotation % 2 === 0) { // was horizontal
+                for (let c = oldCol; c < oldCol + 3 && c < 8; c++) {
+                  grid[oldRow][c] = null;
+                }
+              } else { // was vertical
+                for (let r = oldRow; r < oldRow + 3 && r < 4; r++) {
+                  grid[r][oldCol] = null;
+                }
+              }
+            }
+            
+            // Place bridge in 3 cells
+            const rotation = block.rotation;
+            if (rotation % 2 === 0) { // horizontal
+              for (let c = col; c < col + 3; c++) {
+                grid[row][c] = { type: 'bridge', index: this.draggedBlockIndex };
+              }
+            } else { // vertical
+              for (let r = row; r < row + 3; r++) {
+                grid[r][col] = { type: 'bridge', index: this.draggedBlockIndex };
+              }
+            }
+            
+            block.placed = true;
+            block.position = { row, col };
+          } else {
+            // Single cell placement (existing blocks)
+            grid[row][col] = { type: this.draggedBlockType, index: this.draggedBlockIndex };
+            
+            if (!block.placed && this.draggedBlockType === 'checkpoint') {
+              if (level === 'mid') {
+                this.midCheckpointCount++;
+              } else {
+                this.highCheckpointCount++;
+              }
+            }
+            
+            block.placed = true;
+            block.position = { row, col };
           }
-          
-          block.placed = true;
-          block.position = { row, col };
           
           this.draggedBlockIndex = null;
           this.draggedBlockType = null;
+          this.draggedLevel = null;
         },
-        isCellOccupied(row, col) {
-          return this.fieldGrid[row][col] !== null;
+        isCellOccupied(row, col, level = 'mid') {
+          const grid = level === 'mid' ? this.midFieldGrid : this.highFieldGrid;
+          return grid[row][col] !== null;
         },
-        getCellStyle(row, col) {
-          const cellData = this.fieldGrid[row][col];
+        getCellStyle(row, col, level = 'mid') {
+          const grid = level === 'mid' ? this.midFieldGrid : this.highFieldGrid;
+          const cellData = grid[row][col];
           if (cellData !== null) {
             let block;
             let borderStyle = 'border: 1px solid #ddd;';
@@ -2244,7 +3242,8 @@
             
             // Handle different block types
             if (cellData.type === 'field') {
-              block = this.fieldBlocks[cellData.index];
+              const blocks = level === 'mid' ? this.midFieldBlocks : this.highFieldBlocks;
+              block = blocks[cellData.index];
               const rotatedBorders = this.getRotatedBorders(block.borders, block.rotation);
               
               // เพิ่มขอบตามประเภทของ block (หลังหมุน)
@@ -2298,13 +3297,16 @@
                   break;
               }
             } else if (cellData.type === 'checkpoint') {
-              block = this.checkpointBlocks[cellData.index];
-              const rotatedBorders = this.getRotatedBorders(block.borders, block.rotation);
-              borderStyle += 'position: relative;';
+              const blocks = level === 'mid' ? this.midCheckpointBlocks : this.highCheckpointBlocks;
+              block = blocks[cellData.index];
+              const rotation = block.rotation * 90;
+              borderStyle = 'position: relative; transform: rotate(' + rotation + 'deg);';
               bgStyle = 'background: #f0f0f0;';
               
-              // Apply checkpoint borders
-              switch(rotatedBorders) {
+              // Apply checkpoint borders (ก่อนหมุน)
+              switch(block.borders) {
+                case 'none':
+                  break;
                 case 'bottom':
                   borderStyle += 'border-bottom: 4px solid #000;';
                   break;
@@ -2325,50 +3327,133 @@
                   break;
               }
             } else if (cellData.type === 'obstacle') {
-              // Black hole style with rotation and visible indent
-              block = this.obstacleBlocks[cellData.index];
+              // Black hole style - แถบดำกลางสูงเต็มแผ่น
+              const blocks = level === 'mid' ? this.midObstacleBlocks : this.highObstacleBlocks;
+              block = blocks[cellData.index];
               const rotation = block.rotation * 90;
-              bgStyle = 'background: radial-gradient(ellipse 80% 100% at 50% 50%, #1a1a1a 0%, #000 100%); border-radius: 10px; overflow: hidden;';
-              borderStyle = 'border: none; transform: rotate(' + rotation + 'deg); box-shadow: inset -8px 0 15px -5px rgba(0, 0, 0, 0.8), inset 8px 0 15px -5px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.1);';
+              bgStyle = 'background: linear-gradient(90deg, white 0%, white 20%, #000 20%, #000 80%, white 80%, white 100%); position: relative;';
+              borderStyle = 'border: none; transform: rotate(' + rotation + 'deg);';
             } else if (cellData.type === 'ball') {
-              // Stick style with rotation, visible indent and 7 lines
-              block = this.ballBlocks[cellData.index];
+              // Stick style - พื้นที่กลาง 60% มี 7 เส้นส้มแนวตั้งเท่ากัน
+              const blocks = level === 'mid' ? this.midBallBlocks : this.highBallBlocks;
+              block = blocks[cellData.index];
               const rotation = block.rotation * 90;
-              bgStyle = 'background: radial-gradient(ellipse 80% 100% at 50% 50%, #fff 0%, #e8e8e8 100%); border-radius: 10px; overflow: hidden; position: relative;';
-              borderStyle = 'border: none; transform: rotate(' + rotation + 'deg); box-shadow: inset -8px 0 15px -5px rgba(0, 0, 0, 0.3), inset 8px 0 15px -5px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(0, 0, 0, 0.1);';
+              bgStyle = 'background: white; position: relative;';
+              borderStyle = 'border: none; transform: rotate(' + rotation + 'deg);';
+              // Add the vertical striped pattern in the center with exactly 7 lines
+              const centerStripes = 'background-image: repeating-linear-gradient(90deg, #FF6600 0px, #FF6600 2px, transparent 2px, transparent 8px); background-position: center; background-size: 56px 100%; background-repeat: no-repeat;';
+              bgStyle = centerStripes;
             } else if (cellData.type === 'zone') {
-              block = this.zoneBlocks[cellData.index];
-              bgStyle = 'background: ' + block.color + '; opacity: 0.8;';
-              borderStyle = 'border: 2px solid ' + block.color + ';';
+              const blocks = level === 'mid' ? this.midZoneBlocks : this.highZoneBlocks;
+              block = blocks[cellData.index];
+              const rotation = block.rotation * 90;
+              
+              if (block.shape === 'half-left') {
+                // Half-left zone - สีเขียวครึ่งซ้าย พื้นหลังขวาเป็นสีขาว
+                bgStyle = 'background: linear-gradient(to right, ' + block.color + ' 0%, ' + block.color + ' 50%, white 50%, white 100%); opacity: 0.8; position: relative;';
+                
+                if (block.border === 'left') {
+                  borderStyle = 'border: none; border-left: 4px solid #000; transform: rotate(' + rotation + 'deg);';
+                } else if (block.border === 'three-sides') {
+                  borderStyle = 'border: 4px solid #000; border-right: none; transform: rotate(' + rotation + 'deg);';
+                } else if (block.border === 'all') {
+                  borderStyle = 'border: 4px solid #000; transform: rotate(' + rotation + 'deg);';
+                } else {
+                  borderStyle = 'border: 2px solid #ddd; transform: rotate(' + rotation + 'deg);';
+                }
+              } else {
+                // Default zone (for high level)
+                bgStyle = 'background: ' + block.color + '; opacity: 0.8; position: relative;';
+                borderStyle = 'border: 2px solid ' + block.color + '; transform: rotate(' + rotation + 'deg);';
+              }
+            } else if (cellData.type === 'start') {
+              const blocks = level === 'mid' ? this.midStartBlock : this.highStartBlock;
+              block = blocks[cellData.index];
+              const rotation = block.rotation * 90;
+              bgStyle = 'background: #CCCCCC; opacity: 0.5; position: relative;';
+              borderStyle = 'border: 2px solid #999; transform: rotate(' + rotation + 'deg);';
+            } else if (cellData.type === 'bridge') {
+              const blocks = level === 'mid' ? this.midBridgeBlocks : this.highBridgeBlocks;
+              block = blocks[cellData.index];
+              bgStyle = 'background: white; position: relative;';
+              
+              // Bridge has borders on long sides (top/bottom when horizontal, left/right when vertical)
+              // ไม่ต้องใช้ transform เพราะเราวางช่องตาม rotation จริงๆ แล้ว
+              if (block.rotation % 2 === 0) { // horizontal (0 or 180)
+                borderStyle = 'border-top: 4px solid #000; border-bottom: 4px solid #000; border-left: none; border-right: none;';
+              } else { // vertical (90 or 270)
+                borderStyle = 'border-left: 4px solid #000; border-right: 4px solid #000; border-top: none; border-bottom: none;';
+              }
             }
             
             return borderStyle + bgStyle + ' cursor: pointer;';
           }
           return {};
         },
-        resetField() {
-          this.fieldGrid = Array(4).fill(null).map(() => Array(8).fill(null));
-          this.fieldBlocks.forEach(block => {
-            block.placed = false;
-            block.position = null;
-          });
-          this.checkpointBlocks.forEach(block => {
-            block.placed = false;
-            block.position = null;
-          });
-          this.obstacleBlocks.forEach(block => {
-            block.placed = false;
-            block.position = null;
-          });
-          this.ballBlocks.forEach(block => {
-            block.placed = false;
-            block.position = null;
-          });
-          this.zoneBlocks.forEach(block => {
-            block.placed = false;
-            block.position = null;
-          });
-          this.checkpointCount = 0;
+        resetField(level = 'mid') {
+          if (level === 'mid') {
+            this.midFieldGrid = Array(4).fill(null).map(() => Array(8).fill(null));
+            this.midFieldBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.midCheckpointBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.midObstacleBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.midBallBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.midBridgeBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.midZoneBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.midStartBlock.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.midCheckpointCount = 0;
+          } else {
+            this.highFieldGrid = Array(4).fill(null).map(() => Array(8).fill(null));
+            this.highFieldBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.highCheckpointBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.highObstacleBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.highBallBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.highBridgeBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.highZoneBlocks.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.highStartBlock.forEach(block => {
+              block.placed = false;
+              block.position = null;
+            });
+            this.highCheckpointCount = 0;
+          }
         }
       },
       mounted() {
@@ -2389,6 +3474,32 @@
               this.toggleTimer();
             } else if (e.code === "Numpad0") {
               this.resetTimer();
+            } else if (e.code === "NumpadAdd") {
+              this.toggleFullscreen();
+            }
+          } else if (this.tab === 'mid-timer') {
+            if (e.code === "Space") {
+              e.preventDefault();
+              if (!this.midTimerRunning && !this.midTimerIsPreparing) {
+                this.startMidTimer();
+              } else if (this.midTimerRunning) {
+                this.pauseMidTimer();
+              }
+            } else if (e.code === "Numpad0") {
+              this.resetMidTimer();
+            } else if (e.code === "NumpadAdd") {
+              this.toggleFullscreen();
+            }
+          } else if (this.tab === 'high-timer') {
+            if (e.code === "Space") {
+              e.preventDefault();
+              if (!this.highTimerRunning && !this.highTimerIsPreparing) {
+                this.startHighTimer();
+              } else if (this.highTimerRunning) {
+                this.pauseHighTimer();
+              }
+            } else if (e.code === "Numpad0") {
+              this.resetHighTimer();
             } else if (e.code === "NumpadAdd") {
               this.toggleFullscreen();
             }
