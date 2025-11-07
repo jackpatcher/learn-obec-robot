@@ -77,6 +77,325 @@
       border-top: 30px solid red;
       z-index: 10;
     }
+    
+    /* Field Grid Styles */
+    .field-grid-container {
+      display: inline-block;
+      border: 3px solid #333;
+      background: #f5f5f5;
+    }
+    .field-grid-row {
+      display: flex;
+    }
+    .field-grid-cell {
+      width: 60px;
+      height: 60px;
+      border: 1px solid #999;
+      background: white;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .field-grid-cell:hover {
+      background: #e3f2fd;
+    }
+    .cell-occupied {
+      opacity: 1;
+    }
+    .cell-occupied:hover {
+      background: #fff3cd;
+    }
+    .cell-label {
+      font-size: 10px;
+      color: #999;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+    }
+    
+    /* Block Preview Styles */
+    .block-preview {
+      cursor: move;
+      display: inline-block;
+      padding: 5px;
+      border: 2px dashed #999;
+      border-radius: 4px;
+      background: #fafafa;
+      transition: all 0.2s;
+    }
+    .block-preview:hover {
+      border-color: #1976d2;
+      background: #e3f2fd;
+    }
+    .block-placed {
+      cursor: not-allowed;
+      opacity: 0.3;
+      filter: grayscale(100%);
+    }
+    
+    /* New Field Block Styles */
+    .blocks-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .field-block {
+      width: 50px;
+      height: 50px;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .field-block:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    .field-block.block-placed {
+      opacity: 0.5;
+    }
+    
+    .block-number {
+      font-size: 14px;
+      font-weight: bold;
+      color: #666;
+      user-select: none;
+      pointer-events: none;
+    }
+    
+    /* Border styles for each block type */
+    .block-border-all {
+      border: 4px solid #000;
+    }
+    
+    .block-border-bottom {
+      border-bottom: 4px solid #000;
+    }
+    
+    .block-border-right {
+      border-right: 4px solid #000;
+    }
+    
+    .block-border-top-right {
+      border-top: 4px solid #000;
+      border-right: 4px solid #000;
+    }
+    
+    .block-border-bottom-right {
+      border-bottom: 4px solid #000;
+      border-right: 4px solid #000;
+    }
+    
+    .block-border-left {
+      border-left: 4px solid #000;
+    }
+    
+    .block-border-top-left {
+      border-top: 4px solid #000;
+      border-left: 4px solid #000;
+    }
+    
+    .block-border-bottom-left {
+      border-bottom: 4px solid #000;
+      border-left: 4px solid #000;
+    }
+    
+    .block-border-top {
+      border-top: 4px solid #000;
+    }
+    
+    .block-border-top-bottom {
+      border-top: 4px solid #000;
+      border-bottom: 4px solid #000;
+    }
+    
+    .block-border-none {
+      border: none;
+    }
+    
+    .block-border-top-left-bottom {
+      border-top: 4px solid #000;
+      border-left: 4px solid #000;
+      border-bottom: 4px solid #000;
+    }
+    
+    .block-border-left-right {
+      border-left: 4px solid #000;
+      border-right: 4px solid #000;
+    }
+    
+    /* Checkpoint styles */
+    .checkpoint-block {
+      position: relative;
+      background: #f0f0f0 !important;
+    }
+    
+    .checkpoint-block::after {
+      content: '';
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #FFD700;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+    }
+    
+    .checkpoint-block.block-placed {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    .checkpoint-block:not(.block-placed):hover::after {
+      background: #FFA500;
+      box-shadow: 0 0 15px rgba(255, 165, 0, 0.7);
+    }
+    
+    /* Black Hole (Obstacle) styles - มีการเว้าเข้ามาด้านในทั้งสองข้าง แบบที่เห็นชัดเจน */
+    .blackhole-block {
+      background: radial-gradient(ellipse 80% 100% at 50% 50%, #1a1a1a 0%, #000 100%) !important;
+      position: relative;
+      border: none !important;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 
+        inset -8px 0 15px -5px rgba(0, 0, 0, 0.8),
+        inset 8px 0 15px -5px rgba(0, 0, 0, 0.8),
+        inset 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+    
+    .blackhole-block::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(ellipse 15% 40% at 8% 50%, rgba(50, 50, 50, 0.6) 0%, transparent 70%),
+        radial-gradient(ellipse 15% 40% at 92% 50%, rgba(50, 50, 50, 0.6) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    
+    .blackhole-block::after {
+      content: 'H1';
+      position: absolute;
+      font-size: 10px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+      top: 5px;
+      left: 5px;
+      z-index: 1;
+    }
+    
+    .blackhole-block.block-placed {
+      opacity: 0.5;
+    }
+    
+    /* Ball (Stick) styles - มีการเว้าเข้ามาด้านในและมี 7 เส้น แบบที่เห็นชัดเจน */
+    .ball-block {
+      position: relative;
+      background: radial-gradient(ellipse 80% 100% at 50% 50%, #fff 0%, #e8e8e8 100%) !important;
+      border: none !important;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 
+        inset -8px 0 15px -5px rgba(0, 0, 0, 0.3),
+        inset 8px 0 15px -5px rgba(0, 0, 0, 0.3),
+        inset 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .ball-block::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(ellipse 15% 40% at 8% 50%, rgba(200, 200, 200, 0.6) 0%, transparent 70%),
+        radial-gradient(ellipse 15% 40% at 92% 50%, rgba(200, 200, 200, 0.6) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    /* 7 horizontal lines for stick */
+    .ball-block::after {
+      content: '';
+      position: absolute;
+      top: 15%;
+      left: 25%;
+      right: 25%;
+      bottom: 15%;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 4px,
+        #FF8C00 4px,
+        #FF8C00 6px
+      );
+      background-size: 100% 100%;
+      z-index: 1;
+    }
+    
+    .ball-block.block-placed {
+      opacity: 0.4;
+    }
+    
+    /* Rotation classes for obstacle and ball */
+    .blackhole-rotate-0 { transform: rotate(0deg); }
+    .blackhole-rotate-1 { transform: rotate(90deg); }
+    .blackhole-rotate-2 { transform: rotate(180deg); }
+    .blackhole-rotate-3 { transform: rotate(270deg); }
+    
+    .ball-rotate-0 { transform: rotate(0deg); }
+    .ball-rotate-1 { transform: rotate(90deg); }
+    .ball-rotate-2 { transform: rotate(180deg); }
+    .ball-rotate-3 { transform: rotate(270deg); }
+    
+    /* Zone Color styles - ไม่มีขอบมน */
+    .zone-block {
+      position: relative;
+      border: 2px solid #333 !important;
+      opacity: 0.8;
+      border-radius: 0 !important;
+    }
+    
+    .zone-block:hover {
+      opacity: 1;
+    }
+    
+    .zone-block.block-placed {
+      opacity: 0.4;
+    }
+    
+    .zone-label {
+      position: absolute;
+      bottom: 1px;
+      font-size: 8px;
+      font-weight: bold;
+      color: #333;
+      text-shadow: 1px 1px 2px white;
+    }
+    
+    .field-grid-wrapper {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
   </style>
 </head>
 <body>
@@ -526,72 +845,217 @@
           <v-sheet v-if="tab === 'mid-rules'" class="pa-4">
             <v-container>
               <v-card class="pa-6">
-                <v-card-title class="text-h4">
+                <v-card-title class="text-h4 justify-center">
                   <v-icon large color="primary" class="mr-3">mdi-file-document</v-icon>
                   กติกาการแข่งขันระดับกลาง
                 </v-card-title>
                 <v-divider class="my-4"></v-divider>
-                <v-card-text class="text-h6">
-                  <p>เนื้อหากติกาการแข่งขันระดับกลาง...</p>
+                
+                <!-- ปุ่มเปิด PDF -->
+                <v-card-text class="text-center mb-4">
+                  <v-btn
+                    color="primary"
+                    large
+                    href="https://www.sillapa.net/rule70/robot-70.pdf"
+                    target="_blank"
+                  >
+                    <v-icon left>mdi-file-pdf-box</v-icon>
+                    เปิดกติกา PDF
+                  </v-btn>
+                </v-card-text>
+
+                <v-divider class="my-6"></v-divider>
+
+                <!-- ทำได้ -->
+                <v-card-text>
+                  <h2 class="text-h5 text-center mb-4 green--text text--darken-2">
+                    <v-icon color="green darken-2" large>mdi-check-circle</v-icon>
+                    ทำได้
+                  </h2>
+                  <v-row>
+                    <v-col cols="12" sm="4" v-for="n in 6" :key="'allow-' + n">
+                      <v-card elevation="2">
+                        <v-img
+                          :src="'https://placehold.co/200x150?text=GOOD+' + n"
+                          aspect-ratio="1.5"
+                          class="grey lighten-2"
+                        ></v-img>
+                      </v-card>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+
+                <v-divider class="my-6"></v-divider>
+
+                <!-- ทำไม่ได้ -->
+                <v-card-text>
+                  <h2 class="text-h5 text-center mb-4 red--text text--darken-2">
+                    <v-icon color="red darken-2" large>mdi-close-circle</v-icon>
+                    ทำไม่ได้
+                  </h2>
+                  <v-row>
+                    <v-col cols="12" sm="4" v-for="n in 6" :key="'disallow-' + n">
+                      <v-card elevation="2">
+                        <v-img
+                          :src="'https://placehold.co/200x150?text=BAD+' + n"
+                          aspect-ratio="1.5"
+                          class="grey lighten-2"
+                        ></v-img>
+                      </v-card>
+                    </v-col>
+                  </v-row>
                 </v-card-text>
               </v-card>
             </v-container>
           </v-sheet>
 
           <!-- สุ่มสนามระดับกลาง -->
-          <v-sheet v-if="tab === 'mid-field'" class="pa-4">
-            <v-row justify="center" class="mb-4">
-              <v-col cols="12" class="d-flex justify-center align-center">
-                <v-btn 
-                  color="primary" 
-                  @click="startRandom" 
-                  :disabled="isRandomRunning"
-                  large
-                >
-                  เริ่มสุ่ม
-                </v-btn>
-                <v-slider
-                  v-model="randomSpeed"
-                  label="ความเร็ว"
-                  :min="100"
-                  :max="1000"
-                  :step="100"
-                  class="ml-4"
-                  style="max-width: 300px;"
-                ></v-slider>
-              </v-col>
-            </v-row>
-
-            <div class="grid-container">
-              <v-card 
-                v-for="cell in grid" 
-                :key="cell"
-                :color="getCellColor(cell)"
-                class="grid-cell"
-                :class="{'elevation-4': current === cell || highlighted === cell}"
-              >
-                {{ cell }}
-              </v-card>
-            </div>
-
-            <v-dialog v-model="dialog" max-width="500">
-              <v-card>
-                <v-card-title class="headline green--text">
-                  ยินดีด้วย!
-                </v-card-title>
-                <v-card-text class="text-center">
-                  <div class="display-1 red--text font-weight-bold">
-                    {{ highlighted }}
+          <v-sheet v-if="tab === 'mid-field'" class="pa-2">
+            <v-container fluid>
+              <!-- All Blocks Panel (รวมบล๊อคทั้งหมด) -->
+              <v-card class="pa-2 mb-2">
+                <div class="d-flex justify-space-between align-center mb-2">
+                  <div>
+                    <h3 class="text-subtitle-1 mb-1">
+                      🎯 บล๊อคทั้งหมด 
+                      <span class="text-caption grey--text">
+                        (CP: <strong :class="checkpointCount >= maxCheckpoints ? 'red--text' : 'green--text'">{{ checkpointCount }}/{{ maxCheckpoints }}</strong>)
+                      </span>
+                    </h3>
+                    <p class="text-caption grey--text mb-0" style="font-size: 10px;">
+                      💡 คลิกซ้าย=หมุน | คลิกขวา=ลบ | ลาก=วาง
+                    </p>
                   </div>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="primary" @click="dialog = false">
-                    ปิด
+                  <v-btn x-small color="warning" @click="resetField">
+                    <v-icon x-small left>mdi-refresh</v-icon>
+                    รีเซ็ต
                   </v-btn>
-                </v-card-actions>
+                </div>
+
+                <!-- All Blocks in One Row -->
+                <div class="blocks-container" style="flex-wrap: wrap; gap: 4px;">
+                  <!-- Field Blocks (10) -->
+                  <div 
+                    v-for="(block, index) in fieldBlocks" 
+                    :key="index"
+                    class="field-block"
+                    :class="[
+                      'block-border-' + getRotatedBorders(block.borders, block.rotation),
+                      {'block-placed': block.placed}
+                    ]"
+                    @click="rotateBlock(index)"
+                    @dragstart="startDrag($event, index, 'field')"
+                    @dragend="endDrag"
+                    draggable="true"
+                  >
+                    <span class="block-number">{{ block.id }}</span>
+                  </div>
+
+                  <!-- Checkpoint Blocks (4) -->
+                  <div 
+                    v-for="(block, index) in checkpointBlocks" 
+                    :key="'cp-' + index"
+                    class="field-block checkpoint-block"
+                    :class="[
+                      'block-border-' + getRotatedBorders(block.borders, block.rotation),
+                      {'block-placed': block.placed}
+                    ]"
+                    @click="rotateCheckpointBlock(index)"
+                    @dragstart="startDrag($event, index, 'checkpoint')"
+                    @dragend="endDrag"
+                    :draggable="!block.placed"
+                  >
+                    <span class="block-number">{{ block.id }}</span>
+                  </div>
+
+                  <!-- Black Hole (1) -->
+                  <div 
+                    v-for="(block, index) in obstacleBlocks" 
+                    :key="'obs-' + index"
+                    class="field-block blackhole-block"
+                    :class="['blackhole-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                    @click="rotateObstacleBlock(index)"
+                    @dragstart="startDrag($event, index, 'obstacle')"
+                    @dragend="endDrag"
+                    :draggable="!block.placed"
+                  >
+                    <span class="block-number" style="color: white; font-size: 11px;">{{ block.id }}</span>
+                  </div>
+
+                  <!-- Stick (1) -->
+                  <div 
+                    v-for="(block, index) in ballBlocks" 
+                    :key="'ball-' + index"
+                    class="field-block ball-block"
+                    :class="['ball-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                    @click="rotateBallBlock(index)"
+                    @dragstart="startDrag($event, index, 'ball')"
+                    @dragend="endDrag"
+                    :draggable="!block.placed"
+                  >
+                    <span class="block-number">{{ block.id }}</span>
+                  </div>
+
+                  <!-- Zone Colors (4) -->
+                  <div 
+                    v-for="(block, index) in zoneBlocks" 
+                    :key="'zone-' + index"
+                    class="field-block zone-block"
+                    :class="{'block-placed': block.placed}"
+                    :style="{ backgroundColor: block.color }"
+                    @dragstart="startDrag($event, index, 'zone')"
+                    @dragend="endDrag"
+                    :draggable="!block.placed"
+                  >
+                    <span class="block-number">{{ block.id }}</span>
+                    <span class="zone-label">{{ block.name }}</span>
+                  </div>
+                </div>
               </v-card>
-            </v-dialog>
+
+              <!-- Grid 4x8 -->
+              <v-card class="pa-2">
+                <v-card-title class="text-subtitle-1 justify-center mb-2 py-2">
+                  <v-icon color="primary" class="mr-2">mdi-grid</v-icon>
+                  สนามแข่งขัน 4x8
+                </v-card-title>
+                
+                <div class="field-grid-wrapper">
+                  <div class="field-grid-container">
+                    <div 
+                      v-for="row in 4" 
+                      :key="'row-' + row" 
+                      class="field-grid-row"
+                    >
+                      <div
+                        v-for="col in 8"
+                        :key="'cell-' + row + '-' + col"
+                        class="field-grid-cell"
+                        :class="{'cell-occupied': isCellOccupied(row - 1, col - 1)}"
+                        :style="getCellStyle(row - 1, col - 1)"
+                        @click="rotateBlockInGrid(row - 1, col - 1)"
+                        @contextmenu.prevent="removeBlockFromGrid(row - 1, col - 1)"
+                        @dragover.prevent
+                        @drop="dropBlock($event, row - 1, col - 1)"
+                      >
+                        <span class="cell-label">{{ (row - 1) * 8 + col }}</span>
+                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'checkpoint'" 
+                             style="position: absolute; width: 20px; height: 20px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
+                        </div>
+                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'ball'" 
+                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
+                          {{ ballBlocks[fieldGrid[row - 1][col - 1].index].name }}
+                        </div>
+                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'zone'" 
+                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); font-size: 12px;">
+                          {{ zoneBlocks[fieldGrid[row - 1][col - 1].index].name }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </v-card>
+            </v-container>
           </v-sheet>
 
           <!-- จับเวลา 3 นาทีระดับกลาง -->
@@ -645,29 +1109,215 @@
           <v-sheet v-if="tab === 'high-rules'" class="pa-4">
             <v-container>
               <v-card class="pa-6">
-                <v-card-title class="text-h4">
+                <v-card-title class="text-h4 justify-center">
                   <v-icon large color="primary" class="mr-3">mdi-file-document</v-icon>
                   กติกาการแข่งขันระดับสูง
                 </v-card-title>
                 <v-divider class="my-4"></v-divider>
-                <v-card-text class="text-h6">
-                  <p>เนื้อหากติกาการแข่งขันระดับสูง...</p>
+                
+                <!-- ปุ่มเปิด PDF -->
+                <v-card-text class="text-center mb-4">
+                  <v-btn
+                    color="primary"
+                    large
+                    href="https://www.sillapa.net/rule70/robot-70.pdf"
+                    target="_blank"
+                  >
+                    <v-icon left>mdi-file-pdf-box</v-icon>
+                    เปิดกติกา PDF
+                  </v-btn>
+                </v-card-text>
+
+                <v-divider class="my-6"></v-divider>
+
+                <!-- ทำได้ -->
+                <v-card-text>
+                  <h2 class="text-h5 text-center mb-4 green--text text--darken-2">
+                    <v-icon color="green darken-2" large>mdi-check-circle</v-icon>
+                    ทำได้
+                  </h2>
+                  <v-row>
+                    <v-col cols="12" sm="4" v-for="n in 6" :key="'allow-' + n">
+                      <v-card elevation="2">
+                        <v-img
+                          :src="'https://placehold.co/200x150?text=GOOD+' + n"
+                          aspect-ratio="1.5"
+                          class="grey lighten-2"
+                        ></v-img>
+                      </v-card>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+
+                <v-divider class="my-6"></v-divider>
+
+                <!-- ทำไม่ได้ -->
+                <v-card-text>
+                  <h2 class="text-h5 text-center mb-4 red--text text--darken-2">
+                    <v-icon color="red darken-2" large>mdi-close-circle</v-icon>
+                    ทำไม่ได้
+                  </h2>
+                  <v-row>
+                    <v-col cols="12" sm="4" v-for="n in 6" :key="'disallow-' + n">
+                      <v-card elevation="2">
+                        <v-img
+                          :src="'https://placehold.co/200x150?text=BAD+' + n" 
+                          aspect-ratio="1.5"
+                          class="grey lighten-2"
+                        ></v-img>
+                      </v-card>
+                    </v-col>
+                  </v-row>
                 </v-card-text>
               </v-card>
             </v-container>
           </v-sheet>
 
           <!-- สุ่มสนามระดับสูง -->
-          <v-sheet v-if="tab === 'high-field'" class="pa-4">
-            <v-container>
-              <v-card class="pa-6">
-                <v-card-title class="text-h4 justify-center">
-                  <v-icon large color="primary" class="mr-3">mdi-grid</v-icon>
-                  สุ่มสนาม (ระดับสูง)
+          <v-sheet v-if="tab === 'high-field'" class="pa-2">
+            <v-container fluid>
+              <!-- All Blocks Panel (รวมบล๊อคทั้งหมด) -->
+              <v-card class="pa-2 mb-2">
+                <div class="d-flex justify-space-between align-center mb-2">
+                  <div>
+                    <h3 class="text-subtitle-1 mb-1">
+                      🎯 บล๊อคทั้งหมด 
+                      <span class="text-caption grey--text">
+                        (CP: <strong :class="checkpointCount >= maxCheckpoints ? 'red--text' : 'green--text'">{{ checkpointCount }}/{{ maxCheckpoints }}</strong>)
+                      </span>
+                    </h3>
+                    <p class="text-caption grey--text mb-0" style="font-size: 10px;">
+                      💡 คลิกซ้าย=หมุน | คลิกขวา=ลบ | ลาก=วาง
+                    </p>
+                  </div>
+                  <v-btn x-small color="warning" @click="resetField">
+                    <v-icon x-small left>mdi-refresh</v-icon>
+                    รีเซ็ต
+                  </v-btn>
+                </div>
+
+                <!-- All Blocks in One Row -->
+                <div class="blocks-container" style="flex-wrap: wrap; gap: 4px;">
+                  <!-- Field Blocks (10) -->
+                  <div 
+                    v-for="(block, index) in fieldBlocks" 
+                    :key="index"
+                    class="field-block"
+                    :class="[
+                      'block-border-' + getRotatedBorders(block.borders, block.rotation),
+                      {'block-placed': block.placed}
+                    ]"
+                    @click="rotateBlock(index)"
+                    @dragstart="startDrag($event, index, 'field')"
+                    @dragend="endDrag"
+                    draggable="true"
+                  >
+                    <span class="block-number">{{ block.id }}</span>
+                  </div>
+
+                  <!-- Checkpoint Blocks (4) -->
+                  <div 
+                    v-for="(block, index) in checkpointBlocks" 
+                    :key="'cp-' + index"
+                    class="field-block checkpoint-block"
+                    :class="[
+                      'block-border-' + getRotatedBorders(block.borders, block.rotation),
+                      {'block-placed': block.placed}
+                    ]"
+                    @click="rotateCheckpointBlock(index)"
+                    @dragstart="startDrag($event, index, 'checkpoint')"
+                    @dragend="endDrag"
+                    :draggable="!block.placed"
+                  >
+                    <span class="block-number">{{ block.id }}</span>
+                  </div>
+
+                  <!-- Black Hole (1) -->
+                  <div 
+                    v-for="(block, index) in obstacleBlocks" 
+                    :key="'obs-' + index"
+                    class="field-block blackhole-block"
+                    :class="['blackhole-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                    @click="rotateObstacleBlock(index)"
+                    @dragstart="startDrag($event, index, 'obstacle')"
+                    @dragend="endDrag"
+                    :draggable="!block.placed"
+                  >
+                    <span class="block-number" style="color: white; font-size: 11px;">{{ block.id }}</span>
+                  </div>
+
+                  <!-- Stick (1) -->
+                  <div 
+                    v-for="(block, index) in ballBlocks" 
+                    :key="'ball-' + index"
+                    class="field-block ball-block"
+                    :class="['ball-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                    @click="rotateBallBlock(index)"
+                    @dragstart="startDrag($event, index, 'ball')"
+                    @dragend="endDrag"
+                    :draggable="!block.placed"
+                  >
+                    <span class="block-number">{{ block.id }}</span>
+                  </div>
+
+                  <!-- Zone Colors (4) -->
+                  <div 
+                    v-for="(block, index) in zoneBlocks" 
+                    :key="'zone-' + index"
+                    class="field-block zone-block"
+                    :class="{'block-placed': block.placed}"
+                    :style="{ backgroundColor: block.color }"
+                    @dragstart="startDrag($event, index, 'zone')"
+                    @dragend="endDrag"
+                    :draggable="!block.placed"
+                  >
+                    <span class="block-number">{{ block.id }}</span>
+                    <span class="zone-label">{{ block.name }}</span>
+                  </div>
+                </div>
+              </v-card>
+
+              <!-- Grid 4x8 -->
+              <v-card class="pa-2">
+                <v-card-title class="text-subtitle-1 justify-center mb-2 py-2">
+                  <v-icon color="primary" class="mr-2">mdi-grid</v-icon>
+                  สนามแข่งขัน 4x8
                 </v-card-title>
-                <v-card-text class="text-center">
-                  <p class="text-h6">หน้านี้จะใช้ระบบสุ่มสนามสำหรับระดับสูง</p>
-                </v-card-text>
+                
+                <div class="field-grid-wrapper">
+                  <div class="field-grid-container">
+                    <div 
+                      v-for="row in 4" 
+                      :key="'row-' + row" 
+                      class="field-grid-row"
+                    >
+                      <div
+                        v-for="col in 8"
+                        :key="'cell-' + row + '-' + col"
+                        class="field-grid-cell"
+                        :class="{'cell-occupied': isCellOccupied(row - 1, col - 1)}"
+                        :style="getCellStyle(row - 1, col - 1)"
+                        @click="rotateBlockInGrid(row - 1, col - 1)"
+                        @contextmenu.prevent="removeBlockFromGrid(row - 1, col - 1)"
+                        @dragover.prevent
+                        @drop="dropBlock($event, row - 1, col - 1)"
+                      >
+                        <span class="cell-label">{{ (row - 1) * 8 + col }}</span>
+                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'checkpoint'" 
+                             style="position: absolute; width: 20px; height: 20px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
+                        </div>
+                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'ball'" 
+                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
+                          {{ ballBlocks[fieldGrid[row - 1][col - 1].index].name }}
+                        </div>
+                        <div v-if="fieldGrid[row - 1][col - 1] && fieldGrid[row - 1][col - 1].type === 'zone'" 
+                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); font-size: 12px;">
+                          {{ zoneBlocks[fieldGrid[row - 1][col - 1].index].name }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </v-card>
             </v-container>
           </v-sheet>
@@ -765,7 +1415,52 @@
           spinAnimation: null,
           wheelNumbers: Array.from({ length: 32 }, (_, i) => i + 1),
           lastSliceIndex: -1,
-          audioContext: null
+          audioContext: null,
+          
+          // Field Grid Data
+          fieldGrid: Array(4).fill(null).map(() => Array(8).fill(null)),
+          draggedBlockIndex: null,
+          draggedBlockType: null,
+          fieldBlocks: [
+            // 10 blocks - แต่ละ block เป็นสี่เหลี่ยว 1 เซลล์ แต่มีขอบต่างกัน
+            { id: 1, borders: 'all', placed: false, position: null, rotation: 0 }, // Block 1: ขอบทั้ง 4 ด้าน
+            { id: 2, borders: 'bottom', placed: false, position: null, rotation: 0 }, // Block 2: ขอบด้านล่าง
+            { id: 3, borders: 'right', placed: false, position: null, rotation: 0 }, // Block 3: ขอบด้านขวา
+            { id: 4, borders: 'top-right', placed: false, position: null, rotation: 0 }, // Block 4: ขอบด้านบนและขวา
+            { id: 5, borders: 'bottom-right', placed: false, position: null, rotation: 0 }, // Block 5: ขอบด้านล่างและขวา
+            { id: 6, borders: 'left', placed: false, position: null, rotation: 0 }, // Block 6: ขอบด้านซ้าย
+            { id: 7, borders: 'top-left', placed: false, position: null, rotation: 0 }, // Block 7: ขอบด้านบนและซ้าย
+            { id: 8, borders: 'bottom-left', placed: false, position: null, rotation: 0 }, // Block 8: ขอบด้านล่างและซ้าย
+            { id: 9, borders: 'top', placed: false, position: null, rotation: 0 }, // Block 9: ขอบด้านบน
+            { id: 10, borders: 'top-bottom', placed: false, position: null, rotation: 0 } // Block 10: ขอบด้านบนและล่าง
+          ],
+          checkpointBlocks: [
+            // 4 checkpoint blocks - วางได้เพียง 2 จาก 4
+            { id: 'C1', borders: 'none', placed: false, position: null, rotation: 0, hasCheckpoint: true }, // ไม่มีขอบ
+            { id: 'C2', borders: 'bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true }, // ขอบด้านล่าง
+            { id: 'C3', borders: 'top-left-bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true }, // ขอบ 3 ด้าน
+            { id: 'C4', borders: 'top-bottom', placed: false, position: null, rotation: 0, hasCheckpoint: true } // ขอบบนและล่าง
+          ],
+          maxCheckpoints: 2, // จำกัดจำนวน checkpoint ที่วางได้
+          checkpointCount: 0, // นับจำนวน checkpoint ที่วางแล้ว
+          
+          // Obstacle Block (หลุมดำ - Black Hole) - เพียง 1 อัน
+          obstacleBlocks: [
+            { id: 'H1', type: 'blackhole', placed: false, position: null, rotation: 0 }
+          ],
+          
+          // Ball Block (ลูกระนาด - Stick) - เพียง 1 อัน
+          ballBlocks: [
+            { id: 'B1', color: 'orange', name: 'Stick', placed: false, position: null, rotation: 0 }
+          ],
+          
+          // Zone Colors (สีพื้นที่) - 4 อัน
+          zoneBlocks: [
+            { id: 'Z1', color: '#FF6B6B', name: 'แดง', placed: false, position: null },
+            { id: 'Z2', color: '#4ECDC4', name: 'ฟ้า', placed: false, position: null },
+            { id: 'Z3', color: '#95E1D3', name: 'เขียว', placed: false, position: null },
+            { id: 'Z4', color: '#FFE66D', name: 'เหลือง', placed: false, position: null }
+          ]
         };
       },
       computed: {
@@ -1294,6 +1989,354 @@
             event.target.innerText = '';
             this.fullscreenText = '';
           }
+        },
+        
+        // Field Grid Methods
+        rotateBlock(index) {
+          const block = this.fieldBlocks[index];
+          block.rotation = (block.rotation + 1) % 4;
+        },
+        rotateCheckpointBlock(index) {
+          const block = this.checkpointBlocks[index];
+          if (!block.placed) {
+            block.rotation = (block.rotation + 1) % 4;
+          }
+        },
+        rotateObstacleBlock(index) {
+          const block = this.obstacleBlocks[index];
+          if (!block.placed) {
+            block.rotation = (block.rotation + 1) % 4;
+          }
+        },
+        rotateBallBlock(index) {
+          const block = this.ballBlocks[index];
+          if (!block.placed) {
+            block.rotation = (block.rotation + 1) % 4;
+          }
+        },
+        rotateBlockInGrid(row, col) {
+          const cellData = this.fieldGrid[row][col];
+          if (cellData !== null) {
+            if (cellData.type === 'field') {
+              this.rotateBlock(cellData.index);
+            } else if (cellData.type === 'checkpoint') {
+              this.rotateCheckpointBlock(cellData.index);
+            } else if (cellData.type === 'obstacle') {
+              this.rotateObstacleBlock(cellData.index);
+            } else if (cellData.type === 'ball') {
+              this.rotateBallBlock(cellData.index);
+            }
+          }
+        },
+        removeBlockFromGrid(row, col) {
+          const cellData = this.fieldGrid[row][col];
+          if (cellData !== null) {
+            if (cellData.type === 'field') {
+              const block = this.fieldBlocks[cellData.index];
+              block.placed = false;
+              block.position = null;
+            } else if (cellData.type === 'checkpoint') {
+              const block = this.checkpointBlocks[cellData.index];
+              block.placed = false;
+              block.position = null;
+              this.checkpointCount--;
+            } else if (cellData.type === 'obstacle') {
+              const block = this.obstacleBlocks[cellData.index];
+              block.placed = false;
+              block.position = null;
+            } else if (cellData.type === 'ball') {
+              const block = this.ballBlocks[cellData.index];
+              block.placed = false;
+              block.position = null;
+            } else if (cellData.type === 'zone') {
+              const block = this.zoneBlocks[cellData.index];
+              block.placed = false;
+              block.position = null;
+            }
+            this.fieldGrid[row][col] = null;
+          }
+        },
+        countPlacedCheckpoints() {
+          return this.checkpointBlocks.filter(b => b.placed).length;
+        },
+        getRotatedBorders(borders, rotation) {
+          // หมุนขอบตาม rotation (0, 1, 2, 3 = 0°, 90°, 180°, 270°)
+          const rotationMap = {
+            'all': 'all', // ไม่เปลี่ยน
+            'top-bottom': ['top-bottom', 'left-right', 'top-bottom', 'left-right'],
+            'left-right': ['left-right', 'top-bottom', 'left-right', 'top-bottom'],
+            'top': ['top', 'right', 'bottom', 'left'],
+            'right': ['right', 'bottom', 'left', 'top'],
+            'bottom': ['bottom', 'left', 'top', 'right'],
+            'left': ['left', 'top', 'right', 'bottom'],
+            'top-right': ['top-right', 'bottom-right', 'bottom-left', 'top-left'],
+            'bottom-right': ['bottom-right', 'bottom-left', 'top-left', 'top-right'],
+            'bottom-left': ['bottom-left', 'top-left', 'top-right', 'bottom-right'],
+            'top-left': ['top-left', 'top-right', 'bottom-right', 'bottom-left']
+          };
+          
+          if (borders === 'all') return 'all';
+          if (borders === 'none') return 'none';
+          if (borders === 'top-left-bottom') {
+            return ['top-left-bottom', 'top-right-bottom', 'top-right-left', 'bottom-right-left'][rotation % 4];
+          }
+          if (rotationMap[borders]) {
+            return rotationMap[borders][rotation % 4];
+          }
+          return borders;
+        },
+        startDrag(event, index, type) {
+          this.draggedBlockType = type;
+          this.draggedBlockIndex = index;
+          
+          if (type === 'field') {
+            const block = this.fieldBlocks[index];
+            if (block.placed) {
+              const { row, col } = block.position;
+              this.fieldGrid[row][col] = null;
+              block.placed = false;
+              block.position = null;
+            }
+          } else if (type === 'checkpoint') {
+            const block = this.checkpointBlocks[index];
+            if (block.placed) {
+              const { row, col } = block.position;
+              this.fieldGrid[row][col] = null;
+              block.placed = false;
+              block.position = null;
+              this.checkpointCount--;
+            }
+          } else if (type === 'obstacle') {
+            const block = this.obstacleBlocks[index];
+            if (block.placed) {
+              const { row, col } = block.position;
+              this.fieldGrid[row][col] = null;
+              block.placed = false;
+              block.position = null;
+            }
+          } else if (type === 'ball') {
+            const block = this.ballBlocks[index];
+            if (block.placed) {
+              const { row, col } = block.position;
+              this.fieldGrid[row][col] = null;
+              block.placed = false;
+              block.position = null;
+            }
+          } else if (type === 'zone') {
+            const block = this.zoneBlocks[index];
+            if (block.placed) {
+              const { row, col } = block.position;
+              this.fieldGrid[row][col] = null;
+              block.placed = false;
+              block.position = null;
+            }
+          }
+          
+          event.dataTransfer.effectAllowed = 'move';
+        },
+        endDrag() {
+          this.draggedBlockIndex = null;
+          this.draggedBlockType = null;
+        },
+        dropBlock(event, row, col) {
+          event.preventDefault();
+          if (this.draggedBlockIndex === null || this.draggedBlockType === null) return;
+          
+          let block, blocks;
+          
+          if (this.draggedBlockType === 'field') {
+            blocks = this.fieldBlocks;
+            block = this.fieldBlocks[this.draggedBlockIndex];
+          } else if (this.draggedBlockType === 'checkpoint') {
+            blocks = this.checkpointBlocks;
+            block = this.checkpointBlocks[this.draggedBlockIndex];
+            
+            // ตรวจสอบจำนวน checkpoint ที่วางแล้ว
+            if (!block.placed && this.checkpointCount >= this.maxCheckpoints) {
+              alert(`วางได้สูงสุด ${this.maxCheckpoints} จุดเท่านั้น!`);
+              this.draggedBlockIndex = null;
+              this.draggedBlockType = null;
+              return;
+            }
+          } else if (this.draggedBlockType === 'obstacle') {
+            blocks = this.obstacleBlocks;
+            block = this.obstacleBlocks[this.draggedBlockIndex];
+          } else if (this.draggedBlockType === 'ball') {
+            blocks = this.ballBlocks;
+            block = this.ballBlocks[this.draggedBlockIndex];
+          } else if (this.draggedBlockType === 'zone') {
+            blocks = this.zoneBlocks;
+            block = this.zoneBlocks[this.draggedBlockIndex];
+          }
+          
+          // ถ้าเซลล์มี block อื่นอยู่แล้ว ให้เอา block นั้นออก
+          const existingCellData = this.fieldGrid[row][col];
+          if (existingCellData !== null) {
+            if (existingCellData.type === 'field') {
+              const existingBlock = this.fieldBlocks[existingCellData.index];
+              existingBlock.placed = false;
+              existingBlock.position = null;
+            } else if (existingCellData.type === 'checkpoint') {
+              const existingBlock = this.checkpointBlocks[existingCellData.index];
+              existingBlock.placed = false;
+              existingBlock.position = null;
+              this.checkpointCount--;
+            } else if (existingCellData.type === 'obstacle') {
+              const existingBlock = this.obstacleBlocks[existingCellData.index];
+              existingBlock.placed = false;
+              existingBlock.position = null;
+            } else if (existingCellData.type === 'ball') {
+              const existingBlock = this.ballBlocks[existingCellData.index];
+              existingBlock.placed = false;
+              existingBlock.position = null;
+            } else if (existingCellData.type === 'zone') {
+              const existingBlock = this.zoneBlocks[existingCellData.index];
+              existingBlock.placed = false;
+              existingBlock.position = null;
+            }
+          }
+          
+          // Place the block (1 cell only)
+          this.fieldGrid[row][col] = { type: this.draggedBlockType, index: this.draggedBlockIndex };
+          
+          if (!block.placed && this.draggedBlockType === 'checkpoint') {
+            this.checkpointCount++;
+          }
+          
+          block.placed = true;
+          block.position = { row, col };
+          
+          this.draggedBlockIndex = null;
+          this.draggedBlockType = null;
+        },
+        isCellOccupied(row, col) {
+          return this.fieldGrid[row][col] !== null;
+        },
+        getCellStyle(row, col) {
+          const cellData = this.fieldGrid[row][col];
+          if (cellData !== null) {
+            let block;
+            let borderStyle = 'border: 1px solid #ddd;';
+            let bgStyle = 'background: white;';
+            
+            // Handle different block types
+            if (cellData.type === 'field') {
+              block = this.fieldBlocks[cellData.index];
+              const rotatedBorders = this.getRotatedBorders(block.borders, block.rotation);
+              
+              // เพิ่มขอบตามประเภทของ block (หลังหมุน)
+              switch(rotatedBorders) {
+                case 'all':
+                  borderStyle += 'border: 4px solid #000;';
+                  break;
+                case 'none':
+                  break;
+                case 'bottom':
+                  borderStyle += 'border-bottom: 4px solid #000;';
+                  break;
+                case 'right':
+                  borderStyle += 'border-right: 4px solid #000;';
+                  break;
+                case 'left-right':
+                  borderStyle += 'border-left: 4px solid #000; border-right: 4px solid #000;';
+                  break;
+                case 'top-right':
+                  borderStyle += 'border-top: 4px solid #000; border-right: 4px solid #000;';
+                  break;
+                case 'bottom-right':
+                  borderStyle += 'border-bottom: 4px solid #000; border-right: 4px solid #000;';
+                  break;
+                case 'left':
+                  borderStyle += 'border-left: 4px solid #000;';
+                  break;
+                case 'top-left':
+                  borderStyle += 'border-top: 4px solid #000; border-left: 4px solid #000;';
+                  break;
+                case 'bottom-left':
+                  borderStyle += 'border-bottom: 4px solid #000; border-left: 4px solid #000;';
+                  break;
+                case 'top':
+                  borderStyle += 'border-top: 4px solid #000;';
+                  break;
+                case 'top-bottom':
+                  borderStyle += 'border-top: 4px solid #000; border-bottom: 4px solid #000;';
+                  break;
+                case 'top-left-bottom':
+                  borderStyle += 'border-top: 4px solid #000; border-left: 4px solid #000; border-bottom: 4px solid #000;';
+                  break;
+                case 'top-right-bottom':
+                  borderStyle += 'border-top: 4px solid #000; border-right: 4px solid #000; border-bottom: 4px solid #000;';
+                  break;
+                case 'top-right-left':
+                  borderStyle += 'border-top: 4px solid #000; border-right: 4px solid #000; border-left: 4px solid #000;';
+                  break;
+                case 'bottom-right-left':
+                  borderStyle += 'border-bottom: 4px solid #000; border-right: 4px solid #000; border-left: 4px solid #000;';
+                  break;
+              }
+            } else if (cellData.type === 'checkpoint') {
+              block = this.checkpointBlocks[cellData.index];
+              const rotatedBorders = this.getRotatedBorders(block.borders, block.rotation);
+              borderStyle += 'position: relative;';
+              bgStyle = 'background: #f0f0f0;';
+              
+              // Apply checkpoint borders
+              switch(rotatedBorders) {
+                case 'bottom':
+                  borderStyle += 'border-bottom: 4px solid #000;';
+                  break;
+                case 'top-left-bottom':
+                  borderStyle += 'border-top: 4px solid #000; border-left: 4px solid #000; border-bottom: 4px solid #000;';
+                  break;
+                case 'top-bottom':
+                  borderStyle += 'border-top: 4px solid #000; border-bottom: 4px solid #000;';
+                  break;
+              }
+            } else if (cellData.type === 'obstacle') {
+              // Black hole style with rotation and visible indent
+              block = this.obstacleBlocks[cellData.index];
+              const rotation = block.rotation * 90;
+              bgStyle = 'background: radial-gradient(ellipse 80% 100% at 50% 50%, #1a1a1a 0%, #000 100%); border-radius: 10px; overflow: hidden;';
+              borderStyle = 'border: none; transform: rotate(' + rotation + 'deg); box-shadow: inset -8px 0 15px -5px rgba(0, 0, 0, 0.8), inset 8px 0 15px -5px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.1);';
+            } else if (cellData.type === 'ball') {
+              // Stick style with rotation, visible indent and 7 lines
+              block = this.ballBlocks[cellData.index];
+              const rotation = block.rotation * 90;
+              bgStyle = 'background: radial-gradient(ellipse 80% 100% at 50% 50%, #fff 0%, #e8e8e8 100%); border-radius: 10px; overflow: hidden; position: relative;';
+              borderStyle = 'border: none; transform: rotate(' + rotation + 'deg); box-shadow: inset -8px 0 15px -5px rgba(0, 0, 0, 0.3), inset 8px 0 15px -5px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(0, 0, 0, 0.1);';
+            } else if (cellData.type === 'zone') {
+              block = this.zoneBlocks[cellData.index];
+              bgStyle = 'background: ' + block.color + '; opacity: 0.8;';
+              borderStyle = 'border: 2px solid ' + block.color + ';';
+            }
+            
+            return borderStyle + bgStyle + ' cursor: pointer;';
+          }
+          return {};
+        },
+        resetField() {
+          this.fieldGrid = Array(4).fill(null).map(() => Array(8).fill(null));
+          this.fieldBlocks.forEach(block => {
+            block.placed = false;
+            block.position = null;
+          });
+          this.checkpointBlocks.forEach(block => {
+            block.placed = false;
+            block.position = null;
+          });
+          this.obstacleBlocks.forEach(block => {
+            block.placed = false;
+            block.position = null;
+          });
+          this.ballBlocks.forEach(block => {
+            block.placed = false;
+            block.position = null;
+          });
+          this.zoneBlocks.forEach(block => {
+            block.placed = false;
+            block.position = null;
+          });
+          this.checkpointCount = 0;
         }
       },
       mounted() {
