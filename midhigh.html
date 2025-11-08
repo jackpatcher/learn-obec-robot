@@ -103,10 +103,10 @@
       display: flex;
     }
     .field-grid-cell {
-      width: 100px;
-      height: 100px;
-      border: 1px solid #999;
-      background: white;
+      width: 120px;
+      height: 120px;
+      border: 1px dashed #ddd;
+      background: #f8f8f8;
       position: relative;
       display: flex;
       align-items: center;
@@ -129,6 +129,7 @@
       position: absolute;
       top: 2px;
       left: 2px;
+      display: none; /* ซ่อนเลขในช่องสนาม */
     }
     
     /* Block Preview Styles */
@@ -181,11 +182,18 @@
     }
     
     .block-number {
-      font-size: 14px;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      font-size: 9px;
       font-weight: bold;
-      color: #666;
+      color: #999;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 1px 3px;
+      border-radius: 2px;
       user-select: none;
       pointer-events: none;
+      z-index: 10;
     }
     
     /* Border styles for each block type */
@@ -319,7 +327,7 @@
     }
     
     .blackhole-block::after {
-      content: 'H1';
+      content: '';  /* ลบข้อความ H1 */
       position: absolute;
       font-size: 10px;
       font-weight: bold;
@@ -366,7 +374,7 @@
     
     /* Label for ball block */
     .ball-block::after {
-      content: 'S';
+      content: '';  /* ลบข้อความ S */
       position: absolute;
       font-size: 10px;
       font-weight: bold;
@@ -405,7 +413,7 @@
     }
     
     .bridge-block::after {
-      content: 'BR1';
+      content: 'สะพาน';  /* เปลี่ยนจาก BR1 เป็น สะพาน */
       position: absolute;
       font-size: 10px;
       font-weight: bold;
@@ -486,14 +494,15 @@
       color: #333;
       text-shadow: 1px 1px 2px white;
       z-index: 1;
+      display: none; /* ซ่อนชื่อสี */
     }
     
-    /* START block - สีเทาบางๆ */
+    /* START block - พื้นขาว ตัวอักษรสีแดง */
     .start-block {
       position: relative;
-      background-color: #CCCCCC;
-      opacity: 0.5;
-      border: 2px solid #999 !important;
+      background-color: #FFFFFF;  /* เปลี่ยนเป็นพื้นขาว */
+      opacity: 1;  /* ไม่โปร่งแสง */
+      border: none !important;
       border-radius: 0 !important;
       display: flex;
       align-items: center;
@@ -501,18 +510,19 @@
     }
     
     .start-block:hover {
-      opacity: 0.7;
+      opacity: 1;
+      background-color: #f5f5f5;  /* สีขาวนวลเมื่อ hover */
     }
     
     .start-block.block-placed {
-      opacity: 0.3;
+      opacity: 0.5;
     }
     
     .start-label {
       position: absolute;
       font-size: 12px;
       font-weight: bold;
-      color: #333;
+      color: #f44336;  /* ตัวอักษรสีแดง */
       z-index: 1;
     }
     
@@ -1042,189 +1052,272 @@
           <!-- สุ่มสนามระดับกลาง -->
           <v-sheet v-if="tab === 'mid-field'" class="pa-2">
             <v-container fluid>
-              <!-- All Blocks Panel (รวมบล๊อคทั้งหมด) -->
-              <v-card class="pa-2 mb-2">
-                <div class="d-flex justify-space-between align-center mb-2">
+              <v-card class="pa-4">
+                <!-- Header -->
+                <div class="d-flex justify-space-between align-center mb-3">
                   <div>
-                    <h3 class="text-subtitle-1 mb-1">
-                      🎯 บล๊อคทั้งหมด (ระดับกลาง)
-                      <span class="text-caption grey--text">
-                        (CP: <strong :class="midCheckpointCount >= maxCheckpoints ? 'red--text' : 'green--text'">{{ midCheckpointCount }}/{{ maxCheckpoints }}</strong>)
-                      </span>
+                    <h3 class="text-h6 mb-1">
+                      <v-icon color="primary" class="mr-2">mdi-grid</v-icon>
+                      สนามแข่งขัน 4x8 (ระดับกลาง)
                     </h3>
                     <p class="text-caption grey--text mb-0" style="font-size: 10px;">
-                      💡 คลิกซ้าย=หมุน | คลิกขวา=ลบ | ลาก=วาง
+                      💡 คลิกซ้าย=หมุน | คลิกขวา=ลบ | ลาก=วาง | 
+                      CP: <strong :class="midCheckpointCount >= maxCheckpoints ? 'red--text' : 'green--text'">{{ midCheckpointCount }}/{{ maxCheckpoints }}</strong>
                     </p>
                   </div>
-                  <v-btn x-small color="warning" @click="resetField('mid')">
-                    <v-icon x-small left>mdi-refresh</v-icon>
-                    รีเซ็ต
-                  </v-btn>
                 </div>
 
-                <!-- All Blocks in One Row -->
-                <div class="blocks-container" style="flex-wrap: wrap; gap: 4px;">
-                  <!-- Field Blocks (10) -->
-                  <div 
-                    v-for="(block, index) in midFieldBlocks" 
-                    :key="index"
-                    class="field-block"
-                    :class="[
-                      'block-border-' + getRotatedBorders(block.borders, block.rotation),
-                      {'block-placed': block.placed}
-                    ]"
-                    @click="rotateBlock(index, 'mid')"
-                    @dragstart="startDrag($event, index, 'field', 'mid')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="block-number">{{ block.id }}</span>
-                  </div>
-
-                  <!-- Checkpoint Blocks (4) -->
-                  <div 
-                    v-for="(block, index) in midCheckpointBlocks" 
-                    :key="'cp-' + index"
-                    class="field-block checkpoint-block"
-                    :class="[
-                      'block-border-' + getRotatedBorders(block.borders, block.rotation),
-                      {'block-placed': block.placed}
-                    ]"
-                    @click="rotateCheckpointBlock(index, 'mid')"
-                    @dragstart="startDrag($event, index, 'checkpoint', 'mid')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="block-number">{{ block.id }}</span>
-                  </div>
-
-                  <!-- Black Hole (1) -->
-                  <div 
-                    v-for="(block, index) in midObstacleBlocks" 
-                    :key="'obs-' + index"
-                    class="field-block blackhole-block"
-                    :class="['blackhole-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateObstacleBlock(index, 'mid')"
-                    @dragstart="startDrag($event, index, 'obstacle', 'mid')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="block-number" style="color: white; font-size: 11px;">{{ block.id }}</span>
-                  </div>
-
-                  <!-- Stick (1) -->
-                  <div 
-                    v-for="(block, index) in midBallBlocks" 
-                    :key="'ball-' + index"
-                    class="field-block ball-block"
-                    :class="['ball-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateBallBlock(index, 'mid')"
-                    @dragstart="startDrag($event, index, 'ball', 'mid')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="block-number">{{ block.id }}</span>
-                  </div>
-
-                  <!-- Bridge (1) - 3 ช่องติดกัน -->
-                  <div 
-                    v-for="(block, index) in midBridgeBlocks" 
-                    :key="'bridge-' + index"
-                    class="bridge-block"
-                    :class="['bridge-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateBridgeBlock(index, 'mid')"
-                    @dragstart="startDrag($event, index, 'bridge', 'mid')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                  </div>
-
-                  <!-- Zone Colors (4) -->
-                  <div 
-                    v-for="(block, index) in midZoneBlocks" 
-                    :key="'zone-' + index"
-                    class="field-block zone-block"
-                    :class="[
-                      {'block-placed': block.placed}, 
-                      'zone-rotate-' + block.rotation,
-                      block.border ? 'zone-border-' + block.border : ''
-                    ]"
-                    :style="block.shape === 'half-left' ? 
-                      { background: 'linear-gradient(to right, ' + block.color + ' 0%, ' + block.color + ' 50%, white 50%, white 100%)' } : 
-                      { backgroundColor: block.color }"
-                    @click="rotateZoneBlock(index, 'mid')"
-                    @dragstart="startDrag($event, index, 'zone', 'mid')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="block-number">{{ block.id }}</span>
-                    <span class="zone-label">{{ block.name }}</span>
-                  </div>
-
-                  <!-- START Block (1) -->
-                  <div 
-                    v-for="(block, index) in midStartBlock" 
-                    :key="'start-' + index"
-                    class="field-block start-block"
-                    :class="['start-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateStartBlock(index, 'mid')"
-                    @dragstart="startDrag($event, index, 'start', 'mid')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="start-label">{{ block.name }}</span>
-                  </div>
-                </div>
-              </v-card>
-
-              <!-- Grid 4x8 -->
-              <v-card class="pa-2">
-                <v-card-title class="text-subtitle-1 justify-center mb-2 py-2">
-                  <v-icon color="primary" class="mr-2">mdi-grid</v-icon>
-                  สนามแข่งขัน 4x8 (ระดับกลาง)
-                </v-card-title>
-                
-                <div class="field-grid-wrapper">
-                  <div class="field-grid-container">
-                    <div 
-                      v-for="row in 4" 
-                      :key="'row-' + row" 
-                      class="field-grid-row"
-                    >
-                      <div
-                        v-for="col in 8"
-                        :key="'cell-' + row + '-' + col"
-                        class="field-grid-cell"
-                        :class="{'cell-occupied': isCellOccupied(row - 1, col - 1, 'mid')}"
-                        :style="getCellStyle(row - 1, col - 1, 'mid')"
-                        @click="rotateBlockInGrid(row - 1, col - 1, 'mid')"
-                        @contextmenu.prevent="removeBlockFromGrid(row - 1, col - 1, 'mid')"
-                        @dragover.prevent
-                        @drop="dropBlock($event, row - 1, col - 1, 'mid')"
+                <!-- ระบบสุ่มสนาม -->
+                <v-card outlined class="mb-4 pa-4">
+                  <!-- Radio Toggle Buttons ตรงกลาง -->
+                  <v-row justify="center" class="mb-3">
+                    <v-col cols="auto">
+                      <v-btn-toggle
+                        v-model="midSelectedGrade"
+                        mandatory
+                        color="primary"
+                        class="elevation-2"
                       >
-                        <span class="cell-label">{{ (row - 1) * 8 + col }}</span>
-                        <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'checkpoint'" 
-                             style="position: absolute; width: 20px; height: 20px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
-                        </div>
-                        <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'ball'" 
-                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
-                          {{ midBallBlocks[midFieldGrid[row - 1][col - 1].index].name }}
-                        </div>
-                        <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'bridge'" 
-                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
-                          สะพาน
-                        </div>
-                        <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'zone'" 
-                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); font-size: 12px;">
-                          {{ midZoneBlocks[midFieldGrid[row - 1][col - 1].index].name }}
-                        </div>
-                        <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'start'" 
-                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 12px;">
-                          START
+                        <v-tooltip bottom>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn value="primary" x-large color="white" v-bind="attrs" v-on="on">
+                              <span class="font-weight-bold primary--text text-h5">ประถม</span>
+                            </v-btn>
+                          </template>
+                          <span>+ หลุมดำ</span>
+                        </v-tooltip>
+                        
+                        <v-tooltip bottom>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn value="secondary" x-large color="white" v-bind="attrs" v-on="on">
+                              <span class="font-weight-bold success--text text-h5">ม.ต้น</span>
+                            </v-btn>
+                          </template>
+                          <span>+ ลูกระนาด</span>
+                        </v-tooltip>
+                        
+                        <v-tooltip bottom>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn value="high-secondary" x-large color="white" v-bind="attrs" v-on="on">
+                              <span class="font-weight-bold deep-orange--text text-h5">ม.ปลาย</span>
+                            </v-btn>
+                          </template>
+                          <span>+ สะพาน</span>
+                        </v-tooltip>
+                      </v-btn-toggle>
+                    </v-col>
+                  </v-row>
+                  
+                  <!-- ปุ่มสุ่มและรีเซต ขนาดเล็ก -->
+                  <v-row justify="center" align="center">
+                    <v-col cols="auto">
+                      <v-btn 
+                        color="primary" 
+                        @click="randomField('mid', midSelectedGrade)"
+                        :disabled="!midSelectedGrade"
+                        small
+                      >
+                        <v-icon small left>mdi-dice-multiple</v-icon>
+                        สุ่มสนาม
+                      </v-btn>
+                      <v-btn color="warning" @click="resetField('mid')" class="ml-2" small>
+                        <v-icon small left>mdi-refresh</v-icon>
+                        รีเซ็ต
+                      </v-btn>
+                      
+                      <!-- ปุ่ม ? สำหรับคำแนะนำ -->
+                      <v-tooltip bottom>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn 
+                            icon 
+                            small 
+                            v-bind="attrs" 
+                            v-on="on"
+                            class="ml-2"
+                          >
+                            <v-icon small color="grey">mdi-help-circle</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>กดปุ่ม + เพื่อสุ่ม</span>
+                      </v-tooltip>
+                    </v-col>
+                  </v-row>
+                </v-card>
+
+                <!-- Layout: สนามกลาง, บล๊อค 2 ฝั่ง -->
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  
+                  <!-- บล๊อคพื้นฐาน (ซ้าย) -->
+                  <div style="width: 200px; flex-shrink: 0;">
+                    <h4 class="text-subtitle-2 mb-2 grey--text text--darken-2">
+                      <v-icon small>mdi-border-all</v-icon> บล๊อคพื้นฐาน
+                    </h4>
+                    <div class="blocks-container" style="flex-wrap: wrap; gap: 4px; max-height: 500px; overflow-y: auto; padding: 8px; background: #fafafa; border-radius: 4px;">
+                      <!-- Field Blocks (10) -->
+                      <div 
+                        v-for="(block, index) in midFieldBlocks" 
+                        :key="index"
+                        class="field-block"
+                        :class="[
+                          'block-border-' + getRotatedBorders(block.borders, block.rotation),
+                          {'block-placed': block.placed}
+                        ]"
+                        @click="rotateBlock(index, 'mid')"
+                        @dragstart="startDrag($event, index, 'field', 'mid')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                        <span class="block-number">{{ block.id }}</span>
+                      </div>
+
+                      <!-- Checkpoint Blocks (4) -->
+                      <div 
+                        v-for="(block, index) in midCheckpointBlocks" 
+                        :key="'cp-' + index"
+                        class="field-block checkpoint-block"
+                        :class="[
+                          'block-border-' + getRotatedBorders(block.borders, block.rotation),
+                          {'block-placed': block.placed}
+                        ]"
+                        @click="rotateCheckpointBlock(index, 'mid')"
+                        @dragstart="startDrag($event, index, 'checkpoint', 'mid')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Grid 4x8 (กลาง) -->
+                  <div style="flex: 1; display: flex; justify-content: center;">
+                    <div class="field-grid-wrapper" style="padding: 0;">
+                      <div class="field-grid-container">
+                        <div 
+                          v-for="row in 4" 
+                          :key="'row-' + row" 
+                          class="field-grid-row"
+                        >
+                          <div
+                            v-for="col in 8"
+                            :key="'cell-' + row + '-' + col"
+                            class="field-grid-cell"
+                            :class="{'cell-occupied': isCellOccupied(row - 1, col - 1, 'mid')}"
+                            :style="getCellStyle(row - 1, col - 1, 'mid')"
+                            @click="rotateBlockInGrid(row - 1, col - 1, 'mid')"
+                            @contextmenu.prevent="removeBlockFromGrid(row - 1, col - 1, 'mid')"
+                            @dragover.prevent
+                            @drop="dropBlock($event, row - 1, col - 1, 'mid')"
+                          >
+                            <span class="cell-label">{{ (row - 1) * 8 + col }}</span>
+                            <!-- แสดงเลข block เฉพาะบล๊อคพื้นฐาน (field/ball) ไม่รวม zone -->
+                            <span 
+                              v-if="midFieldGrid[row - 1][col - 1] && ['field', 'ball'].includes(midFieldGrid[row - 1][col - 1].type)" 
+                              style="position: absolute; top: 2px; left: 2px; font-size: 9px; font-weight: bold; color: #999; background: rgba(255, 255, 255, 0.8); padding: 1px 3px; border-radius: 2px; z-index: 10;"
+                            >
+                              {{ midFieldGrid[row - 1][col - 1].type === 'field' ? midFieldBlocks[midFieldGrid[row - 1][col - 1].index].id : 
+                                 midFieldGrid[row - 1][col - 1].type === 'ball' ? midBallBlocks[midFieldGrid[row - 1][col - 1].index].id : '' }}
+                            </span>
+                            <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'checkpoint'" 
+                                 style="position: absolute; width: 20px; height: 20px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
+                            </div>
+                            <!-- ลบการแสดงข้อความ Stick -->
+                            <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'bridge'" 
+                                 style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
+                              สะพาน
+                            </div>
+                            <!-- ลบการแสดงชื่อสีใน Zone -->
+                            <div v-if="midFieldGrid[row - 1][col - 1] && midFieldGrid[row - 1][col - 1].type === 'start'" 
+                                 style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #f44336; font-size: 12px;">
+                              START
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+
+                  <!-- บล๊อคพิเศษ (ขวา) -->
+                  <div style="width: 200px; flex-shrink: 0;">
+                    <h4 class="text-subtitle-2 mb-2 grey--text text--darken-2">
+                      <v-icon small>mdi-star</v-icon> บล๊อคพิเศษ
+                    </h4>
+                    <div class="blocks-container" style="flex-wrap: wrap; gap: 4px; max-height: 500px; overflow-y: auto; padding: 8px; background: #fafafa; border-radius: 4px;">
+                      
+                      <!-- Zone Colors (4) -->
+                      <div 
+                        v-for="(block, index) in midZoneBlocks" 
+                        :key="'zone-' + index"
+                        class="field-block zone-block"
+                        :class="[
+                          {'block-placed': block.placed}, 
+                          'zone-rotate-' + block.rotation,
+                          block.border ? 'zone-border-' + block.border : ''
+                        ]"
+                        :style="block.shape === 'half-left' ? 
+                          { background: 'linear-gradient(to right, ' + block.color + ' 0%, ' + block.color + ' 50%, white 50%, white 100%)' } : 
+                          { backgroundColor: block.color }"
+                        @click="rotateZoneBlock(index, 'mid')"
+                        @dragstart="startDrag($event, index, 'zone', 'mid')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                      </div>
+
+                      <!-- Black Hole (1) -->
+                      <div 
+                        v-for="(block, index) in midObstacleBlocks" 
+                        :key="'obs-' + index"
+                        class="field-block blackhole-block"
+                        :class="['blackhole-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                        @click="rotateObstacleBlock(index, 'mid')"
+                        @dragstart="startDrag($event, index, 'obstacle', 'mid')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                      </div>
+
+                      <!-- Stick (1) -->
+                      <div 
+                        v-for="(block, index) in midBallBlocks" 
+                        :key="'ball-' + index"
+                        class="field-block ball-block"
+                        :class="['ball-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                        @click="rotateBallBlock(index, 'mid')"
+                        @dragstart="startDrag($event, index, 'ball', 'mid')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                      </div>
+
+                      <!-- Bridge (1) - 3 ช่องติดกัน -->
+                      <div 
+                        v-for="(block, index) in midBridgeBlocks" 
+                        :key="'bridge-' + index"
+                        class="bridge-block"
+                        :class="['bridge-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                        @click="rotateBridgeBlock(index, 'mid')"
+                        @dragstart="startDrag($event, index, 'bridge', 'mid')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                      </div>
+
+                      <!-- START Block (1) -->
+                      <div 
+                        v-for="(block, index) in midStartBlock" 
+                        :key="'start-' + index"
+                        class="field-block start-block"
+                        :class="['start-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                        @click="rotateStartBlock(index, 'mid')"
+                        @dragstart="startDrag($event, index, 'start', 'mid')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                        <span class="start-label">{{ block.name }}</span>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </v-card>
             </v-container>
@@ -1433,189 +1526,264 @@
           <!-- สุ่มสนามระดับสูง -->
           <v-sheet v-if="tab === 'high-field'" class="pa-2">
             <v-container fluid>
-              <!-- All Blocks Panel (รวมบล๊อคทั้งหมด) -->
-              <v-card class="pa-2 mb-2">
-                <div class="d-flex justify-space-between align-center mb-2">
+              <v-card class="pa-4">
+                <!-- Header -->
+                <div class="d-flex justify-space-between align-center mb-3">
                   <div>
-                    <h3 class="text-subtitle-1 mb-1">
-                      🎯 บล๊อคทั้งหมด (ระดับสูง)
-                      <span class="text-caption grey--text">
-                        (CP: <strong :class="highCheckpointCount >= maxCheckpoints ? 'red--text' : 'green--text'">{{ highCheckpointCount }}/{{ maxCheckpoints }}</strong>)
-                      </span>
+                    <h3 class="text-h6 mb-1">
+                      <v-icon color="orange" class="mr-2">mdi-grid</v-icon>
+                      สนามแข่งขัน 4x8 (ระดับสูง)
                     </h3>
                     <p class="text-caption grey--text mb-0" style="font-size: 10px;">
-                      💡 คลิกซ้าย=หมุน | คลิกขวา=ลบ | ลาก=วาง
+                      💡 คลิกซ้าย=หมุน | คลิกขวา=ลบ | ลาก=วาง | 
+                      CP: <strong :class="highCheckpointCount >= maxCheckpoints ? 'red--text' : 'green--text'">{{ highCheckpointCount }}/{{ maxCheckpoints }}</strong>
                     </p>
                   </div>
-                  <v-btn x-small color="warning" @click="resetField('high')">
-                    <v-icon x-small left>mdi-refresh</v-icon>
-                    รีเซ็ต
-                  </v-btn>
                 </div>
 
-                <!-- All Blocks in One Row -->
-                <div class="blocks-container" style="flex-wrap: wrap; gap: 4px;">
-                  <!-- Field Blocks (10) -->
-                  <div 
-                    v-for="(block, index) in highFieldBlocks" 
-                    :key="index"
-                    class="field-block"
-                    :class="[
-                      'block-border-' + getRotatedBorders(block.borders, block.rotation),
-                      {'block-placed': block.placed}
-                    ]"
-                    @click="rotateBlock(index, 'high')"
-                    @dragstart="startDrag($event, index, 'field', 'high')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="block-number">{{ block.id }}</span>
-                  </div>
-
-                  <!-- Checkpoint Blocks (4) -->
-                  <div 
-                    v-for="(block, index) in highCheckpointBlocks" 
-                    :key="'cp-' + index"
-                    class="field-block checkpoint-block"
-                    :class="[
-                      'block-border-' + getRotatedBorders(block.borders, block.rotation),
-                      {'block-placed': block.placed}
-                    ]"
-                    @click="rotateCheckpointBlock(index, 'high')"
-                    @dragstart="startDrag($event, index, 'checkpoint', 'high')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="block-number">{{ block.id }}</span>
-                  </div>
-
-                  <!-- Black Hole (1) -->
-                  <div 
-                    v-for="(block, index) in highObstacleBlocks" 
-                    :key="'obs-' + index"
-                    class="field-block blackhole-block"
-                    :class="['blackhole-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateObstacleBlock(index, 'high')"
-                    @dragstart="startDrag($event, index, 'obstacle', 'high')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="block-number" style="color: white; font-size: 11px;">{{ block.id }}</span>
-                  </div>
-
-                  <!-- Stick (1) -->
-                  <div 
-                    v-for="(block, index) in highBallBlocks" 
-                    :key="'ball-' + index"
-                    class="field-block ball-block"
-                    :class="['ball-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateBallBlock(index, 'high')"
-                    @dragstart="startDrag($event, index, 'ball', 'high')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="block-number">{{ block.id }}</span>
-                  </div>
-
-                  <!-- Bridge (1) - 3 ช่องติดกัน -->
-                  <div 
-                    v-for="(block, index) in highBridgeBlocks" 
-                    :key="'bridge-' + index"
-                    class="bridge-block"
-                    :class="['bridge-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateBridgeBlock(index, 'high')"
-                    @dragstart="startDrag($event, index, 'bridge', 'high')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                  </div>
-
-                  <!-- Zone Colors (4) -->
-                  <div 
-                    v-for="(block, index) in highZoneBlocks" 
-                    :key="'zone-' + index"
-                    class="field-block zone-block"
-                    :class="[
-                      {'block-placed': block.placed}, 
-                      'zone-rotate-' + block.rotation,
-                      block.border ? 'zone-border-' + block.border : ''
-                    ]"
-                    :style="block.shape === 'half-left' ? 
-                      { background: 'linear-gradient(to right, ' + block.color + ' 0%, ' + block.color + ' 50%, white 50%, white 100%)' } : 
-                      { backgroundColor: block.color }"
-                    @click="rotateZoneBlock(index, 'high')"
-                    @dragstart="startDrag($event, index, 'zone', 'high')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="block-number">{{ block.id }}</span>
-                    <span class="zone-label">{{ block.name }}</span>
-                  </div>
-
-                  <!-- START Block (1) -->
-                  <div 
-                    v-for="(block, index) in highStartBlock" 
-                    :key="'start-' + index"
-                    class="field-block start-block"
-                    :class="['start-rotate-' + block.rotation, {'block-placed': block.placed}]"
-                    @click="rotateStartBlock(index, 'high')"
-                    @dragstart="startDrag($event, index, 'start', 'high')"
-                    @dragend="endDrag"
-                    draggable="true"
-                  >
-                    <span class="start-label">{{ block.name }}</span>
-                  </div>
-                </div>
-              </v-card>
-
-              <!-- Grid 4x8 -->
-              <v-card class="pa-2">
-                <v-card-title class="text-subtitle-1 justify-center mb-2 py-2">
-                  <v-icon color="primary" class="mr-2">mdi-grid</v-icon>
-                  สนามแข่งขัน 4x8 (ระดับสูง)
-                </v-card-title>
-                
-                <div class="field-grid-wrapper">
-                  <div class="field-grid-container">
-                    <div 
-                      v-for="row in 4" 
-                      :key="'row-' + row" 
-                      class="field-grid-row"
-                    >
-                      <div
-                        v-for="col in 8"
-                        :key="'cell-' + row + '-' + col"
-                        class="field-grid-cell"
-                        :class="{'cell-occupied': isCellOccupied(row - 1, col - 1, 'high')}"
-                        :style="getCellStyle(row - 1, col - 1, 'high')"
-                        @click="rotateBlockInGrid(row - 1, col - 1, 'high')"
-                        @contextmenu.prevent="removeBlockFromGrid(row - 1, col - 1, 'high')"
-                        @dragover.prevent
-                        @drop="dropBlock($event, row - 1, col - 1, 'high')"
+                <!-- ระบบสุ่มสนาม -->
+                <v-card outlined class="mb-4 pa-4">
+                  <!-- Radio Toggle Buttons ตรงกลาง -->
+                  <v-row justify="center" class="mb-3">
+                    <v-col cols="auto">
+                      <v-btn-toggle
+                        v-model="highSelectedGrade"
+                        mandatory
+                        color="orange"
+                        class="elevation-2"
                       >
-                        <span class="cell-label">{{ (row - 1) * 8 + col }}</span>
-                        <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'checkpoint'" 
-                             style="position: absolute; width: 20px; height: 20px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
-                        </div>
-                        <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'ball'" 
-                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
-                          {{ highBallBlocks[highFieldGrid[row - 1][col - 1].index].name }}
-                        </div>
-                        <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'bridge'" 
-                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
-                          สะพาน
-                        </div>
-                        <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'zone'" 
-                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); font-size: 12px;">
-                          {{ highZoneBlocks[highFieldGrid[row - 1][col - 1].index].name }}
-                        </div>
-                        <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'start'" 
-                             style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 12px;">
-                          START
+                        <v-tooltip bottom>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn value="primary" x-large color="white" v-bind="attrs" v-on="on">
+                              <span class="font-weight-bold primary--text text-h5">ประถม</span>
+                            </v-btn>
+                          </template>
+                          <span>+ หลุมดำ</span>
+                        </v-tooltip>
+                        
+                        <v-tooltip bottom>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn value="secondary" x-large color="white" v-bind="attrs" v-on="on">
+                              <span class="font-weight-bold success--text text-h5">ม.ต้น</span>
+                            </v-btn>
+                          </template>
+                          <span>+ ลูกระนาด</span>
+                        </v-tooltip>
+                        
+                        <v-tooltip bottom>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn value="high-secondary" x-large color="white" v-bind="attrs" v-on="on">
+                              <span class="font-weight-bold deep-orange--text text-h5">ม.ปลาย</span>
+                            </v-btn>
+                          </template>
+                          <span>+ สะพาน</span>
+                        </v-tooltip>
+                      </v-btn-toggle>
+                    </v-col>
+                  </v-row>
+                  
+                  <!-- ปุ่มสุ่มและรีเซต ขนาดเล็ก -->
+                  <v-row justify="center" align="center">
+                    <v-col cols="auto">
+                      <v-btn 
+                        color="orange" 
+                        @click="randomField('high', highSelectedGrade)"
+                        :disabled="!highSelectedGrade"
+                        small
+                      >
+                        <v-icon small left>mdi-dice-multiple</v-icon>
+                        สุ่มสนาม
+                      </v-btn>
+                      <v-btn color="warning" @click="resetField('high')" class="ml-2" small>
+                        <v-icon small left>mdi-refresh</v-icon>
+                        รีเซ็ต
+                      </v-btn>
+                      
+                      <!-- ปุ่ม ? สำหรับคำแนะนำ -->
+                      <v-tooltip bottom>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn 
+                            icon 
+                            small 
+                            v-bind="attrs" 
+                            v-on="on"
+                            class="ml-2"
+                          >
+                            <v-icon small color="grey">mdi-help-circle</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>กดปุ่ม + เพื่อสุ่ม</span>
+                      </v-tooltip>
+                    </v-col>
+                  </v-row>
+                </v-card>
+
+                <!-- Layout: สนามกลาง, บล๊อค 2 ฝั่ง -->
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  
+                  <!-- บล๊อคพื้นฐาน (ซ้าย) -->
+                  <div style="width: 200px; flex-shrink: 0;">
+                    <h4 class="text-subtitle-2 mb-2 grey--text text--darken-2">
+                      <v-icon small>mdi-border-all</v-icon> บล๊อคพื้นฐาน
+                    </h4>
+                    <div class="blocks-container" style="flex-wrap: wrap; gap: 4px; max-height: 500px; overflow-y: auto; padding: 8px; background: #fafafa; border-radius: 4px;">
+                      <!-- Field Blocks (10) -->
+                      <div 
+                        v-for="(block, index) in highFieldBlocks" 
+                        :key="index"
+                        class="field-block"
+                        :class="[
+                          'block-border-' + getRotatedBorders(block.borders, block.rotation),
+                          {'block-placed': block.placed}
+                        ]"
+                        @click="rotateBlock(index, 'high')"
+                        @dragstart="startDrag($event, index, 'field', 'high')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                        <span class="block-number">{{ block.id }}</span>
+                      </div>
+
+                      <!-- Checkpoint Blocks (4) -->
+                      <div 
+                        v-for="(block, index) in highCheckpointBlocks" 
+                        :key="'cp-' + index"
+                        class="field-block checkpoint-block"
+                        :class="[
+                          'block-border-' + getRotatedBorders(block.borders, block.rotation),
+                          {'block-placed': block.placed}
+                        ]"
+                        @click="rotateCheckpointBlock(index, 'high')"
+                        @dragstart="startDrag($event, index, 'checkpoint', 'high')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Grid 4x8 (กลาง) -->
+                  <div style="flex: 1; display: flex; justify-content: center;">
+                    <div class="field-grid-wrapper" style="padding: 0;">
+                      <div class="field-grid-container">
+                        <div 
+                          v-for="row in 4" 
+                          :key="'row-' + row" 
+                          class="field-grid-row"
+                        >
+                          <div
+                            v-for="col in 8"
+                            :key="'cell-' + row + '-' + col"
+                            class="field-grid-cell"
+                            :class="{'cell-occupied': isCellOccupied(row - 1, col - 1, 'high')}"
+                            :style="getCellStyle(row - 1, col - 1, 'high')"
+                            @click="rotateBlockInGrid(row - 1, col - 1, 'high')"
+                            @contextmenu.prevent="removeBlockFromGrid(row - 1, col - 1, 'high')"
+                            @dragover.prevent
+                            @drop="dropBlock($event, row - 1, col - 1, 'high')"
+                          >
+                            <span class="cell-label">{{ (row - 1) * 8 + col }}</span>
+                            <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'checkpoint'" 
+                                 style="position: absolute; width: 20px; height: 20px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
+                            </div>
+                            <!-- ลบการแสดงข้อความ Stick -->
+                            <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'bridge'" 
+                                 style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; font-size: 10px;">
+                              สะพาน
+                            </div>
+                            <!-- ลบการแสดงชื่อสีใน Zone -->
+                            <div v-if="highFieldGrid[row - 1][col - 1] && highFieldGrid[row - 1][col - 1].type === 'start'" 
+                                 style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #f44336; font-size: 12px;">
+                              START
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+
+                  <!-- บล๊อคพิเศษ (ขวา) -->
+                  <div style="width: 200px; flex-shrink: 0;">
+                    <h4 class="text-subtitle-2 mb-2 grey--text text--darken-2">
+                      <v-icon small>mdi-star</v-icon> บล๊อคพิเศษ
+                    </h4>
+                    <div class="blocks-container" style="flex-wrap: wrap; gap: 4px; max-height: 500px; overflow-y: auto; padding: 8px; background: #fafafa; border-radius: 4px;">
+                      
+                      <!-- Zone Colors (4) -->
+                      <div 
+                        v-for="(block, index) in highZoneBlocks" 
+                        :key="'zone-' + index"
+                        class="field-block zone-block"
+                        :class="[
+                          {'block-placed': block.placed}, 
+                          'zone-rotate-' + block.rotation,
+                          block.border ? 'zone-border-' + block.border : ''
+                        ]"
+                        :style="block.shape === 'half-left' ? 
+                          { background: 'linear-gradient(to right, ' + block.color + ' 0%, ' + block.color + ' 50%, white 50%, white 100%)' } : 
+                          { backgroundColor: block.color }"
+                        @click="rotateZoneBlock(index, 'high')"
+                        @dragstart="startDrag($event, index, 'zone', 'high')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                      </div>
+
+                      <!-- Black Hole (1) -->
+                      <div 
+                        v-for="(block, index) in highObstacleBlocks" 
+                        :key="'obs-' + index"
+                        class="field-block blackhole-block"
+                        :class="['blackhole-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                        @click="rotateObstacleBlock(index, 'high')"
+                        @dragstart="startDrag($event, index, 'obstacle', 'high')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                      </div>
+
+                      <!-- Stick (1) -->
+                      <div 
+                        v-for="(block, index) in highBallBlocks" 
+                        :key="'ball-' + index"
+                        class="field-block ball-block"
+                        :class="['ball-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                        @click="rotateBallBlock(index, 'high')"
+                        @dragstart="startDrag($event, index, 'ball', 'high')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                      </div>
+
+                      <!-- Bridge (1) - 3 ช่องติดกัน -->
+                      <div 
+                        v-for="(block, index) in highBridgeBlocks" 
+                        :key="'bridge-' + index"
+                        class="bridge-block"
+                        :class="['bridge-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                        @click="rotateBridgeBlock(index, 'high')"
+                        @dragstart="startDrag($event, index, 'bridge', 'high')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                      </div>
+
+                      <!-- START Block (1) -->
+                      <div 
+                        v-for="(block, index) in highStartBlock" 
+                        :key="'start-' + index"
+                        class="field-block start-block"
+                        :class="['start-rotate-' + block.rotation, {'block-placed': block.placed}]"
+                        @click="rotateStartBlock(index, 'high')"
+                        @dragstart="startDrag($event, index, 'start', 'high')"
+                        @dragend="endDrag"
+                        draggable="true"
+                      >
+                        <span class="start-label">{{ block.name }}</span>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </v-card>
             </v-container>
@@ -1827,6 +1995,7 @@
           
           // Field Grid Data - แยกระดับกลางและระดับสูง
           // ระดับกลาง (Mid Level)
+          midSelectedGrade: 'primary', // ค่าเริ่มต้นเลือกประถม
           midFieldGrid: Array(4).fill(null).map(() => Array(8).fill(null)),
           midFieldBlocks: [
             { id: 1, borders: 'all', placed: false, position: null, rotation: 0 },
@@ -1856,16 +2025,17 @@
             { id: 'BR1', placed: false, position: null, rotation: 0, size: 3 }
           ],
           midZoneBlocks: [
-            { id: 'Z1', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'left', placed: false, position: null, rotation: 0 },
-            { id: 'Z2', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'left', placed: false, position: null, rotation: 0 },
-            { id: 'Z3', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
-            { id: 'Z4', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 }
+            { id: '1', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'left', placed: false, position: null, rotation: 0 },
+            { id: '2', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'left', placed: false, position: null, rotation: 0 },
+            { id: '3', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
+            { id: '4', color: '#4CAF50', name: 'เขียว', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 }
           ],
           midStartBlock: [
             { id: 'START', color: '#CCCCCC', name: 'START', placed: false, position: null, rotation: 0 }
           ],
           
           // ระดับสูง (High Level)
+          highSelectedGrade: 'primary', // ค่าเริ่มต้นเลือกประถม
           highFieldGrid: Array(4).fill(null).map(() => Array(8).fill(null)),
           highFieldBlocks: [
             { id: 1, borders: 'all', placed: false, position: null, rotation: 0 },
@@ -1895,10 +2065,10 @@
             { id: 'BR1', placed: false, position: null, rotation: 0, size: 3 }
           ],
           highZoneBlocks: [
-            { id: 'Z1', color: '#FF0000', name: 'แดง', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
-            { id: 'Z2', color: '#0066FF', name: 'น้ำเงิน', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
-            { id: 'Z3', color: '#FFD700', name: 'เหลือง', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
-            { id: 'Z4', color: '#00CC66', name: 'เขียว', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 }
+            { id: '1', color: '#FF0000', name: 'แดง', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
+            { id: '2', color: '#0066FF', name: 'น้ำเงิน', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
+            { id: '3', color: '#FFD700', name: 'เหลือง', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 },
+            { id: '4', color: '#00CC66', name: 'เขียว', shape: 'half-left', border: 'three-sides', placed: false, position: null, rotation: 0 }
           ],
           highStartBlock: [
             { id: 'START', color: '#CCCCCC', name: 'START', placed: false, position: null, rotation: 0 }
@@ -3301,7 +3471,7 @@
               block = blocks[cellData.index];
               const rotation = block.rotation * 90;
               borderStyle = 'position: relative; transform: rotate(' + rotation + 'deg);';
-              bgStyle = 'background: #f0f0f0;';
+              bgStyle = 'background: #FFFFFF;';  // เปลี่ยนเป็นพื้นขาว
               
               // Apply checkpoint borders (ก่อนหมุน)
               switch(block.borders) {
@@ -3332,46 +3502,74 @@
               block = blocks[cellData.index];
               const rotation = block.rotation * 90;
               bgStyle = 'background: linear-gradient(90deg, white 0%, white 20%, #000 20%, #000 80%, white 80%, white 100%); position: relative;';
-              borderStyle = 'border: none; transform: rotate(' + rotation + 'deg);';
+              borderStyle = 'border: 0; transform: rotate(' + rotation + 'deg);';
             } else if (cellData.type === 'ball') {
               // Stick style - พื้นที่กลาง 60% มี 7 เส้นส้มแนวตั้งเท่ากัน
               const blocks = level === 'mid' ? this.midBallBlocks : this.highBallBlocks;
               block = blocks[cellData.index];
               const rotation = block.rotation * 90;
               bgStyle = 'background: white; position: relative;';
-              borderStyle = 'border: none; transform: rotate(' + rotation + 'deg);';
+              borderStyle = 'border: 0; transform: rotate(' + rotation + 'deg);';
               // Add the vertical striped pattern in the center with exactly 7 lines
               const centerStripes = 'background-image: repeating-linear-gradient(90deg, #FF6600 0px, #FF6600 2px, transparent 2px, transparent 8px); background-position: center; background-size: 56px 100%; background-repeat: no-repeat;';
               bgStyle = centerStripes;
             } else if (cellData.type === 'zone') {
               const blocks = level === 'mid' ? this.midZoneBlocks : this.highZoneBlocks;
               block = blocks[cellData.index];
-              const rotation = block.rotation * 90;
+              const rotation = block.rotation;
               
               if (block.shape === 'half-left') {
-                // Half-left zone - สีเขียวครึ่งซ้าย พื้นหลังขวาเป็นสีขาว
-                bgStyle = 'background: linear-gradient(to right, ' + block.color + ' 0%, ' + block.color + ' 50%, white 50%, white 100%); opacity: 0.8; position: relative;';
+                // Half-left zone - ปรับทิศทาง gradient ตาม rotation
+                let gradientDirection = 'to right';
+                if (rotation === 0) {
+                  gradientDirection = 'to right';  // ครึ่งซ้ายเป็นสี
+                } else if (rotation === 1) {
+                  gradientDirection = 'to bottom'; // ครึ่งบนเป็นสี
+                } else if (rotation === 2) {
+                  gradientDirection = 'to left';   // ครึ่งขวาเป็นสี
+                } else if (rotation === 3) {
+                  gradientDirection = 'to top';    // ครึ่งล่างเป็นสี
+                }
                 
+                bgStyle = 'background: linear-gradient(' + gradientDirection + ', ' + block.color + ' 0%, ' + block.color + ' 50%, white 50%, white 100%); opacity: 0.8; position: relative;';
+                
+                // ปรับขอบตาม rotation - กำหนดทุกด้านชัดเจน
                 if (block.border === 'left') {
-                  borderStyle = 'border: none; border-left: 4px solid #000; transform: rotate(' + rotation + 'deg);';
+                  if (rotation === 0) {
+                    borderStyle = 'border-top: 0; border-right: 0; border-bottom: 0; border-left: 4px solid #000;';
+                  } else if (rotation === 1) {
+                    borderStyle = 'border-top: 4px solid #000; border-right: 0; border-bottom: 0; border-left: 0;';
+                  } else if (rotation === 2) {
+                    borderStyle = 'border-top: 0; border-right: 4px solid #000; border-bottom: 0; border-left: 0;';
+                  } else if (rotation === 3) {
+                    borderStyle = 'border-top: 0; border-right: 0; border-bottom: 4px solid #000; border-left: 0;';
+                  }
                 } else if (block.border === 'three-sides') {
-                  borderStyle = 'border: 4px solid #000; border-right: none; transform: rotate(' + rotation + 'deg);';
+                  if (rotation === 0) {
+                    borderStyle = 'border-top: 4px solid #000; border-right: 0; border-bottom: 4px solid #000; border-left: 4px solid #000;';
+                  } else if (rotation === 1) {
+                    borderStyle = 'border-top: 4px solid #000; border-right: 4px solid #000; border-bottom: 0; border-left: 4px solid #000;';
+                  } else if (rotation === 2) {
+                    borderStyle = 'border-top: 4px solid #000; border-right: 4px solid #000; border-bottom: 4px solid #000; border-left: 0;';
+                  } else if (rotation === 3) {
+                    borderStyle = 'border-top: 0; border-right: 4px solid #000; border-bottom: 4px solid #000; border-left: 4px solid #000;';
+                  }
                 } else if (block.border === 'all') {
-                  borderStyle = 'border: 4px solid #000; transform: rotate(' + rotation + 'deg);';
+                  borderStyle = 'border: 4px solid #000;';
                 } else {
-                  borderStyle = 'border: 2px solid #ddd; transform: rotate(' + rotation + 'deg);';
+                  borderStyle = 'border: 2px solid #ddd;';
                 }
               } else {
-                // Default zone (for high level)
+                // Default zone (for high level) - ไม่ต้องหมุน
                 bgStyle = 'background: ' + block.color + '; opacity: 0.8; position: relative;';
-                borderStyle = 'border: 2px solid ' + block.color + '; transform: rotate(' + rotation + 'deg);';
+                borderStyle = 'border: 2px solid ' + block.color + ';';
               }
             } else if (cellData.type === 'start') {
               const blocks = level === 'mid' ? this.midStartBlock : this.highStartBlock;
               block = blocks[cellData.index];
               const rotation = block.rotation * 90;
-              bgStyle = 'background: #CCCCCC; opacity: 0.5; position: relative;';
-              borderStyle = 'border: 2px solid #999; transform: rotate(' + rotation + 'deg);';
+              bgStyle = 'background: #FFFFFF; opacity: 1; position: relative;';  // เปลี่ยนเป็นพื้นขาว
+              borderStyle = 'border: 0; transform: rotate(' + rotation + 'deg);';
             } else if (cellData.type === 'bridge') {
               const blocks = level === 'mid' ? this.midBridgeBlocks : this.highBridgeBlocks;
               block = blocks[cellData.index];
@@ -3380,9 +3578,9 @@
               // Bridge has borders on long sides (top/bottom when horizontal, left/right when vertical)
               // ไม่ต้องใช้ transform เพราะเราวางช่องตาม rotation จริงๆ แล้ว
               if (block.rotation % 2 === 0) { // horizontal (0 or 180)
-                borderStyle = 'border-top: 4px solid #000; border-bottom: 4px solid #000; border-left: none; border-right: none;';
+                borderStyle = 'border-top: 4px solid #000; border-right: 0; border-bottom: 4px solid #000; border-left: 0;';
               } else { // vertical (90 or 270)
-                borderStyle = 'border-left: 4px solid #000; border-right: 4px solid #000; border-top: none; border-bottom: none;';
+                borderStyle = 'border-top: 0; border-right: 4px solid #000; border-bottom: 0; border-left: 4px solid #000;';
               }
             }
             
@@ -3390,6 +3588,225 @@
           }
           return {};
         },
+        
+        // ฟังก์ชันสุ่มสนามตามระดับ
+        randomField(level = 'mid', grade = 'high-secondary') {
+          // เล่นเสียงแหลม - ใช้ AudioContext เดียวกันตลอด
+          if (!this.audioContext) {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          
+          const oscillator = this.audioContext.createOscillator();
+          const gainNode = this.audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(this.audioContext.destination);
+          
+          oscillator.frequency.value = 2000; // ความถี่สูงมาก = เสียงแหลมมาก
+          oscillator.type = 'sine';
+          
+          gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+          
+          oscillator.start(this.audioContext.currentTime);
+          oscillator.stop(this.audioContext.currentTime + 0.1);
+          
+          // รีเซ็ตสนามก่อน
+          this.resetField(level);
+          
+          const grid = level === 'mid' ? this.midFieldGrid : this.highFieldGrid;
+          const fieldBlocks = level === 'mid' ? this.midFieldBlocks : this.highFieldBlocks;
+          const checkpointBlocks = level === 'mid' ? this.midCheckpointBlocks : this.highCheckpointBlocks;
+          const zoneBlocks = level === 'mid' ? this.midZoneBlocks : this.highZoneBlocks;
+          const obstacleBlocks = level === 'mid' ? this.midObstacleBlocks : this.highObstacleBlocks;
+          const ballBlocks = level === 'mid' ? this.midBallBlocks : this.highBallBlocks;
+          const bridgeBlocks = level === 'mid' ? this.midBridgeBlocks : this.highBridgeBlocks;
+          const startBlock = level === 'mid' ? this.midStartBlock : this.highStartBlock;
+          
+          // สร้างรายการตำแหน่งว่างทั้งหมด
+          const getAvailableCells = () => {
+            const cells = [];
+            for (let row = 0; row < 4; row++) {
+              for (let col = 0; col < 8; col++) {
+                if (!grid[row][col]) {
+                  cells.push({ row, col });
+                }
+              }
+            }
+            return cells;
+          };
+          
+          // ฟังก์ชันสุ่มตำแหน่ง
+          const randomCell = () => {
+            const available = getAvailableCells();
+            if (available.length === 0) return null;
+            return available[Math.floor(Math.random() * available.length)];
+          };
+          
+          // ฟังก์ชันสุ่มมุม
+          const randomRotation = () => Math.floor(Math.random() * 4);
+          
+          // ฟังก์ชันวางบล๊อคธรรมดา
+          const placeFieldBlock = (block, row, col, rotation) => {
+            block.rotation = rotation;
+            block.placed = true;
+            block.position = { row, col };
+            grid[row][col] = { type: 'field', index: fieldBlocks.indexOf(block) };
+          };
+          
+          // ฟังก์ชันวาง Checkpoint
+          const placeCheckpoint = (block, row, col, rotation) => {
+            block.rotation = rotation;
+            block.placed = true;
+            block.position = { row, col };
+            grid[row][col] = { type: 'checkpoint', index: checkpointBlocks.indexOf(block) };
+            if (level === 'mid') {
+              this.midCheckpointCount++;
+            } else {
+              this.highCheckpointCount++;
+            }
+          };
+          
+          // ฟังก์ชันวาง Zone
+          const placeZone = (block, row, col, rotation) => {
+            block.rotation = rotation;
+            block.placed = true;
+            block.position = { row, col };
+            grid[row][col] = { type: 'zone', index: zoneBlocks.indexOf(block) };
+          };
+          
+          // ฟังก์ชันวาง Obstacle (Black Hole)
+          const placeObstacle = (block, row, col, rotation) => {
+            block.rotation = rotation;
+            block.placed = true;
+            block.position = { row, col };
+            grid[row][col] = { type: 'obstacle', index: 0 };
+          };
+          
+          // ฟังก์ชันวาง Ball (Stick)
+          const placeBall = (block, row, col, rotation) => {
+            block.rotation = rotation;
+            block.placed = true;
+            block.position = { row, col };
+            grid[row][col] = { type: 'ball', index: 0 };
+          };
+          
+          // ฟังก์ชันวาง Bridge (ต้องเช็คว่ามีที่ว่าง 3 ช่องติดกัน)
+          const placeBridge = (block, row, col, rotation) => {
+            const isHorizontal = rotation % 2 === 0;
+            
+            // เช็คว่ามีพื้นที่พอไหม
+            if (isHorizontal) {
+              if (col + 3 > 8) return false;
+              for (let c = col; c < col + 3; c++) {
+                if (grid[row][c]) return false;
+              }
+              // วางบล๊อค
+              block.rotation = rotation;
+              block.placed = true;
+              block.position = { row, col };
+              for (let c = col; c < col + 3; c++) {
+                grid[row][c] = { type: 'bridge', index: 0, isMain: c === col };
+              }
+              return true;
+            } else {
+              if (row + 3 > 4) return false;
+              for (let r = row; r < row + 3; r++) {
+                if (grid[r][col]) return false;
+              }
+              // วางบล๊อค
+              block.rotation = rotation;
+              block.placed = true;
+              block.position = { row, col };
+              for (let r = row; r < row + 3; r++) {
+                grid[r][col] = { type: 'bridge', index: 0, isMain: r === row };
+              }
+              return true;
+            }
+          };
+          
+          // ฟังก์ชันวาง START
+          const placeStart = (block, row, col, rotation) => {
+            block.rotation = rotation;
+            block.placed = true;
+            block.position = { row, col };
+            grid[row][col] = { type: 'start', index: 0 };
+          };
+          
+          // ลำดับการวาง: สำคัญมาก่อน
+          
+          // 1. วาง Checkpoint 2 จุดจาก 4 จุด (บังคับ - ต้องมี)
+          const selectedCheckpoints = [];
+          const checkpointIndices = [0, 1, 2, 3];
+          // สุ่มเลือก 2 จุด
+          for (let i = 0; i < 2; i++) {
+            const randomIndex = Math.floor(Math.random() * checkpointIndices.length);
+            selectedCheckpoints.push(checkpointIndices[randomIndex]);
+            checkpointIndices.splice(randomIndex, 1);
+          }
+          
+          selectedCheckpoints.forEach(index => {
+            const cell = randomCell();
+            if (cell) {
+              placeCheckpoint(checkpointBlocks[index], cell.row, cell.col, randomRotation());
+            }
+          });
+          
+          // 2. วาง Bridge - บังคับสำหรับ ม.ปลาย
+          if (grade === 'high-secondary') {
+            // พยายามวางสะพาน (ลองหลายครั้งเพราะต้องมี 3 ช่องติดกัน)
+            let bridgePlaced = false;
+            for (let attempt = 0; attempt < 50 && !bridgePlaced; attempt++) {
+              const cell3 = randomCell();
+              if (cell3) {
+                bridgePlaced = placeBridge(bridgeBlocks[0], cell3.row, cell3.col, Math.floor(Math.random() * 2) * 2);
+              }
+            }
+            
+            // ถ้าวางไม่สำเร็จ ให้รีเซ็ตและสุ่มใหม่ทั้งหมด
+            if (!bridgePlaced) {
+              console.log('ไม่สามารถวางสะพานได้ กำลังสุ่มใหม่...');
+              return this.randomField(level, grade);
+            }
+          }
+          
+          // 3. วาง Zone Blocks (4 แผ่น - ทุกระดับมี)
+          zoneBlocks.forEach(block => {
+            const cell = randomCell();
+            if (cell) {
+              placeZone(block, cell.row, cell.col, randomRotation());
+            }
+          });
+          
+          // 4. วาง Obstacle (Black Hole) - ทุกระดับมี
+          const cell1 = randomCell();
+          if (cell1) {
+            placeObstacle(obstacleBlocks[0], cell1.row, cell1.col, randomRotation());
+          }
+          
+          // 5. วาง Ball (Stick) - เฉพาะ ม.ต้น และ ม.ปลาย
+          if (grade === 'secondary' || grade === 'high-secondary') {
+            const cell2 = randomCell();
+            if (cell2) {
+              placeBall(ballBlocks[0], cell2.row, cell2.col, randomRotation());
+            }
+          }
+          
+          // 6. วาง START Block (บังคับ)
+          const cellStart = randomCell();
+          if (cellStart) {
+            placeStart(startBlock[0], cellStart.row, cellStart.col, randomRotation());
+          }
+          
+          // 7. วาง Field Blocks (10 แผ่น) - เติมเท่าที่เหลือ ไม่บังคับให้ครบ
+          fieldBlocks.forEach(block => {
+            const cell = randomCell();
+            if (cell) {
+              placeFieldBlock(block, cell.row, cell.col, randomRotation());
+            }
+          });
+        },
+        
         resetField(level = 'mid') {
           if (level === 'mid') {
             this.midFieldGrid = Array(4).fill(null).map(() => Array(8).fill(null));
@@ -3502,6 +3919,18 @@
               this.resetHighTimer();
             } else if (e.code === "NumpadAdd") {
               this.toggleFullscreen();
+            }
+          } else if (this.tab === 'mid-field') {
+            // สุ่มสนามระดับกลางด้วย Enter หรือ NumpadAdd
+            if (e.code === "NumpadAdd" && this.midSelectedGrade) {
+              e.preventDefault();
+              this.randomField('mid', this.midSelectedGrade);
+            }
+          } else if (this.tab === 'high-field') {
+            // สุ่มสนามระดับสูงด้วย Enter หรือ NumpadAdd
+            if ( e.code === "NumpadAdd" && this.highSelectedGrade) {
+              e.preventDefault();
+              this.randomField('high', this.highSelectedGrade);
             }
           }
         });
