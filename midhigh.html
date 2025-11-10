@@ -1408,7 +1408,7 @@
                 <v-card-text v-if="!midTimerIsPreparing" class="text-center">
                   <p class="caption grey--text">
                     <v-icon small>mdi-keyboard</v-icon>
-                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>Num 0</strong> เพื่อรีเซ็ต | <strong>Num +</strong> เพื่อเต็มจอ
+                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>Z</strong> เพื่อซ้อม 1 นาที | <strong>Num 0</strong> เพื่อรีเซ็ต | <strong>Num +</strong> เพื่อเต็มจอ
                   </p>
                 </v-card-text>
               </v-card>
@@ -1874,7 +1874,7 @@
                 <v-card-text v-if="!highTimerIsPreparing" class="text-center">
                   <p class="caption grey--text">
                     <v-icon small>mdi-keyboard</v-icon>
-                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>Num 0</strong> เพื่อรีเซ็ต | <strong>Num +</strong> เพื่อเต็มจอ
+                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>Z</strong> เพื่อซ้อม 1 นาที | <strong>Num 0</strong> เพื่อรีเซ็ต | <strong>Num +</strong> เพื่อเต็มจอ
                   </p>
                 </v-card-text>
               </v-card>
@@ -2717,6 +2717,85 @@
             }
           }, 1000);
         },
+        // Mid Timer Practice (1 minute)
+        startMidTimerPractice() {
+          this.midTimerIsPreparing = true;
+          this.midTimerPrepareCountdown = 5;
+          
+          // ตั้งเวลาเป็น 1 นาทีทันทีก่อนนับถอยหลัง
+          this.midTimerMinutes = 1;
+          this.midTimerSeconds = 0;
+          this.midTimerMilliseconds = 0;
+          this.midTimerElapsedMinutes = 0;
+          this.midTimerElapsedSeconds = 0;
+          this.midTimerElapsedMilliseconds = 0;
+          
+          // เปิด fullscreen อัตโนมัติ
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            this.isFullScreen = true;
+          }
+          
+          // นับถอยหลัง 5 วินาที
+          const prepareInterval = setInterval(() => {
+            if (this.midTimerPrepareCountdown > 0) {
+              this.midTimerPrepareCountdown--;
+              
+              if (this.midTimerPrepareCountdown > 0) {
+                this.playCountdownBeep(); // เสียง beep ที่ 4, 3, 2, 1
+              } else {
+                // เมื่อเป็น 0 แล้ว เล่นเสียงสูงและเริ่มจับเวลาเลย
+                this.playStartBeep();
+                clearInterval(prepareInterval);
+                this.midTimerIsPreparing = false;
+                this.midTimerRunning = true;
+                
+                this.midTimerInterval = setInterval(() => {
+                  // นับถอยหลัง (เวลาคงเหลือ) - ลด 10 milliseconds (1 centisecond)
+                  if (this.midTimerMilliseconds === 0) {
+                    if (this.midTimerSeconds === 0) {
+                      if (this.midTimerMinutes === 0) {
+                        // หมดเวลา
+                        this.pauseMidTimer();
+                        this.playBeepSound(3); // เสียงเตือน 3 ครั้ง
+                        return;
+                      }
+                      this.midTimerMinutes--;
+                      this.midTimerSeconds = 59;
+                      this.midTimerMilliseconds = 99;
+                      
+                      // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
+                      if (this.midTimerMinutes === 0 && this.midTimerSeconds < 10) {
+                        this.playCountdownBeep();
+                      }
+                    } else {
+                      this.midTimerSeconds--;
+                      this.midTimerMilliseconds = 99;
+                      
+                      // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
+                      if (this.midTimerMinutes === 0 && this.midTimerSeconds < 10) {
+                        this.playCountdownBeep();
+                      }
+                    }
+                  } else {
+                    this.midTimerMilliseconds--;
+                  }
+                  
+                  // นับเพิ่ม (เวลาที่ใช้ไป)
+                  this.midTimerElapsedMilliseconds++;
+                  if (this.midTimerElapsedMilliseconds >= 100) {
+                    this.midTimerElapsedMilliseconds = 0;
+                    this.midTimerElapsedSeconds++;
+                    if (this.midTimerElapsedSeconds >= 60) {
+                      this.midTimerElapsedSeconds = 0;
+                      this.midTimerElapsedMinutes++;
+                    }
+                  }
+                }, 10); // 10ms = 1 centisecond
+              }
+            }
+          }, 1000);
+        },
         pauseMidTimer() {
           this.midTimerRunning = false;
           if (this.midTimerInterval) {
@@ -2790,6 +2869,79 @@
                 this.highTimerRunning = true;
                 
                 // เริ่มจับเวลาจริง
+                this.highTimerInterval = setInterval(() => {
+                  if (this.highTimerMilliseconds === 0) {
+                    if (this.highTimerSeconds === 0) {
+                      if (this.highTimerMinutes === 0) {
+                        this.pauseHighTimer();
+                        this.playBeepSound(3);
+                        return;
+                      }
+                      this.highTimerMinutes--;
+                      this.highTimerSeconds = 59;
+                      this.highTimerMilliseconds = 99;
+                      
+                      if (this.highTimerMinutes === 0 && this.highTimerSeconds < 10) {
+                        this.playCountdownBeep();
+                      }
+                    } else {
+                      this.highTimerSeconds--;
+                      this.highTimerMilliseconds = 99;
+                      
+                      if (this.highTimerMinutes === 0 && this.highTimerSeconds < 10) {
+                        this.playCountdownBeep();
+                      }
+                    }
+                  } else {
+                    this.highTimerMilliseconds--;
+                  }
+                  
+                  this.highTimerElapsedMilliseconds++;
+                  if (this.highTimerElapsedMilliseconds >= 100) {
+                    this.highTimerElapsedMilliseconds = 0;
+                    this.highTimerElapsedSeconds++;
+                    if (this.highTimerElapsedSeconds >= 60) {
+                      this.highTimerElapsedSeconds = 0;
+                      this.highTimerElapsedMinutes++;
+                    }
+                  }
+                }, 10);
+              }
+            }
+          }, 1000);
+        },
+        // High Timer Practice (1 minute)
+        startHighTimerPractice() {
+          this.highTimerIsPreparing = true;
+          this.highTimerPrepareCountdown = 5;
+          
+          // ตั้งเวลาเป็น 1 นาทีทันทีก่อนนับถอยหลัง
+          this.highTimerMinutes = 1;
+          this.highTimerSeconds = 0;
+          this.highTimerMilliseconds = 0;
+          this.highTimerElapsedMinutes = 0;
+          this.highTimerElapsedSeconds = 0;
+          this.highTimerElapsedMilliseconds = 0;
+          
+          // เปิด fullscreen อัตโนมัติ
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            this.isFullScreen = true;
+          }
+          
+          // นับถอยหลัง 5 วินาที
+          const prepareInterval = setInterval(() => {
+            if (this.highTimerPrepareCountdown > 0) {
+              this.highTimerPrepareCountdown--;
+              
+              if (this.highTimerPrepareCountdown > 0) {
+                this.playCountdownBeep();
+              } else {
+                this.playStartBeep();
+                clearInterval(prepareInterval);
+                this.highTimerIsPreparing = false;
+                this.highTimerRunning = true;
+                
                 this.highTimerInterval = setInterval(() => {
                   if (this.highTimerMilliseconds === 0) {
                     if (this.highTimerSeconds === 0) {
@@ -3907,6 +4059,10 @@
               this.resetMidTimer();
             } else if (e.code === "NumpadAdd") {
               this.toggleFullscreen();
+            } else if (e.code === "KeyZ" && !this.midTimerRunning && !this.midTimerIsPreparing) {
+              // กด Z เพื่อเริ่มจับเวลา 1 นาทีสำหรับซ้อม
+              e.preventDefault();
+              this.startMidTimerPractice();
             }
           } else if (this.tab === 'high-timer') {
             if (e.code === "Space") {
@@ -3920,6 +4076,10 @@
               this.resetHighTimer();
             } else if (e.code === "NumpadAdd") {
               this.toggleFullscreen();
+            } else if (e.code === "KeyZ" && !this.highTimerRunning && !this.highTimerIsPreparing) {
+              // กด Z เพื่อเริ่มจับเวลา 1 นาทีสำหรับซ้อม
+              e.preventDefault();
+              this.startHighTimerPractice();
             }
           } else if (this.tab === 'mid-field') {
             // สุ่มสนามระดับกลางด้วย Enter หรือ NumpadAdd
