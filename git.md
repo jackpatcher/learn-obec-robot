@@ -1,3 +1,3 @@
 git add .
-git commit -m "เปลี่ยนปุ่มกด"
+git commit -m " กรอบ"
 git push origin main

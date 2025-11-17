@@ -24,11 +24,55 @@
       font-size:  25vh !important;
       line-height: 1;
       text-align: center;
-      margin-top:200px;
-      margin-bottom:50px;
+      margin-top: 0;
+      margin-bottom: 20px;
     }
     .fullscreen-millisecond {
       font-size: 15vh !important;
+    }
+    /* กรอบล้อมตัวเลขจับเวลา */
+    .timer-box {
+      display: inline-block;
+      padding: 20px 40px;
+      border: 4px solid #1976D2;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #ffffff, #f5f5f5);
+      box-shadow: 
+        0 8px 32px rgba(25, 118, 210, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.9);
+      position: relative;
+      margin: 0 auto;
+    }
+    .timer-box-orange {
+      border-color: #FF9800;
+      box-shadow: 
+        0 8px 32px rgba(255, 152, 0, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.9);
+    }
+    .timer-box-green {
+      border-color: #4CAF50;
+      box-shadow: 
+        0 8px 32px rgba(76, 175, 80, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.9);
+    }
+    .timer-box::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+      border-radius: 20px;
+      pointer-events: none;
+    }
+    .timer-box-fullscreen {
+      padding: 40px 80px;
+      border-width: 8px;
+      border-radius: 40px;
+      box-shadow: 
+        0 16px 64px rgba(25, 118, 210, 0.3),
+        inset 0 4px 8px rgba(255, 255, 255, 0.9);
     }
     .timer-text-label {
       transition: font-size 0.5s ease-in-out, margin 0.5s ease-in-out, padding 0.5s ease-in-out;
@@ -839,8 +883,10 @@
                 {{ timerPrepareCountdown }}
               </div>
               
-              <div :class="['fixed-number', isFullScreen ? 'fullscreen-time' : 'display-3']">
-                {{ formattedTime }}
+              <div :class="['timer-box', isFullScreen ? 'timer-box-fullscreen' : '']">
+                <div :class="['fixed-number', isFullScreen ? 'fullscreen-time' : 'display-3']">
+                  {{ formattedTime }}
+                </div>
               </div>
               <v-btn-group>
                 <v-btn 
@@ -894,10 +940,12 @@
                 {{ countdownPrepareCountdown }}
               </div>
               
-              <div 
-                :class="['fixed-number', isFullScreen ? 'fullscreen-time' : 'display-3', countdownColor]"
-              >
-                {{ countdownTime }}
+              <div :class="['timer-box', isFullScreen ? 'timer-box-fullscreen' : '']">
+                <div 
+                  :class="['fixed-number', isFullScreen ? 'fullscreen-time' : 'display-3', countdownColor]"
+                >
+                  {{ countdownTime }}
+                </div>
               </div>
               
               <v-btn 
@@ -1341,14 +1389,16 @@
                 </v-card-subtitle>
                 
                 <!-- เวลาที่ใช้ไป (ใหญ่) - แสดงตอนหยุด ใช้ v-show -->
-                <v-card-text v-show="!midTimerIsPreparing && !midTimerRunning" class="text-center pt-4 pb-0">
-                  <p class="timer-text-label grey--text mb-1" 
-                     :style="isFullScreen ? 'font-weight: 300; font-size: 5rem;' : 'font-weight: 300; font-size: 3rem;'">
+                <v-card-text v-show="!midTimerIsPreparing && !midTimerRunning" class="text-center pt-2 pb-0">
+                  <p class="timer-text-label grey--text mb-2" 
+                     :style="isFullScreen ? 'font-weight: 300; font-size: 3rem;' : 'font-weight: 300; font-size: 1.5rem;'">
                     เวลาที่ใช้ไป
                   </p>
-                  <div :class="['fixed-number', isFullScreen ? 'fullscreen-time' : '']"
-                       :style="isFullScreen ? { color: '#1976D2' } : { fontSize: '8rem', lineHeight: '1', color: '#1976D2' }">
-                    {{ String(midTimerElapsedMinutes).padStart(2, '0') }}:{{ String(midTimerElapsedSeconds).padStart(2, '0') }}<span class="fixed-number" :class="isFullScreen ? 'fullscreen-millisecond' : ''" :style="isFullScreen ? {} : { fontSize: '5rem' }">.{{ String(midTimerElapsedMilliseconds).padStart(2, '0') }}</span>
+                  <div :class="['timer-box', 'timer-box-green', isFullScreen ? 'timer-box-fullscreen' : '']">
+                    <div :class="['fixed-number', isFullScreen ? 'fullscreen-time' : '']"
+                         :style="isFullScreen ? { color: '#4CAF50' } : { fontSize: '8rem', lineHeight: '1', color: '#4CAF50' }">
+                      {{ String(midTimerElapsedMinutes).padStart(2, '0') }}:{{ String(midTimerElapsedSeconds).padStart(2, '0') }}<span class="fixed-number" :class="isFullScreen ? 'fullscreen-millisecond' : ''" :style="isFullScreen ? {} : { fontSize: '5rem' }">.{{ String(midTimerElapsedMilliseconds).padStart(2, '0') }}</span>
+                    </div>
                   </div>
                 </v-card-text>
                 
@@ -1363,10 +1413,12 @@
 
                 <!-- เวลาคงเหลือ (นับถอยหลัง) - ใหญ่ตอนกำลังนับ, เล็กตอนหยุด -->
                 <v-card-text class="text-center" :style="midTimerRunning || midTimerIsPreparing ? 'padding-top: 2rem;' : 'padding-top: 1rem; padding-bottom: 0.5rem;'">
-                  <div :class="['fixed-number', isFullScreen && (midTimerRunning || midTimerIsPreparing) ? 'fullscreen-time' : '']" 
-                       class="mb-2" 
-                       :style="midTimerRunning || midTimerIsPreparing ? (isFullScreen ? {fontSize: '25vh'} : {fontSize: '8rem'}) : {fontSize: '3rem'}">
-                    {{ String(midTimerMinutes).padStart(2, '0') }}:{{ String(midTimerSeconds).padStart(2, '0') }}<span :class="['fixed-number', (midTimerRunning || midTimerIsPreparing) && isFullScreen ? 'fullscreen-millisecond' : '']" :style="midTimerRunning || midTimerIsPreparing ? (isFullScreen ? {} : {fontSize: '5rem'}) : {fontSize: '2rem'}">.{{ String(midTimerMilliseconds).padStart(2, '0') }}</span>
+                  <div :class="['timer-box', isFullScreen && (midTimerRunning || midTimerIsPreparing) ? 'timer-box-fullscreen' : '']">
+                    <div :class="['fixed-number', isFullScreen && (midTimerRunning || midTimerIsPreparing) ? 'fullscreen-time' : '']" 
+                         class="mb-2" 
+                         :style="midTimerRunning || midTimerIsPreparing ? (isFullScreen ? {fontSize: '25vh'} : {fontSize: '8rem'}) : {fontSize: '3rem'}">
+                      {{ String(midTimerMinutes).padStart(2, '0') }}:{{ String(midTimerSeconds).padStart(2, '0') }}<span :class="['fixed-number', (midTimerRunning || midTimerIsPreparing) && isFullScreen ? 'fullscreen-millisecond' : '']" :style="midTimerRunning || midTimerIsPreparing ? (isFullScreen ? {} : {fontSize: '5rem'}) : {fontSize: '2rem'}">.{{ String(midTimerMilliseconds).padStart(2, '0') }}</span>
+                    </div>
                   </div>
                   <p :class="['timer-text-label', midTimerRunning || midTimerIsPreparing ? 'text-h6' : 'body-2']" class="grey--text">เวลาคงเหลือ</p>
                 </v-card-text>
@@ -1807,14 +1859,16 @@
                 </v-card-subtitle>
                 
                 <!-- เวลาที่ใช้ไป (ใหญ่) - แสดงตอนหยุด ใช้ v-show -->
-                <v-card-text v-show="!highTimerIsPreparing && !highTimerRunning" class="text-center pt-4 pb-0">
-                  <p class="timer-text-label grey--text mb-1" 
-                     :style="isFullScreen ? 'font-weight: 300; font-size: 5rem;' : 'font-weight: 300; font-size: 3rem;'">
+                <v-card-text v-show="!highTimerIsPreparing && !highTimerRunning" class="text-center pt-2 pb-0">
+                  <p class="timer-text-label grey--text mb-2" 
+                     :style="isFullScreen ? 'font-weight: 300; font-size: 3rem;' : 'font-weight: 300; font-size: 1.5rem;'">
                     เวลาที่ใช้ไป
                   </p>
-                  <div :class="['fixed-number', isFullScreen ? 'fullscreen-time' : '']"
-                       :style="isFullScreen ? { color: '#FF6F00' } : { fontSize: '8rem', lineHeight: '1', color: '#FF6F00' }">
-                    {{ String(highTimerElapsedMinutes).padStart(2, '0') }}:{{ String(highTimerElapsedSeconds).padStart(2, '0') }}<span class="fixed-number" :class="isFullScreen ? 'fullscreen-millisecond' : ''" :style="isFullScreen ? {} : { fontSize: '5rem' }">.{{ String(highTimerElapsedMilliseconds).padStart(2, '0') }}</span>
+                  <div :class="['timer-box', 'timer-box-green', isFullScreen ? 'timer-box-fullscreen' : '']">
+                    <div :class="['fixed-number', isFullScreen ? 'fullscreen-time' : '']"
+                         :style="isFullScreen ? { color: '#4CAF50' } : { fontSize: '8rem', lineHeight: '1', color: '#4CAF50' }">
+                      {{ String(highTimerElapsedMinutes).padStart(2, '0') }}:{{ String(highTimerElapsedSeconds).padStart(2, '0') }}<span class="fixed-number" :class="isFullScreen ? 'fullscreen-millisecond' : ''" :style="isFullScreen ? {} : { fontSize: '5rem' }">.{{ String(highTimerElapsedMilliseconds).padStart(2, '0') }}</span>
+                    </div>
                   </div>
                 </v-card-text>
                 
@@ -1829,10 +1883,12 @@
 
                 <!-- เวลาคงเหลือ (นับถอยหลัง) - ใหญ่ตอนกำลังนับ, เล็กตอนหยุด -->
                 <v-card-text class="text-center" :style="highTimerRunning || highTimerIsPreparing ? 'padding-top: 2rem;' : 'padding-top: 1rem; padding-bottom: 0.5rem;'">
-                  <div :class="['fixed-number', isFullScreen && (highTimerRunning || highTimerIsPreparing) ? 'fullscreen-time' : '']" 
-                       class="mb-2" 
-                       :style="highTimerRunning || highTimerIsPreparing ? (isFullScreen ? {fontSize: '25vh'} : {fontSize: '8rem'}) : {fontSize: '3rem'}">
-                    {{ String(highTimerMinutes).padStart(2, '0') }}:{{ String(highTimerSeconds).padStart(2, '0') }}<span :class="['fixed-number', (highTimerRunning || highTimerIsPreparing) && isFullScreen ? 'fullscreen-millisecond' : '']" :style="highTimerRunning || highTimerIsPreparing ? (isFullScreen ? {} : {fontSize: '5rem'}) : {fontSize: '2rem'}">.{{ String(highTimerMilliseconds).padStart(2, '0') }}</span>
+                  <div :class="['timer-box', 'timer-box-orange', isFullScreen && (highTimerRunning || highTimerIsPreparing) ? 'timer-box-fullscreen' : '']">
+                    <div :class="['fixed-number', isFullScreen && (highTimerRunning || highTimerIsPreparing) ? 'fullscreen-time' : '']" 
+                         class="mb-2" 
+                         :style="highTimerRunning || highTimerIsPreparing ? (isFullScreen ? {fontSize: '25vh', color: '#FF9800'} : {fontSize: '8rem', color: '#FF9800'}) : {fontSize: '3rem', color: '#FF9800'}">
+                      {{ String(highTimerMinutes).padStart(2, '0') }}:{{ String(highTimerSeconds).padStart(2, '0') }}<span :class="['fixed-number', (highTimerRunning || highTimerIsPreparing) && isFullScreen ? 'fullscreen-millisecond' : '']" :style="highTimerRunning || highTimerIsPreparing ? (isFullScreen ? {} : {fontSize: '5rem'}) : {fontSize: '2rem'}">.{{ String(highTimerMilliseconds).padStart(2, '0') }}</span>
+                    </div>
                   </div>
                   <p :class="['timer-text-label', highTimerRunning || highTimerIsPreparing ? 'text-h6' : 'body-2']" class="grey--text">เวลาคงเหลือ</p>
                 </v-card-text>
