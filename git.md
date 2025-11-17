@@ -1,3 +1,3 @@
 git add .
-git commit -m "เพิ่มปุ่มจับเวลาซ้อม z"
+git commit -m "เปลี่ยนปุ่มกด"
 git push origin main

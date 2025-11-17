@@ -857,7 +857,7 @@
                 </v-btn>
               </v-btn-group>
               <p class="font-weight-thin" style="margin-top:20px">
-                กด SPACE BAR เพื่อเริ่ม หรือ หยุด<br>กด 0 เพื่อ รีเซ็ต
+                กด SPACE BAR เพื่อเริ่ม หรือ หยุด<br>กด 0 เพื่อรีเซ็ต
               </p>
             </div>
           </v-sheet>
@@ -1139,7 +1139,7 @@
                             <v-icon small color="grey">mdi-help-circle</v-icon>
                           </v-btn>
                         </template>
-                        <span>กดปุ่ม + เพื่อสุ่ม</span>
+                        <span>กดปุ่ม Z เพื่อสุ่ม</span>
                       </v-tooltip>
                     </v-col>
                   </v-row>
@@ -1408,7 +1408,7 @@
                 <v-card-text v-if="!midTimerIsPreparing" class="text-center">
                   <p class="caption grey--text">
                     <v-icon small>mdi-keyboard</v-icon>
-                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>Z</strong> เพื่อซ้อม 1 นาที | <strong>Num 0</strong> เพื่อรีเซ็ต | <strong>Num +</strong> เพื่อเต็มจอ
+                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>1</strong> เพื่อซ้อม 1 นาที | <strong>3</strong> เพื่อจับเวลาจริง | <strong>0</strong> เพื่อรีเซ็ต
                   </p>
                 </v-card-text>
               </v-card>
@@ -1613,7 +1613,7 @@
                             <v-icon small color="grey">mdi-help-circle</v-icon>
                           </v-btn>
                         </template>
-                        <span>กดปุ่ม + เพื่อสุ่ม</span>
+                        <span>กดปุ่ม Z เพื่อสุ่ม</span>
                       </v-tooltip>
                     </v-col>
                   </v-row>
@@ -1874,7 +1874,7 @@
                 <v-card-text v-if="!highTimerIsPreparing" class="text-center">
                   <p class="caption grey--text">
                     <v-icon small>mdi-keyboard</v-icon>
-                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>Z</strong> เพื่อซ้อม 1 นาที | <strong>Num 0</strong> เพื่อรีเซ็ต | <strong>Num +</strong> เพื่อเต็มจอ
+                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>1</strong> เพื่อซ้อม 1 นาที | <strong>5</strong> เพื่อจับเวลาจริง | <strong>0</strong> เพื่อรีเซ็ต
                   </p>
                 </v-card-text>
               </v-card>
@@ -4042,7 +4042,7 @@
             if (e.code === "Space") {
               e.preventDefault();
               this.toggleTimer();
-            } else if (e.code === "Numpad0") {
+            } else if (e.code === "Digit0") {
               this.resetTimer();
             } else if (e.code === "NumpadAdd") {
               this.toggleFullscreen();
@@ -4055,14 +4055,17 @@
               } else if (this.midTimerRunning) {
                 this.pauseMidTimer();
               }
-            } else if (e.code === "Numpad0") {
+            } else if (e.code === "Digit0") {
+              // กด 0 เพื่อรีเซต
               this.resetMidTimer();
-            } else if (e.code === "NumpadAdd") {
-              this.toggleFullscreen();
-            } else if (e.code === "KeyZ" && !this.midTimerRunning && !this.midTimerIsPreparing) {
-              // กด Z เพื่อเริ่มจับเวลา 1 นาทีสำหรับซ้อม
+            } else if (e.code === "Digit1" && !this.midTimerRunning && !this.midTimerIsPreparing) {
+              // กด 1 เพื่อเริ่มจับเวลา 1 นาทีสำหรับซ้อม
               e.preventDefault();
               this.startMidTimerPractice();
+            } else if (e.code === "Digit3" && !this.midTimerRunning && !this.midTimerIsPreparing) {
+              // กด 3 เพื่อจับเวลาจริงบนระดับกลาง
+              e.preventDefault();
+              this.startMidTimer();
             }
           } else if (this.tab === 'high-timer') {
             if (e.code === "Space") {
@@ -4072,24 +4075,27 @@
               } else if (this.highTimerRunning) {
                 this.pauseHighTimer();
               }
-            } else if (e.code === "Numpad0") {
+            } else if (e.code === "Digit0") {
+              // กด 0 เพื่อรีเซต
               this.resetHighTimer();
-            } else if (e.code === "NumpadAdd") {
-              this.toggleFullscreen();
-            } else if (e.code === "KeyZ" && !this.highTimerRunning && !this.highTimerIsPreparing) {
-              // กด Z เพื่อเริ่มจับเวลา 1 นาทีสำหรับซ้อม
+            } else if (e.code === "Digit1" && !this.highTimerRunning && !this.highTimerIsPreparing) {
+              // กด 1 เพื่อเริ่มจับเวลา 1 นาทีสำหรับซ้อม
               e.preventDefault();
               this.startHighTimerPractice();
+            } else if (e.code === "Digit5" && !this.highTimerRunning && !this.highTimerIsPreparing) {
+              // กด 5 เพื่อจับเวลาจริงบนระดับสูง
+              e.preventDefault();
+              this.startHighTimer();
             }
           } else if (this.tab === 'mid-field') {
-            // สุ่มสนามระดับกลางด้วย Enter หรือ NumpadAdd
-            if (e.code === "NumpadAdd" && this.midSelectedGrade) {
+            // สุ่มสนามระดับกลางด้วย Z
+            if (e.code === "KeyZ" && this.midSelectedGrade) {
               e.preventDefault();
               this.randomField('mid', this.midSelectedGrade);
             }
           } else if (this.tab === 'high-field') {
-            // สุ่มสนามระดับสูงด้วย Enter หรือ NumpadAdd
-            if ( e.code === "NumpadAdd" && this.highSelectedGrade) {
+            // สุ่มสนามระดับสูงด้วย Z
+            if (e.code === "KeyZ" && this.highSelectedGrade) {
               e.preventDefault();
               this.randomField('high', this.highSelectedGrade);
             }
