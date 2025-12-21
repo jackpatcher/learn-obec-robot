@@ -1062,10 +1062,18 @@
                     ทำได้
                   </h2>
                   <v-row>
-                    <v-col cols="12" sm="4" v-for="n in 6" :key="'allow-' + n">
+                    <v-col cols="12" sm="4"   :key="'allow-' + n">
                       <v-card elevation="2">
                         <v-img
-                          :src="'https://placehold.co/200x150?text=GOOD+' + n"
+                          :src="https://placehold.co/200x150?text=GOOD1"
+                          aspect-ratio="1.5"
+                          class="grey lighten-2"
+                        ></v-img>
+                        text
+                      </v-card>
+                      <v-card elevation="2">
+                        <v-img
+                          :src="https://placehold.co/200x150?text=GOOD2"
                           aspect-ratio="1.5"
                           class="grey lighten-2"
                         ></v-img>
