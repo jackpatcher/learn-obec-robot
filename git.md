@@ -1,3 +1,3 @@
 git add .
-git commit -m "  เว้นวรรค"
+git commit -m "  rules"
 git push origin main
