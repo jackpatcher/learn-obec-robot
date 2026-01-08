@@ -1,3 +1,3 @@
 git add .
-git commit -m "  teaming"
+git commit -m "  กราฟ ทีม gas"
 git push origin main

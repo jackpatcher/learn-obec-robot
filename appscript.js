@@ -126,11 +126,11 @@ function addTeamToSheet(params) {
       params.competition || '',
       params.field || '',
       0,  // score1
-      3,  // retry1 (ค่าเริ่มต้น 3 ครั้ง)
-      '3:00:00',  // time1
+      0,  // retry1
+      '0:00:00',  // time1
       0,  // score2
       0,  // retry2
-      '3:00:00',  // time2
+      '0:00:00',  // time2
       params.timestamp || new Date().toISOString()
     ];
     
@@ -202,6 +202,8 @@ function initializeSheets() {
       settingsSheet = ss.insertSheet('การตั้งค่า');
       settingsSheet.getRange('A1').setValue('abcd');
       settingsSheet.getRange('B1').setValue('← รหัสผ่านสำหรับยืนยันตัวตน (แก้ไขได้)');
+      settingsSheet.getRange('A2').setValue('');
+      settingsSheet.getRange('B2').setValue('← รายการแข่ง default (ว่าง = แสดงทั้งหมด)');
       
       // จัดรูปแบบ
       settingsSheet.getRange('A1').setBackground('#FFE599');
@@ -209,6 +211,12 @@ function initializeSheets() {
       settingsSheet.getRange('A1').setFontSize(14);
       settingsSheet.getRange('B1').setFontStyle('italic');
       settingsSheet.getRange('B1').setFontColor('#666666');
+      
+      settingsSheet.getRange('A2').setBackground('#E3F2FD');
+      settingsSheet.getRange('A2').setFontWeight('bold');
+      settingsSheet.getRange('A2').setFontSize(14);
+      settingsSheet.getRange('B2').setFontStyle('italic');
+      settingsSheet.getRange('B2').setFontColor('#666666');
       
       // ปรับขนาดคอลัมน์
       settingsSheet.setColumnWidth(1, 150);
@@ -263,9 +271,11 @@ function initializeSheets() {
       dataSheet.setColumnWidth(7, 90);   // score1
       dataSheet.setColumnWidth(8, 90);   // retry1
       dataSheet.setColumnWidth(9, 100);  // time1
+      dataSheet.getRange(2, 9, dataSheet.getMaxRows(), 1).setNumberFormat('@'); // time1 เป็น text
       dataSheet.setColumnWidth(10, 90);  // score2
       dataSheet.setColumnWidth(11, 90);  // retry2
       dataSheet.setColumnWidth(12, 100); // time2
+      dataSheet.getRange(2, 12, dataSheet.getMaxRows(), 1).setNumberFormat('@'); // time2 เป็น text
       dataSheet.setColumnWidth(13, 150); // timestamp
       
       // ตรึงแถวหัวตาราง
@@ -302,8 +312,8 @@ function initializeSheets() {
       const sampleData = [
         headers,
         ['s001', 'สมศุภนาการวิทยา', '4', 'ม.ปลาย', 'สพม.นศ68', 'A', 100, 0, '0:43:84', 75, 0, '1:00:00', '2025-01-08T10:00:00.000Z'],
-        ['s002', 'สตรีปากพนัง', '3', 'ม.ปลาย', 'สพม.นศ68', 'A', 0, 1, '3:00:00', 0, 4, '3:00:00', '2025-01-08T10:01:00.000Z'],
-        ['s003', 'ทุ่งสง', '2', 'ม.ปลาย', 'สพม.นศ68', 'A', 30, 3, '3:00:00', 60, 2, '3:00:00', '2025-01-08T10:02:00.000Z']
+        ['s002', 'สตรีปากพนัง', '3', 'ม.ปลาย', 'สพม.นศ68', 'B', 0, 1, '0:00:00', 0, 4, '0:00:00', '2025-01-08T10:01:00.000Z'],
+        ['s003', 'ทุ่งสง', '2', 'ม.ปลาย', 'สพม.นศ68', 'A', 30, 3, '0:00:00', 60, 2, '0:00:00', '2025-01-08T10:02:00.000Z']
       ];
       
       // ใส่ข้อมูล
@@ -414,13 +424,19 @@ function getPassword() {
       settingsSheet.getRange('A1').setBackground('#FFE599');
       settingsSheet.getRange('A1').setFontWeight('bold');
       settingsSheet.getRange('B1').setValue('← รหัสผ่านสำหรับยืนยันตัวตน (แก้ไขได้)');
+      settingsSheet.getRange('A2').setValue(''); // รายการแข่ง default
+      settingsSheet.getRange('A2').setBackground('#E3F2FD');
+      settingsSheet.getRange('A2').setFontWeight('bold');
+      settingsSheet.getRange('B2').setValue('← รายการแข่ง default (ว่าง = แสดงทั้งหมด)');
     }
     
     const password = settingsSheet.getRange('A1').getValue() || 'abcd';
+    const defaultCompetition = settingsSheet.getRange('A2').getValue() || '';
     
     return {
       success: true,
-      password: password
+      password: password,
+      defaultCompetition: defaultCompetition
     };
   } catch (error) {
     Logger.log('Error in getPassword: ' + error.toString());
@@ -478,7 +494,7 @@ function getAllTeams() {
           if (value && value.trim() !== '') {
             team[key] = value.trim();
           } else {
-            team[key] = '3:00:00';
+            team[key] = '0:00:00';
           }
         } else if (key === 'score1' || key === 'score2' || key === 'retry1' || key === 'retry2') {
           // แปลงเป็นตัวเลข
@@ -530,10 +546,18 @@ function updateScore(params) {
         // อัพเดตคะแนนทั้ง 2 รอบ
         sheet.getRange(rowNum, 7).setValue(params.score1 || 0); // score1
         sheet.getRange(rowNum, 8).setValue(params.retry1 || 0); // retry1
-        sheet.getRange(rowNum, 9).setValue(params.time1 || '0:00:00'); // time1
+        // บันทึก time1 เป็น text เพื่อป้องกันการแปลงค่าอัตโนมัติ
+        const time1Cell = sheet.getRange(rowNum, 9);
+        time1Cell.setNumberFormat('@');
+        time1Cell.setValue(params.time1 || '0:00:00');
         sheet.getRange(rowNum, 10).setValue(params.score2 || 0); // score2
         sheet.getRange(rowNum, 11).setValue(params.retry2 || 0); // retry2
-        sheet.getRange(rowNum, 12).setValue(params.time2 || '0:00:00'); // time2
+        // บันทึก time2 เป็น text เพื่อป้องกันการแปลงค่าอัตโนมัติ
+        const time2Cell = sheet.getRange(rowNum, 12);
+        time2Cell.setNumberFormat('@');
+        time2Cell.setValue(params.time2 || '0:00:00');
+        // อัพเดต timestamp
+        sheet.getRange(rowNum, 13).setValue(new Date().toISOString());
         
         return {
           success: true,

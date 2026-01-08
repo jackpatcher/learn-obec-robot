@@ -13,6 +13,7 @@
   <script src="vue.js"></script>
   <script src="vuetify.js"></script>
   <script src="https://unpkg.com/vue-router@3.5.3/dist/vue-router.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
   <link rel="manifest" href="manifest.json">
   <style>
@@ -1614,117 +1615,41 @@
 
               <!-- Header พร้อมปุ่ม -->
               <div class="d-flex justify-space-between align-center mb-4">
-                <h2 class="text-h5">
-                  <v-icon large color="primary" class="mr-2">mdi-account-group</v-icon>
-                  ตั้งค่าทีม
-                </h2>
-                <v-btn
-                  color="primary"
-                  @click="openAddTeamDialog"
-                  :disabled="!isAuthenticated"
-                >
-                  <v-icon left>mdi-plus</v-icon>
-                  เพิ่มทีม
-                </v-btn>
+                <div>
+                  <h2 class="text-h5">
+                    <v-icon large color="primary" class="mr-2">mdi-account-group</v-icon>
+                    ตั้งค่าทีม<span v-if="filterCompetition" class="ml-2 text-subtitle-1">({{ filterCompetition }})</span>
+                  </h2>
+                  <!-- แสดงค่าตัวกรองที่เลือก -->
+                  <div class="text-caption grey--text mt-1">
+                    <v-chip x-small class="mr-1" color="primary">{{ filteredTeams.length }}/{{ midTeams.length }} ทีม</v-chip>
+                    <span v-if="filterZone !== 'ทั้งหมด'">เขต {{ filterZone }}</span>
+                    <span v-if="filterLevel !== 'ทั้งหมด'" class="ml-2">{{ filterLevel }}</span>
+                    <span v-if="filterField !== 'ทั้งหมด'" class="ml-2">สนาม {{ filterField }}</span>
+                    <span v-if="filterCompetition" class="ml-2">รายการ: {{ filterCompetition }}</span>
+                    <span v-if="filterZone === 'ทั้งหมด' && filterLevel === 'ทั้งหมด' && filterField === 'ทั้งหมด' && !filterCompetition">แสดงทั้งหมด</span>
+                  </div>
+                </div>
+                <div>
+                  <v-btn
+                    color="primary"
+                    outlined
+                    @click="filterDialog = true"
+                    class="mr-2"
+                  >
+                    <v-icon left>mdi-filter</v-icon>
+                    ตัวกรอง
+                  </v-btn>
+                  <v-btn
+                    color="primary"
+                    @click="openAddTeamDialog"
+                    :disabled="!isAuthenticated"
+                  >
+                    <v-icon left>mdi-plus</v-icon>
+                    เพิ่มทีม
+                  </v-btn>
+                </div>
               </div>
-
-              <!-- ตัวกรองข้อมูล (Collapsible) -->
-              <v-expansion-panels v-model="showFilters" class="mb-3">
-                <v-expansion-panel>
-                  <v-expansion-panel-header class="py-2">
-                    <div>
-                      <div class="d-flex align-center">
-                        <v-icon small class="mr-2">mdi-filter</v-icon>
-                        <span class="font-weight-bold">ตัวกรอง</span>
-                        <v-chip x-small class="ml-2" color="primary">{{ filteredTeams.length }}/{{ midTeams.length }}</v-chip>
-                      </div>
-                      <div class="text-caption grey--text mt-1">
-                        <span v-if="filterZone !== 'ทั้งหมด'">เขต {{ filterZone }}</span>
-                        <span v-if="filterLevel !== 'ทั้งหมด'" class="ml-2">{{ filterLevel }}</span>
-                        <span v-if="filterField !== 'ทั้งหมด'" class="ml-2">สนาม {{ filterField }}</span>
-                        <span v-if="filterCompetition" class="ml-2">รายการ: {{ filterCompetition }}</span>
-                        <span v-if="filterZone === 'ทั้งหมด' && filterLevel === 'ทั้งหมด' && filterField === 'ทั้งหมด' && !filterCompetition">แสดงทั้งหมด</span>
-                      </div>
-                    </div>
-                  </v-expansion-panel-header>
-                  
-                  <v-expansion-panel-content>
-                    <v-card-text class="py-2 px-0">
-                      <!-- กรองตามรายการแข่ง -->
-                      <div class="mb-3">
-                        <v-text-field
-                          v-model="filterCompetition"
-                          label="รายการแข่ง"
-                          placeholder="ค้นหารายการแข่ง เช่น สพม.นศ68"
-                          outlined
-                          dense
-                          clearable
-                          hide-details
-                          prepend-inner-icon="mdi-trophy"
-                        ></v-text-field>
-                      </div>
-                      
-                      <!-- กรองตามเขต -->
-                      <div class="mb-2">
-                        <v-chip-group v-model="filterZone" column mandatory>
-                          <v-chip small filter outlined value="ทั้งหมด">
-                            <v-icon small left>mdi-map-marker</v-icon>
-                            ทั้งหมด
-                          </v-chip>
-                          <v-chip 
-                            v-for="zone in availableZones" 
-                            :key="zone"
-                            small 
-                            filter 
-                            outlined
-                            :value="zone"
-                          >
-                            เขต {{ zone }}
-                          </v-chip>
-                        </v-chip-group>
-                      </div>
-                      
-                      <!-- กรองตามระดับ -->
-                      <div class="mb-2">
-                        <v-chip-group v-model="filterLevel" column mandatory>
-                          <v-chip small filter outlined value="ทั้งหมด">
-                            <v-icon small left>mdi-school</v-icon>
-                            ทั้งหมด
-                          </v-chip>
-                          <v-chip small filter outlined value="ประถม">ประถม</v-chip>
-                          <v-chip small filter outlined value="ม.ต้น">ม.ต้น</v-chip>
-                          <v-chip small filter outlined value="ม.ปลาย">ม.ปลาย</v-chip>
-                        </v-chip-group>
-                      </div>
-                      
-                      <!-- กรองตามสนาม -->
-                      <div class="mb-1">
-                        <v-chip-group v-model="filterField" column mandatory>
-                          <v-chip small filter outlined value="ทั้งหมด">
-                            <v-icon small left>mdi-stadium</v-icon>
-                            ทั้งหมด
-                          </v-chip>
-                          <v-chip 
-                            v-for="field in availableFields" 
-                            :key="field"
-                            small 
-                            filter 
-                            outlined
-                            :value="field"
-                          >
-                            สนาม {{ field }}
-                          </v-chip>
-                        </v-chip-group>
-                      </div>
-                      
-                      <v-divider class="my-2"></v-divider>
-                      <div class="text-caption grey--text text-center">
-                        แสดง <strong>{{ filteredTeams.length }}</strong> จาก {{ midTeams.length }} ทีม
-                      </div>
-                    </v-card-text>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
 
               <!-- รายการทีม (แสดงเป็น Grid) -->
               <v-row v-if="filteredTeams.length > 0">
@@ -1744,14 +1669,18 @@
                     :class="{ 'editable-card': isAuthenticated }"
                   >
                     <!-- Header ของการ์ด -->
-                    <v-card-title class="pb-2 primary white--text" style="padding: 8px 12px !important;">
+                    <v-card-title class="pb-2 white--text" :class="getFieldHeaderColor(item.field)" style="padding: 8px 12px !important;">
                       <div style="width: 100%;">
                         <!-- บรรทัดที่ 1: ID, สนาม, ระดับ, รายการแข่งขัน -->
                         <div class="text-caption d-flex align-center flex-wrap" style="gap: 4px; line-height: 1.2; opacity: 0.95;">
-                          <span><strong>{{ item.school_id }}</strong></span>
-                          <span>|</span>
-                          <span><v-icon x-small color="white">mdi-stadium</v-icon> {{ item.field }}</span>
-                          <span>|</span>
+                          <v-chip x-small color="white" :text-color="getFieldTextColor(item.field)">
+                             
+                            <strong>{{ item.school_id }}</strong>
+                          </v-chip>
+                          <v-chip x-small :color="getFieldChipColor(item.field)" dark>
+                            <v-icon x-small left>mdi-stadium</v-icon>
+                            สนาม {{ item.field }}
+                          </v-chip>
                           <span><v-icon x-small color="white">mdi-school</v-icon> {{ item.level }}</span>
                           <span v-if="item.competition">|</span>
                           <span v-if="item.competition"><v-icon x-small color="white">mdi-trophy-outline</v-icon> {{ item.competition }}</span>
@@ -1760,7 +1689,7 @@
                         <!-- บรรทัดที่ 2: ชื่อโรงเรียน + เขต -->
                         <div class="mt-1 d-flex align-center justify-space-between">
                           <span class="text-subtitle-2 font-weight-bold" style="line-height: 1.3;">{{ item.school_name }}</span>
-                          <v-chip x-small dark color="white" text-color="primary" class="ml-2">
+                          <v-chip x-small dark color="white" :text-color="getFieldTextColor(item.field)" class="ml-2">
                             <v-icon x-small left>mdi-map-marker</v-icon>
                             เขต {{ item.zone }}
                           </v-chip>
@@ -1933,8 +1862,9 @@
                 โหลดข้อมูลจาก Google Sheets
               </v-btn>
             </v-container>
+          </v-sheet>
 
-            <!-- Dialog ยืนยันตัวตน -->
+          <!-- ผลการแข่งขันระดับกลาง -->
             <v-dialog v-model="authDialog" max-width="400px" persistent>
               <v-card>
                 <v-card-title class="text-h5 primary white--text">
@@ -2060,6 +1990,109 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
+
+            <!-- Dialog ตัวกรอง -->
+            <v-dialog v-model="filterDialog" max-width="600px">
+              <v-card>
+                <v-card-title class="text-h5 primary white--text">
+                  <v-icon left color="white">mdi-filter</v-icon>
+                  ตัวกรองข้อมูล
+                </v-card-title>
+                <v-card-text class="pt-6">
+                  <!-- กรองตามรายการแข่ง -->
+                  <div class="mb-4">
+                    <v-text-field
+                      v-model="filterCompetition"
+                      label="รายการแข่ง"
+                      placeholder="ค้นหารายการแข่ง เช่น สพม.นศ68"
+                      outlined
+                      dense
+                      clearable
+                      prepend-inner-icon="mdi-trophy"
+                    ></v-text-field>
+                  </div>
+                  
+                  <!-- กรองตามเขต -->
+                  <div class="mb-3">
+                    <label class="text-subtitle-2 mb-2 d-block">เขต</label>
+                    <v-chip-group v-model="filterZone" column mandatory>
+                      <v-chip small filter outlined value="ทั้งหมด">
+                        <v-icon small left>mdi-map-marker</v-icon>
+                        ทั้งหมด
+                      </v-chip>
+                      <v-chip 
+                        v-for="zone in availableZones" 
+                        :key="zone"
+                        small 
+                        filter 
+                        outlined
+                        :value="zone"
+                      >
+                        เขต {{ zone }}
+                      </v-chip>
+                    </v-chip-group>
+                  </div>
+                  
+                  <!-- กรองตามระดับ -->
+                  <div class="mb-3">
+                    <label class="text-subtitle-2 mb-2 d-block">ระดับ</label>
+                    <v-chip-group v-model="filterLevel" column mandatory>
+                      <v-chip small filter outlined value="ทั้งหมด">
+                        <v-icon small left>mdi-school</v-icon>
+                        ทั้งหมด
+                      </v-chip>
+                      <v-chip small filter outlined value="ประถม">ประถม</v-chip>
+                      <v-chip small filter outlined value="ม.ต้น">ม.ต้น</v-chip>
+                      <v-chip small filter outlined value="ม.ปลาย">ม.ปลาย</v-chip>
+                    </v-chip-group>
+                  </div>
+                  
+                  <!-- กรองตามสนาม -->
+                  <div class="mb-3">
+                    <label class="text-subtitle-2 mb-2 d-block">สนาม</label>
+                    <v-chip-group v-model="filterField" column mandatory>
+                      <v-chip small filter outlined value="ทั้งหมด">
+                        <v-icon small left>mdi-stadium</v-icon>
+                        ทั้งหมด
+                      </v-chip>
+                      <v-chip 
+                        v-for="field in availableFields" 
+                        :key="field"
+                        small 
+                        filter 
+                        outlined
+                        :value="field"
+                      >
+                        สนาม {{ field }}
+                      </v-chip>
+                    </v-chip-group>
+                  </div>
+                  
+                  <v-divider class="my-3"></v-divider>
+                  <div class="text-center">
+                    <v-chip color="primary" class="px-4">
+                      แสดง <strong class="mx-1">{{ filteredTeams.length }}</strong> จาก {{ midTeams.length }} ทีม
+                    </v-chip>
+                  </div>
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn
+                    text
+                    @click="resetFilters"
+                  >
+                    <v-icon left>mdi-refresh</v-icon>
+                    รีเซ็ต
+                  </v-btn>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    color="primary"
+                    @click="filterDialog = false"
+                  >
+                    ปิด
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
           </v-sheet>
 
           <!-- ผลการแข่งขันระดับกลาง -->
@@ -2068,152 +2101,51 @@
               <v-card class="pa-6">
                 <v-card-title class="text-h4 d-flex justify-space-between align-center">
                   <div>
-                    <v-icon large color="primary" class="mr-3">mdi-trophy</v-icon>
-                    ผลการแข่งขัน (ระดับกลาง)
+                    <div class="d-flex align-center">
+                      <v-icon large color="primary" class="mr-3">mdi-trophy</v-icon>
+                      ผลการแข่งขัน (ระดับกลาง)<span v-if="filterCompetition" class="ml-2 text-subtitle-1">({{ filterCompetition }})</span>
+                    </div>
+                    <!-- แสดงค่าตัวกรองที่เลือก -->
+                    <div class="text-caption grey--text mt-2 ml-12">
+                      <v-chip x-small class="mr-1" color="primary">{{ sortedTeams.length }}/{{ midTeams.length }} ทีม</v-chip>
+                      <span v-if="filterZone !== 'ทั้งหมด'">เขต {{ filterZone }}</span>
+                      <span v-if="filterLevel !== 'ทั้งหมด'" class="ml-2">{{ filterLevel }}</span>
+                      <span v-if="filterField !== 'ทั้งหมด'" class="ml-2">สนาม {{ filterField }}</span>
+                      <span v-if="filterCompetition" class="ml-2">รายการ: {{ filterCompetition }}</span>
+                      <span v-if="filterZone === 'ทั้งหมด' && filterLevel === 'ทั้งหมด' && filterField === 'ทั้งหมด' && !filterCompetition">แสดงทั้งหมด</span>
+                    </div>
                   </div>
-                  <v-btn
-                    color="primary"
-                    outlined
-                    @click="loadTeamsFromGAS"
-                    :loading="isLoadingTeams"
-                  >
-                    <v-icon left>mdi-refresh</v-icon>
-                    โหลดข้อมูล
-                  </v-btn>
+                  <div>
+                    <v-btn
+                      color="primary"
+                      outlined
+                      @click="filterDialog = true"
+                      class="mr-2"
+                    >
+                      <v-icon left>mdi-filter</v-icon>
+                      ตัวกรอง
+                    </v-btn>
+                    <v-btn
+                      color="primary"
+                      outlined
+                      @click="loadTeamsFromGAS"
+                      :loading="isLoadingTeams"
+                    >
+                      <v-icon left>mdi-refresh</v-icon>
+                      โหลดข้อมูล
+                    </v-btn>
+                  </div>
                 </v-card-title>
                 <v-divider class="my-4"></v-divider>
-                
-                <!-- ตัวกรองข้อมูล (Collapsible) -->
-                <v-expansion-panels v-model="showFilters" class="mb-3">
-                  <v-expansion-panel>
-                    <v-expansion-panel-header class="py-2">
-                      <div>
-                        <div class="d-flex align-center">
-                          <v-icon small class="mr-2">mdi-filter</v-icon>
-                          <span class="font-weight-bold">ตัวกรอง</span>
-                          <v-chip x-small class="ml-2" color="primary">{{ sortedTeams.length }}/{{ midTeams.length }}</v-chip>
-                        </div>
-                        <div class="text-caption grey--text mt-1">
-                          <span v-if="filterZone !== 'ทั้งหมด'">เขต {{ filterZone }}</span>
-                          <span v-if="filterLevel !== 'ทั้งหมด'" class="ml-2">{{ filterLevel }}</span>
-                          <span v-if="filterField !== 'ทั้งหมด'" class="ml-2">สนาม {{ filterField }}</span>
-                          <span v-if="filterCompetition" class="ml-2">รายการ: {{ filterCompetition }}</span>
-                          <span v-if="filterZone === 'ทั้งหมด' && filterLevel === 'ทั้งหมด' && filterField === 'ทั้งหมด' && !filterCompetition">แสดงทั้งหมด</span>
-                        </div>
-                      </div>
-                    </v-expansion-panel-header>
-                    
-                    <v-expansion-panel-content>
-                      <v-card-text class="py-2 px-0">
-                        <!-- กรองตามรายการแข่ง -->
-                        <div class="mb-3">
-                          <v-text-field
-                            v-model="filterCompetition"
-                            label="รายการแข่ง"
-                            placeholder="ค้นหารายการแข่ง เช่น สพม.นศ68"
-                            outlined
-                            dense
-                            clearable
-                            hide-details
-                            prepend-inner-icon="mdi-trophy"
-                          ></v-text-field>
-                        </div>
-                        
-                        <!-- กรองตามเขต -->
-                        <div class="mb-2">
-                          <v-chip-group v-model="filterZone" column mandatory>
-                            <v-chip small filter outlined value="ทั้งหมด">
-                              <v-icon small left>mdi-map-marker</v-icon>
-                              ทั้งหมด
-                            </v-chip>
-                            <v-chip 
-                              v-for="zone in availableZones" 
-                              :key="zone"
-                              small 
-                              filter 
-                              outlined
-                              :value="zone"
-                            >
-                              เขต {{ zone }}
-                            </v-chip>
-                          </v-chip-group>
-                        </div>
-                        
-                        <!-- กรองตามระดับ -->
-                        <div class="mb-2">
-                          <v-chip-group v-model="filterLevel" column mandatory>
-                            <v-chip small filter outlined value="ทั้งหมด">
-                              <v-icon small left>mdi-school</v-icon>
-                              ทั้งหมด
-                            </v-chip>
-                            <v-chip small filter outlined value="ประถม">ประถม</v-chip>
-                            <v-chip small filter outlined value="ม.ต้น">ม.ต้น</v-chip>
-                            <v-chip small filter outlined value="ม.ปลาย">ม.ปลาย</v-chip>
-                          </v-chip-group>
-                        </div>
-                        
-                        <!-- กรองตามสนาม -->
-                        <div class="mb-1">
-                          <v-chip-group v-model="filterField" column mandatory>
-                            <v-chip small filter outlined value="ทั้งหมด">
-                              <v-icon small left>mdi-stadium</v-icon>
-                              ทั้งหมด
-                            </v-chip>
-                            <v-chip 
-                              v-for="field in availableFields" 
-                              :key="field"
-                              small 
-                              filter 
-                              outlined
-                              :value="field"
-                            >
-                              สนาม {{ field }}
-                            </v-chip>
-                          </v-chip-group>
-                        </div>
-                        
-                        <v-divider class="my-2"></v-divider>
-                        <div class="text-caption grey--text text-center">
-                          แสดง <strong>{{ sortedTeams.length }}</strong> จาก {{ midTeams.length }} ทีม
-                        </div>
-                      </v-card-text>
-                    </v-expansion-panel-content>
-                  </v-expansion-panel>
-                </v-expansion-panels>
                 
                 <v-card-text>
                   <div v-if="sortedTeams.length > 0">
                     <!-- กราฟแท่งแสดงผลการแข่งขัน -->
-                    <h3 class="text-h5 mb-4">ผลการแข่งขัน ทุ่นยนต์ระดับกลาง อย่างไม่เป็นทางการ</h3>
+                    <h3 class="text-h5 mb-4">ผลการแข่งขัน หุ่นยนต์ระดับกลาง </h3>
                     
-                    <div v-for="(team, index) in sortedTeams" :key="team.school_id" class="mb-4">
-                      <v-row align="center">
-                        <v-col cols="12" md="3">
-                          <div class="d-flex align-center">
-                            <strong class="mr-2">{{ team.school_name }} {{ index + 1 }}</strong>
-                          </div>
-                        </v-col>
-                        <v-col cols="12" md="9">
-                          <div style="position: relative;">
-                            <!-- แท่งคะแนน -->
-                            <v-progress-linear
-                              :value="(getBestScore(team) / 100) * 100"
-                              height="40"
-                              :color="getBarColor(index)"
-                              style="border-radius: 8px;"
-                            >
-                              <template v-slot:default>
-                                <div class="d-flex justify-space-between align-center px-2" style="width: 100%;">
-                                  <strong class="white--text">{{ getBestTime(team) }}</strong>
-                                  <strong class="white--text" style="font-size: 1.2rem;">{{ getBestScore(team) }}</strong>
-                                  <span class="white--text" :class="getRetryBadgeClass(getBestRetry(team))">{{ getBestRetry(team) }}</span>
-                                </div>
-                              </template>
-                            </v-progress-linear>
-                          </div>
-                        </v-col>
-                      </v-row>
-                    </div>
+                    <v-card outlined class="pa-4 mb-6">
+                      <canvas id="resultsChart" :style="'height: ' + (sortedTeams.length * 40 + 100) + 'px;'"></canvas>
+                    </v-card>
                     
                     <!-- ตารางรายละเอียด -->
                     <v-divider class="my-6"></v-divider>
@@ -3033,11 +2965,11 @@
             competition: '',
             field: '',
             score1: 0,
-            retry1: 3,
-            time1: '3:00:00',
+            retry1: 0,
+            time1: '0:00:00',
             score2: 0,
             retry2: 0,
-            time2: '3:00:00'
+            time2: '0:00:00'
           },
           isSaving: false,
           saveStatus: null,
@@ -3049,6 +2981,7 @@
           filterField: 'ทั้งหมด',
           filterCompetition: '',
           showFilters: [0], // เปิด expansion panel แรก (index 0)
+          filterDialog: false,
           availableZones: [],
           availableFields: [],
           
@@ -3095,16 +3028,19 @@
             { text: 'สนาม', value: 'field', width: '80px' }
           ],
           
+          // Chart.js instance
+          resultsChartInstance: null,
+          
           // URL ของ Google Apps Script - ใส่ URL ของคุณที่นี่
           gasUrl: 'https://script.google.com/macros/s/AKfycbwSfGi7G_eqCQh02sKBeF8-JnwOIyc0WPL7Dnntj_9EXPfEiwekHsahJZsP5BsOTYuUMg/exec'
         };
       },
       computed: {
         formattedTime() {
-          const minutes = String(Math.floor(this.time / 6000)).padStart(2, "0");
+          const minutes = String(Math.floor(this.time / 6000)).padStart(1, "0");
           const seconds = String(Math.floor((this.time % 6000) / 100)).padStart(2, "0");
-          const milliseconds = String(this.time % 100).padStart(2, "0");
-          return `${minutes}:${seconds}:${milliseconds}`;
+          const centiseconds = String(this.time % 100).padStart(2, "0");
+          return `${minutes}:${seconds}:${centiseconds}`;
         },
         countdownTime() {
           const hours = String(Math.floor(this.countdownValue / 3600)).padStart(2, "0");
@@ -5243,6 +5179,15 @@
             if (data.success && data.password) {
               this.correctPassword = data.password;
               console.log('✓ โหลดรหัสผ่านจาก Google Sheets สำเร็จ');
+              
+              // โหลด default competition และใช้ค่า default ถ้า filterCompetition ยังว่างอยู่
+              if (data.defaultCompetition !== undefined && data.defaultCompetition !== '') {
+                // ถ้า filterCompetition ยังเป็นค่าว่าง ให้ใช้ค่า default
+                if (!this.filterCompetition) {
+                  this.filterCompetition = data.defaultCompetition;
+                  console.log('✓ ตั้งค่า filter รายการแข่ง default:', this.filterCompetition);
+                }
+              }
             } else {
               // ถ้าโหลดไม่สำเร็จ ใช้ค่าเริ่มต้น
               this.correctPassword = 'abcd';
@@ -5303,24 +5248,24 @@
         },
         
         getBestTime(team) {
-          if (!team) return '3:00:00';
+          if (!team) return '0:00:00';
           const score1 = team.score1 || 0;
           const score2 = team.score2 || 0;
           
           if (score1 > score2) {
-            return team.time1 || '3:00:00';
+            return team.time1 || '0:00:00';
           } else if (score2 > score1) {
-            return team.time2 || '3:00:00';
+            return team.time2 || '0:00:00';
           } else {
             // คะแนนเท่ากัน เลือกเวลาที่น้อยกว่า
-            const time1Sec = this.timeToSeconds(team.time1 || '3:00:00');
-            const time2Sec = this.timeToSeconds(team.time2 || '3:00:00');
+            const time1Sec = this.timeToSeconds(team.time1 || '0:00:00');
+            const time2Sec = this.timeToSeconds(team.time2 || '0:00:00');
             return time1Sec < time2Sec ? team.time1 : team.time2;
           }
         },
         
         timeToSeconds(timeStr) {
-          if (!timeStr || timeStr === '3:00:00') return 180;
+          if (!timeStr || timeStr === '0:00:00') return 0;
           const parts = timeStr.split(':');
           if (parts.length === 3) {
             const minutes = parseInt(parts[0]) || 0;
@@ -5366,7 +5311,7 @@
           
           // ถ้าไม่มีข้อมูล ใช้ค่าเริ่มต้น
           if (digits.length === 0) {
-            this.$set(item, field, '3:00:00');
+            this.$set(item, field, '0:00:00');
             return;
           }
           
@@ -5430,10 +5375,48 @@
         },
         
         getRankColor(index) {
-          if (index === 0) return 'yellow darken-2';
-          if (index === 1) return 'grey lighten-1';
-          if (index === 2) return 'orange darken-3';
+          return 'primary';
+        },
+        
+        // สีสำหรับ header ของการ์ดตามสนาม
+        getFieldHeaderColor(field) {
+          if (field === 'A') return 'blue darken-1';
+          if (field === 'B') return 'red darken-1';
+          return 'primary';
+        },
+        
+        // สีสำหรับ chip สนาม
+        getFieldChipColor(field) {
+          if (field === 'A') return 'blue darken-3';
+          if (field === 'B') return 'red darken-3';
           return 'grey darken-1';
+        },
+        
+        // สีตัวอักษรสำหรับ chip เขต
+        getFieldTextColor(field) {
+          if (field === 'A') return 'blue darken-1';
+          if (field === 'B') return 'red darken-1';
+          return 'primary';
+        },
+        
+        // สีสำหรับ school_id badge
+        getSchoolIdColor(schoolId) {
+          // ใช้ตัวอักษรตัวแรกเพื่อกำหนดสี
+          if (!schoolId) return 'grey';
+          const firstChar = schoolId.toString().charAt(0).toLowerCase();
+          const colorMap = {
+            's': 'teal',
+            'm': 'orange',
+            'h': 'pink',
+            'a': 'indigo',
+            'b': 'cyan',
+            'c': 'amber',
+            'd': 'lime',
+            'e': 'green',
+            'f': 'light-blue',
+            'g': 'purple'
+          };
+          return colorMap[firstChar] || 'white';
         },
         
         async updateTeamScore(team) {
@@ -5475,6 +5458,72 @@
           this.snackbar = true;
         },
         
+        renderResultsChart() {
+          const canvas = document.getElementById('resultsChart');
+          if (!canvas || !this.sortedTeams || this.sortedTeams.length === 0) return;
+          
+          // ทำลายกราฟเก่าถ้ามี
+          if (this.resultsChartInstance) {
+            this.resultsChartInstance.destroy();
+          }
+          
+          const ctx = canvas.getContext('2d');
+          const teams = this.sortedTeams; // แสดงทุกทีมตามตัวกรอง
+          
+          this.resultsChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: teams.map((team, index) => `${index + 1}. ${team.school_name}`),
+              datasets: [{
+                label: 'คะแนน',
+                data: teams.map(team => this.getBestScore(team)),
+                backgroundColor: '#1976D2',
+                borderColor: '#1565C0',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              indexAxis: 'y',
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      const team = teams[context.dataIndex];
+                      return [
+                        `คะแนน: ${context.parsed.x}`,
+                        `Retry: ${this.getBestRetry(team)}`,
+                        `เวลา: ${this.getBestTime(team)}`
+                      ];
+                    }.bind(this)
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  beginAtZero: true,
+                  max: 100,
+                  title: {
+                    display: true,
+                    text: 'คะแนน'
+                  }
+                },
+                y: {
+                  ticks: {
+                    font: {
+                      size: 11
+                    }
+                  }
+                }
+              }
+            }
+          });
+        },
+        
         async loadTeamsFromGAS() {
           this.isLoadingTeams = true;
           
@@ -5485,11 +5534,11 @@
               this.midTeams = data.data.map(team => ({
                 ...team,
                 score1: team.score1 || 0,
-                retry1: team.retry1 || 3,
-                time1: team.time1 || '3:00:00',
+                retry1: team.retry1 || 0,
+                time1: team.time1 || '0:00:00',
                 score2: team.score2 || 0,
                 retry2: team.retry2 || 0,
-                time2: team.time2 || '3:00:00',
+                time2: team.time2 || '0:00:00',
                 updating: false
               }));
               
@@ -5512,6 +5561,14 @@
           // สร้างรายการสนามที่ไม่ซ้ำ
           const fields = [...new Set(this.midTeams.map(t => t.field))].filter(f => f);
           this.availableFields = fields.sort();
+        },
+        
+        // รีเซ็ตตัวกรองทั้งหมด
+        resetFilters() {
+          this.filterZone = 'ทั้งหมด';
+          this.filterLevel = 'ทั้งหมด';
+          this.filterField = 'ทั้งหมด';
+          this.filterCompetition = '';
         },
         
         // บันทึกค่า filter ลง localStorage
@@ -5693,6 +5750,13 @@
           this.saveFiltersToLocalStorage();
         },
         
+        // อัพเดทกราฟเมื่อข้อมูลเปลี่ยน
+        sortedTeams() {
+          this.$nextTick(() => {
+            this.renderResultsChart();
+          });
+        },
+        
         tab(newTab) {
           // อัพเดท URL เมื่อเปลี่ยนแท็บ
           if (this.$route.name !== newTab) {
@@ -5703,6 +5767,13 @@
           if (newTab === 'random') {
             this.$nextTick(() => {
               this.initWheel();
+            });
+          }
+          
+          // เมื่อเปลี่ยนไปหน้าผลการแข่งขัน ให้สร้างกราฟ
+          if (newTab === 'mid-results') {
+            this.$nextTick(() => {
+              this.renderResultsChart();
             });
           }
         },
