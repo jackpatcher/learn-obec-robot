@@ -1,3 +1,3 @@
 git add .
-git commit -m "  rules"
+git commit -m "  teaming"
 git push origin main
