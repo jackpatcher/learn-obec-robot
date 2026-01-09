@@ -1,3 +1,3 @@
 git add .
-git commit -m "  กราฟ ทีม gas"
+git commit -m "  ทำระดับสูง"
 git push origin main

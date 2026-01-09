@@ -42,8 +42,14 @@ function doGet(e) {
     } else if (action === 'updateScore') {
       const result = updateScore(params);
       return createJSONPResponse(callback, result);
-    } else if (action === 'getPassword') {
-      const result = getPassword();
+    } else if (action === 'authenticate') {
+      const result = authenticate(params);
+      return createJSONPResponse(callback, result);
+    } else if (action === 'saveDefaultFilter') {
+      const result = saveDefaultFilter(params);
+      return createJSONPResponse(callback, result);
+    } else if (action === 'getDefaultFilter') {
+      const result = getDefaultFilter();
       return createJSONPResponse(callback, result);
     } else {
       return createJSONPResponse(callback, {
@@ -79,10 +85,10 @@ function addTeamToSheet(params) {
     // เปิด Spreadsheet (ใช้ active spreadsheet หรือระบุ ID)
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     
-    // หาชีทที่ชื่อ "ข้อมูล" หรือสร้างใหม่ถ้ายังไม่มี
-    let sheet = ss.getSheetByName('ข้อมูล');
+    // หาชีทที่ชื่อ "ระดับกลาง" หรือสร้างใหม่ถ้ายังไม่มี
+    let sheet = ss.getSheetByName('ระดับกลาง');
     if (!sheet) {
-      sheet = ss.insertSheet('ข้อมูล');
+      sheet = ss.insertSheet('ระดับกลาง');
       // เพิ่มหัวตาราง
       const headers = [
         'school_id',
@@ -183,54 +189,15 @@ function addTeamToSheet(params) {
 }
 
 /**
- * ฟังก์ชันสำหรับสร้างโครงสร้างชีททั้งหมดครั้งแรก
- * รันฟังก์ชันนี้ใน Apps Script Editor โดยตรง (ไม่ต้องผ่าน URL)
- * 
- * วิธีใช้งาน:
- * 1. เปิด Apps Script Editor
- * 2. เลือกฟังก์ชัน initializeSheets จากเมนู dropdown
- * 3. คลิก Run (▶️)
- * 4. อนุญาตการเข้าถึงครั้งแรก
+ * ฟังก์ชันสำหรับสร้างชีทระดับกลาง
  */
-function initializeSheets() {
+function initMidSheet() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     
-    // ===== 1. สร้างชีท "การตั้งค่า" =====
-    let settingsSheet = ss.getSheetByName('การตั้งค่า');
-    if (!settingsSheet) {
-      settingsSheet = ss.insertSheet('การตั้งค่า');
-      settingsSheet.getRange('A1').setValue('abcd');
-      settingsSheet.getRange('B1').setValue('← รหัสผ่านสำหรับยืนยันตัวตน (แก้ไขได้)');
-      settingsSheet.getRange('A2').setValue('');
-      settingsSheet.getRange('B2').setValue('← รายการแข่ง default (ว่าง = แสดงทั้งหมด)');
-      
-      // จัดรูปแบบ
-      settingsSheet.getRange('A1').setBackground('#FFE599');
-      settingsSheet.getRange('A1').setFontWeight('bold');
-      settingsSheet.getRange('A1').setFontSize(14);
-      settingsSheet.getRange('B1').setFontStyle('italic');
-      settingsSheet.getRange('B1').setFontColor('#666666');
-      
-      settingsSheet.getRange('A2').setBackground('#E3F2FD');
-      settingsSheet.getRange('A2').setFontWeight('bold');
-      settingsSheet.getRange('A2').setFontSize(14);
-      settingsSheet.getRange('B2').setFontStyle('italic');
-      settingsSheet.getRange('B2').setFontColor('#666666');
-      
-      // ปรับขนาดคอลัมน์
-      settingsSheet.setColumnWidth(1, 150);
-      settingsSheet.setColumnWidth(2, 400);
-      
-      Logger.log('✓ สร้างชีท "การตั้งค่า" สำเร็จ');
-    } else {
-      Logger.log('ℹ️ ชีท "การตั้งค่า" มีอยู่แล้ว');
-    }
-    
-    // ===== 2. สร้างชีท "ข้อมูล" สำหรับข้อมูลทีม =====
-    let dataSheet = ss.getSheetByName('ข้อมูล');
-    if (!dataSheet) {
-      dataSheet = ss.insertSheet('ข้อมูล');
+    let sheet = ss.getSheetByName('ระดับกลาง');
+    if (!sheet) {
+      sheet = ss.insertSheet('ระดับกลาง');
       
       // หัวตาราง
       const headers = [
@@ -250,7 +217,7 @@ function initializeSheets() {
       ];
       
       // ใส่หัวตาราง
-      const headerRange = dataSheet.getRange(1, 1, 1, headers.length);
+      const headerRange = sheet.getRange(1, 1, 1, headers.length);
       headerRange.setValues([headers]);
       
       // จัดรูปแบบหัวตาราง
@@ -262,29 +229,162 @@ function initializeSheets() {
       headerRange.setFontSize(11);
       
       // ปรับขนาดคอลัมน์
-      dataSheet.setColumnWidth(1, 100);  // school_id
-      dataSheet.setColumnWidth(2, 200);  // โรงเรียน
-      dataSheet.setColumnWidth(3, 80);   // เขต
-      dataSheet.setColumnWidth(4, 80);   // ระดับ
-      dataSheet.setColumnWidth(5, 120);  // รายการแข่ง
-      dataSheet.setColumnWidth(6, 70);   // สนาม
-      dataSheet.setColumnWidth(7, 90);   // score1
-      dataSheet.setColumnWidth(8, 90);   // retry1
-      dataSheet.setColumnWidth(9, 100);  // time1
-      dataSheet.getRange(2, 9, dataSheet.getMaxRows(), 1).setNumberFormat('@'); // time1 เป็น text
-      dataSheet.setColumnWidth(10, 90);  // score2
-      dataSheet.setColumnWidth(11, 90);  // retry2
-      dataSheet.setColumnWidth(12, 100); // time2
-      dataSheet.getRange(2, 12, dataSheet.getMaxRows(), 1).setNumberFormat('@'); // time2 เป็น text
-      dataSheet.setColumnWidth(13, 150); // timestamp
+      sheet.setColumnWidth(1, 100);  // school_id
+      sheet.setColumnWidth(2, 200);  // โรงเรียน
+      sheet.setColumnWidth(3, 80);   // เขต
+      sheet.setColumnWidth(4, 80);   // ระดับ
+      sheet.setColumnWidth(5, 120);  // รายการแข่ง
+      sheet.setColumnWidth(6, 70);   // สนาม
+      sheet.setColumnWidth(7, 90);   // score1
+      sheet.setColumnWidth(8, 90);   // retry1
+      sheet.setColumnWidth(9, 100);  // time1
+      sheet.getRange(2, 9, sheet.getMaxRows(), 1).setNumberFormat('@'); // time1 เป็น text
+      sheet.setColumnWidth(10, 90);  // score2
+      sheet.setColumnWidth(11, 90);  // retry2
+      sheet.setColumnWidth(12, 100); // time2
+      sheet.getRange(2, 12, sheet.getMaxRows(), 1).setNumberFormat('@'); // time2 เป็น text
+      sheet.setColumnWidth(13, 150); // timestamp
       
       // ตรึงแถวหัวตาราง
-      dataSheet.setFrozenRows(1);
+      sheet.setFrozenRows(1);
       
-      Logger.log('✓ สร้างชีท "ข้อมูล" สำเร็จ');
+      Logger.log('✓ สร้างชีท "ระดับกลาง" สำเร็จ');
+      return { success: true, message: 'สร้างชีท "ระดับกลาง" สำเร็จ' };
     } else {
-      Logger.log('ℹ️ ชีท "ข้อมูล" มีอยู่แล้ว');
+      Logger.log('ℹ️ ชีท "ระดับกลาง" มีอยู่แล้ว');
+      return { success: true, message: 'ชีท "ระดับกลาง" มีอยู่แล้ว' };
     }
+  } catch (error) {
+    Logger.log('❌ เกิดข้อผิดพลาดในการสร้างชีทระดับกลาง: ' + error.toString());
+    return { success: false, message: error.toString() };
+  }
+}
+
+/**
+ * ฟังก์ชันสำหรับสร้างชีทระดับสูง
+ */
+function initHighSheet() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    let sheet = ss.getSheetByName('ระดับสูง');
+    if (!sheet) {
+      sheet = ss.insertSheet('ระดับสูง');
+      
+      // หัวตาราง
+      const headers = [
+        'school_id',
+        'โรงเรียน',
+        'เขต',
+        'ระดับ',
+        'รายการแข่ง',
+        'สนาม',
+        '# score1',
+        '# retry1',
+        'time1',
+        '# score2',
+        '# retry2',
+        'time2',
+        'timestamp'
+      ];
+      
+      // ใส่หัวตาราง
+      const headerRange = sheet.getRange(1, 1, 1, headers.length);
+      headerRange.setValues([headers]);
+      
+      // จัดรูปแบบหัวตาราง
+      headerRange.setBackground('#4CAF50');
+      headerRange.setFontColor('#FFFFFF');
+      headerRange.setFontWeight('bold');
+      headerRange.setHorizontalAlignment('center');
+      headerRange.setVerticalAlignment('middle');
+      headerRange.setFontSize(11);
+      
+      // ปรับขนาดคอลัมน์
+      sheet.setColumnWidth(1, 100);  // school_id
+      sheet.setColumnWidth(2, 200);  // โรงเรียน
+      sheet.setColumnWidth(3, 80);   // เขต
+      sheet.setColumnWidth(4, 80);   // ระดับ
+      sheet.setColumnWidth(5, 120);  // รายการแข่ง
+      sheet.setColumnWidth(6, 70);   // สนาม
+      sheet.setColumnWidth(7, 90);   // score1
+      sheet.setColumnWidth(8, 90);   // retry1
+      sheet.setColumnWidth(9, 100);  // time1
+      sheet.getRange(2, 9, sheet.getMaxRows(), 1).setNumberFormat('@'); // time1 เป็น text
+      sheet.setColumnWidth(10, 90);  // score2
+      sheet.setColumnWidth(11, 90);  // retry2
+      sheet.setColumnWidth(12, 100); // time2
+      sheet.getRange(2, 12, sheet.getMaxRows(), 1).setNumberFormat('@'); // time2 เป็น text
+      sheet.setColumnWidth(13, 150); // timestamp
+      
+      // ตรึงแถวหัวตาราง
+      sheet.setFrozenRows(1);
+      
+      Logger.log('✓ สร้างชีท "ระดับสูง" สำเร็จ');
+      return { success: true, message: 'สร้างชีท "ระดับสูง" สำเร็จ' };
+    } else {
+      Logger.log('ℹ️ ชีท "ระดับสูง" มีอยู่แล้ว');
+      return { success: true, message: 'ชีท "ระดับสูง" มีอยู่แล้ว' };
+    }
+  } catch (error) {
+    Logger.log('❌ เกิดข้อผิดพลาดในการสร้างชีทระดับสูง: ' + error.toString());
+    return { success: false, message: error.toString() };
+  }
+}
+
+/**
+ * ฟังก์ชันสำหรับสร้างโครงสร้างชีททั้งหมดครั้งแรก
+ * รันฟังก์ชันนี้ใน Apps Script Editor โดยตรง (ไม่ต้องผ่าน URL)
+ * 
+ * วิธีใช้งาน:
+ * 1. เปิด Apps Script Editor
+ * 2. เลือกฟังก์ชัน initializeSheets จากเมนู dropdown
+ * 3. คลิก Run (▶️)
+ * 4. อนุญาตการเข้าถึงครั้งแรก
+ */
+function initializeSheets() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    // ===== 1. สร้างชีท "การตั้งค่า" =====
+    let settingsSheet = ss.getSheetByName('การตั้งค่า');
+    if (!settingsSheet) {
+      settingsSheet = ss.insertSheet('การตั้งค่า');
+      
+      // สร้างหัวตาราง
+      settingsSheet.getRange('A1').setValue('Key');
+      settingsSheet.getRange('B1').setValue('Value');
+      
+      // จัดรูปแบบหัวตาราง
+      const headerRange = settingsSheet.getRange('A1:B1');
+      headerRange.setBackground('#1976D2');
+      headerRange.setFontColor('#FFFFFF');
+      headerRange.setFontWeight('bold');
+      headerRange.setHorizontalAlignment('center');
+      
+      // เพิ่มข้อมูลเริ่มต้น
+      settingsSheet.appendRow(['password', 'abcd']);
+      settingsSheet.appendRow(['defaultFilter', '']);
+      
+      // จัดรูปแบบข้อมูล
+      settingsSheet.getRange('A2:A3').setBackground('#FFE599');
+      settingsSheet.getRange('A2:A3').setFontWeight('bold');
+      
+      // ปรับขนาดคอลัมน์
+      settingsSheet.setColumnWidth(1, 200);
+      settingsSheet.setColumnWidth(2, 400);
+      
+      // ตรึงแถวหัวตาราง
+      settingsSheet.setFrozenRows(1);
+      
+      Logger.log('✓ สร้างชีท "การตั้งค่า" สำเร็จ (Key-Value System)');
+    } else {
+      Logger.log('ℹ️ ชีท "การตั้งค่า" มีอยู่แล้ว');
+    }
+    
+    // ===== 2. สร้างชีท "ระดับกลาง" และ "ระดับสูง" =====
+    initMidSheet();
+    initHighSheet();
     
     // ===== 3. สร้างชีท "ตัวอย่างข้อมูล" =====
     let sampleSheet = ss.getSheetByName('ตัวอย่างข้อมูล');
@@ -362,7 +462,7 @@ function initializeSheets() {
     }
     
     // ===== 4. เรียงลำดับชีท =====
-    const sheetOrder = ['การตั้งค่า', 'ข้อมูล', 'ตัวอย่างข้อมูล'];
+    const sheetOrder = ['การตั้งค่า', 'ระดับกลาง', 'ระดับสูง', 'ตัวอย่างข้อมูล'];
     sheetOrder.forEach((sheetName, index) => {
       const sheet = ss.getSheetByName(sheetName);
       if (sheet) {
@@ -371,24 +471,26 @@ function initializeSheets() {
       }
     });
     
-    // ตั้งชีท "ข้อมูล" เป็นชีทที่เปิดอยู่
-    ss.setActiveSheet(ss.getSheetByName('ข้อมูล'));
+    // ตั้งชีท "ระดับกลาง" เป็นชีทที่เปิดอยู่
+    ss.setActiveSheet(ss.getSheetByName('ระดับกลาง'));
     
     Logger.log('=================================');
     Logger.log('✅ สร้างโครงสร้างชีททั้งหมดสำเร็จ!');
     Logger.log('=================================');
     Logger.log('ชีทที่สร้าง:');
-    Logger.log('1. การตั้งค่า - รหัสผ่าน: abcd');
-    Logger.log('2. ข้อมูล - พร้อมหัวตารางและรอข้อมูล');
-    Logger.log('3. ตัวอย่างข้อมูล - มีข้อมูลตัวอย่าง 3 ทีม');
+    Logger.log('1. การตั้งค่า - ระบบ Key-Value (password: abcd)');
+    Logger.log('2. ระดับกลาง - พร้อมหัวตารางและรอข้อมูล');
+    Logger.log('3. ระดับสูง - พร้อมหัวตารางและรอข้อมูล');
+    Logger.log('4. ตัวอย่างข้อมูล - มีข้อมูลตัวอย่าง 3 ทีม');
     Logger.log('=================================');
     
     // แสดง dialog แจ้งเตือน
     SpreadsheetApp.getUi().alert(
       'สำเร็จ! ✅\n\n' +
       'สร้างโครงสร้างชีททั้งหมดเรียบร้อยแล้ว\n\n' +
-      '✓ การตั้งค่า - รหัสผ่าน: abcd\n' +
-      '✓ ข้อมูล - พร้อมใช้งาน\n' +
+      '✓ การตั้งค่า - ระบบ Key-Value (รหัสผ่าน: abcd)\n' +
+      '✓ ระดับกลาง - พร้อมใช้งาน\n' +
+      '✓ ระดับสูง - พร้อมใช้งาน\n' +
       '✓ ตัวอย่างข้อมูล - มีข้อมูลตัวอย่าง\n\n' +
       'ตอนนี้สามารถ Deploy เป็น Web App และใช้งานได้เลย'
     );
@@ -396,7 +498,7 @@ function initializeSheets() {
     return {
       success: true,
       message: 'สร้างโครงสร้างชีททั้งหมดสำเร็จ',
-      sheets: ['การตั้งค่า', 'ข้อมูล', 'ตัวอย่างข้อมูล']
+      sheets: ['การตั้งค่า', 'ระดับกลาง', 'ระดับสูง', 'ตัวอย่างข้อมูล']
     };
     
   } catch (error) {
@@ -410,36 +512,89 @@ function initializeSheets() {
 }
 
 /**
- * ฟังก์ชันสำหรับดึงรหัสผ่านจาก Google Sheets
+ * ฟังก์ชันสำหรับตรวจสอบ authentication (รองรับ multi-user)
+ * @param {string} username - ชื่อผู้ใช้
+ * @param {string} password - รหัสผ่าน
+ * @param {string} level - ระดับ ('mid' หรือ 'high')
+ * @return {object} - ผลการตรวจสอบ
  */
-function getPassword() {
+function authenticate(params) {
   try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let settingsSheet = ss.getSheetByName('การตั้งค่า');
+    const username = params.username || '';
+    const password = params.password || '';
+    const level = params.level || 'mid';
     
-    if (!settingsSheet) {
-      // สร้างชีทการตั้งค่าใหม่ถ้ายังไม่มี
-      settingsSheet = ss.insertSheet('การตั้งค่า');
-      settingsSheet.getRange('A1').setValue('abcd'); // รหัสผ่านเริ่มต้น
-      settingsSheet.getRange('A1').setBackground('#FFE599');
-      settingsSheet.getRange('A1').setFontWeight('bold');
-      settingsSheet.getRange('B1').setValue('← รหัสผ่านสำหรับยืนยันตัวตน (แก้ไขได้)');
-      settingsSheet.getRange('A2').setValue(''); // รายการแข่ง default
-      settingsSheet.getRange('A2').setBackground('#E3F2FD');
-      settingsSheet.getRange('A2').setFontWeight('bold');
-      settingsSheet.getRange('B2').setValue('← รายการแข่ง default (ว่าง = แสดงทั้งหมด)');
+    // ตรวจสอบ superadmin (เข้าถึงได้ทุกระดับ)
+    const superadminUser = getConfigValue('superadmin', 'superadmin');
+    const superadminPass = getConfigValue('superadmin_password', 'amp');
+    
+    if (username === superadminUser && password === superadminPass) {
+      return {
+        success: true,
+        role: 'superadmin',
+        level: 'all',
+        username: username
+      };
     }
     
-    const password = settingsSheet.getRange('A1').getValue() || 'abcd';
-    const defaultCompetition = settingsSheet.getRange('A2').getValue() || '';
+    // ตรวจสอบ admin ตามระดับ
+    if (level === 'mid') {
+      // admin_mid1
+      const admin1User = getConfigValue('admin_mid1', 'admin1');
+      const admin1Pass = getConfigValue('admin_mid1_password', '1234');
+      if (username === admin1User && password === admin1Pass) {
+        return {
+          success: true,
+          role: 'admin',
+          level: 'mid',
+          username: username
+        };
+      }
+      
+      // admin_mid2
+      const admin2User = getConfigValue('admin_mid2', 'admin2');
+      const admin2Pass = getConfigValue('admin_mid2_password', '1234');
+      if (username === admin2User && password === admin2Pass) {
+        return {
+          success: true,
+          role: 'admin',
+          level: 'mid',
+          username: username
+        };
+      }
+    } else if (level === 'high') {
+      // admin_high1
+      const admin1User = getConfigValue('admin_high1', 'admin1');
+      const admin1Pass = getConfigValue('admin_high1_password', '1234');
+      if (username === admin1User && password === admin1Pass) {
+        return {
+          success: true,
+          role: 'admin',
+          level: 'high',
+          username: username
+        };
+      }
+      
+      // admin_high2
+      const admin2User = getConfigValue('admin_high2', 'admin2');
+      const admin2Pass = getConfigValue('admin_high2_password', '1234');
+      if (username === admin2User && password === admin2Pass) {
+        return {
+          success: true,
+          role: 'admin',
+          level: 'high',
+          username: username
+        };
+      }
+    }
     
     return {
-      success: true,
-      password: password,
-      defaultCompetition: defaultCompetition
+      success: false,
+      message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
     };
+    
   } catch (error) {
-    Logger.log('Error in getPassword: ' + error.toString());
+    Logger.log('Error in authenticate: ' + error.toString());
     return {
       success: false,
       message: 'เกิดข้อผิดพลาด: ' + error.toString()
@@ -448,67 +603,277 @@ function getPassword() {
 }
 
 /**
- * ฟังก์ชันสำหรับดึงข้อมูลทีมทั้งหมด
+ * ฟังก์ชันสำหรับบันทึกค่า default filter ลงชีท "การตั้งค่า"
  */
-function getAllTeams() {
+function saveDefaultFilter(params) {
   try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName('ข้อมูล');
-    
-    if (!sheet || sheet.getLastRow() <= 1) {
-      return {
-        success: true,
-        data: []
-      };
-    }
-    
-    // ใช้ getDisplayValues() เพื่อดึงค่าที่แสดงใน Sheet โดยตรง (รวมถึง text format)
-    const data = sheet.getDataRange().getDisplayValues();
-    const headers = data[0];
-    const teams = [];
-    
-    // สร้าง mapping สำหรับแปลงชื่อคอลัมน์
-    const fieldMapping = {
-      '# score1': 'score1',
-      '# retry1': 'retry1',
-      '# score2': 'score2',
-      '# retry2': 'retry2',
-      'โรงเรียน': 'school_name',
-      'เขต': 'zone',
-      'ระดับ': 'level',
-      'รายการแข่ง': 'competition',
-      'สนาม': 'field'
-    };
-    
-    for (let i = 1; i < data.length; i++) {
-      const team = {};
-      for (let j = 0; j < headers.length; j++) {
-        const header = headers[j];
-        // ใช้ชื่อที่แปลงแล้ว หรือชื่อเดิมถ้าไม่มีใน mapping
-        const key = fieldMapping[header] || header;
-        let value = data[i][j];
-        
-        // แปลงค่าเป็น string และใช้ตามที่แสดงใน Sheet
-        if (key === 'time1' || key === 'time2') {
-          // ใช้ค่าที่แสดงใน Sheet โดยตรง (เป็น string แล้ว)
-          if (value && value.trim() !== '') {
-            team[key] = value.trim();
-          } else {
-            team[key] = '0:00:00';
-          }
-        } else if (key === 'score1' || key === 'score2' || key === 'retry1' || key === 'retry2') {
-          // แปลงเป็นตัวเลข
-          team[key] = parseInt(value) || 0;
-        } else {
-          team[key] = value;
-        }
-      }
-      teams.push(team);
-    }
+    const level = params.level || 'mid';
+    const key = level === 'mid' ? 'defaultFilter_mid' : 'defaultFilter_high';
+    setConfigValue(key, params.filterData);
     
     return {
       success: true,
-      data: teams
+      message: 'บันทึก Default Filter สำเร็จ'
+    };
+    
+  } catch (error) {
+    Logger.log('Error in saveDefaultFilter: ' + error.toString());
+    return {
+      success: false,
+      message: 'เกิดข้อผิดพลาด: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * ฟังก์ชันสำหรับอ่านค่า default filter จากชีท "การตั้งค่า"
+ */
+function getDefaultFilter(params) {
+  try {
+    const level = params.level || 'mid';
+    const key = level === 'mid' ? 'defaultFilter_mid' : 'defaultFilter_high';
+    const filterData = getConfigValue(key, null);
+    
+    return {
+      success: true,
+      data: filterData
+    };
+    
+  } catch (error) {
+    Logger.log('Error in getDefaultFilter: ' + error.toString());
+    return {
+      success: false,
+      message: 'เกิดข้อผิดพลาด: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * ฟังก์ชัน Helper สำหรับอ่านค่าจากชีทการตั้งค่า (Key-Value)
+ */
+/**
+ * ฟังก์ชัน Helper สำหรับอ่านค่า config ทั้งหมดจากชีทการตั้งค่า (Key-Value)
+ */
+function getAllConfigValues() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let settingsSheet = ss.getSheetByName('การตั้งค่า');
+    
+    if (!settingsSheet) {
+      Logger.log('ไม่พบชีท "การตั้งค่า"');
+      return {};
+    }
+    
+    const lastRow = settingsSheet.getLastRow();
+    if (lastRow < 2) {
+      Logger.log('ชีท "การตั้งค่า" ไม่มีข้อมูล');
+      return {};
+    }
+    
+    // อ่านข้อมูลทั้งหมดจากชีท (เริ่มแถว 2 เพราะแถว 1 เป็นหัวตาราง)
+    const data = settingsSheet.getRange(2, 1, lastRow - 1, 2).getValues();
+    
+    const config = {};
+    for (let i = 0; i < data.length; i++) {
+      const key = String(data[i][0]).trim();
+      const value = data[i][1];
+      
+      if (key) {  // ถ้ามี key
+        // Trim whitespace ถ้าเป็น string
+        config[key] = typeof value === 'string' ? value.trim() : value;
+      }
+    }
+    
+    Logger.log('✓ อ่าน settings ทั้งหมด: ' + Object.keys(config).length + ' keys');
+    return config;
+    
+  } catch (error) {
+    Logger.log('Error in getAllConfigValues: ' + error.toString());
+    return {};
+  }
+}
+
+/**
+ * ฟังก์ชัน Helper สำหรับอ่านค่า config แบบทีละตัว (backward compatible)
+ */
+function getConfigValue(key, defaultValue = null) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let settingsSheet = ss.getSheetByName('การตั้งค่า');
+    
+    if (!settingsSheet) {
+      return defaultValue;
+    }
+    
+    const lastRow = settingsSheet.getLastRow();
+    if (lastRow < 2) {
+      return defaultValue;
+    }
+    
+    // อ่านข้อมูลทั้งหมดจากชีท
+    const data = settingsSheet.getRange(2, 1, lastRow - 1, 2).getValues();
+    
+    // หา key ที่ตรงกัน (trim ทั้งสองฝั่งเพื่อเปรียบเทียบ)
+    for (let i = 0; i < data.length; i++) {
+      const sheetKey = String(data[i][0]).trim();
+      const searchKey = String(key).trim();
+      
+      if (sheetKey === searchKey) {
+        const value = data[i][1];
+        
+        // ถ้าค่าเป็น empty string หรือ null/undefined ให้ใช้ default
+        if (value === null || value === undefined || value === '') {
+          return defaultValue;
+        }
+        // Trim whitespace จากค่าที่อ่านได้
+        const finalValue = typeof value === 'string' ? value.trim() : value;
+        return finalValue;
+      }
+    }
+    
+    return defaultValue;
+    
+  } catch (error) {
+    Logger.log('Error in getConfigValue: ' + error.toString());
+    return defaultValue;
+  }
+}
+
+/**
+ * ฟังก์ชัน Helper สำหรับบันทึกค่าลงชีทการตั้งค่า (Key-Value)
+ */
+function setConfigValue(key, value) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let settingsSheet = ss.getSheetByName('การตั้งค่า');
+    
+    if (!settingsSheet) {
+      // สร้างชีทใหม่ถ้ายังไม่มี
+      settingsSheet = ss.insertSheet('การตั้งค่า');
+      
+      // สร้างหัวตาราง
+      settingsSheet.getRange('A1').setValue('Key');
+      settingsSheet.getRange('B1').setValue('Value');
+      
+      // จัดรูปแบบหัวตาราง
+      const headerRange = settingsSheet.getRange('A1:B1');
+      headerRange.setBackground('#1976D2');
+      headerRange.setFontColor('#FFFFFF');
+      headerRange.setFontWeight('bold');
+      headerRange.setHorizontalAlignment('center');
+      
+      // ปรับขนาดคอลัมน์
+      settingsSheet.setColumnWidth(1, 200);
+      settingsSheet.setColumnWidth(2, 400);
+      
+      // ตรึงแถวหัวตาราง
+      settingsSheet.setFrozenRows(1);
+    }
+    
+    const lastRow = settingsSheet.getLastRow();
+    let found = false;
+    
+    // หา key ที่มีอยู่แล้ว
+    if (lastRow > 1) {
+      const data = settingsSheet.getRange(2, 1, lastRow - 1, 2).getValues(); // อ่านทั้ง Key และ Value
+      for (let i = 0; i < data.length; i++) {
+        // Trim key ก่อนเปรียบเทียบเพื่อหลีกเลี่ยง whitespace
+        if (String(data[i][0]).trim() === String(key).trim()) {
+          // อัพเดตค่าเดิม (trim value ก่อนเขียน)
+          const trimmedValue = typeof value === 'string' ? value.trim() : value;
+          settingsSheet.getRange(i + 2, 2).setValue(trimmedValue);
+          found = true;
+          break;
+        }
+      }
+    }
+    
+    // ถ้าไม่เจอ ให้เพิ่มแถวใหม่ (trim ทั้ง key และ value)
+    if (!found) {
+      const trimmedKey = typeof key === 'string' ? key.trim() : key;
+      const trimmedValue = typeof value === 'string' ? value.trim() : value;
+      settingsSheet.appendRow([trimmedKey, trimmedValue]);
+    }
+    
+    return true;
+    
+  } catch (error) {
+    Logger.log('Error in setConfigValue: ' + error.toString());
+    return false;
+  }
+}
+function getAllTeams() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheetMid = ss.getSheetByName('ระดับกลาง');
+    const sheetHigh = ss.getSheetByName('ระดับสูง');
+    
+    // โหลดการตั้งค่าทั้งหมดจากชีท "การตั้งค่า" (key-value pairs)
+    const settings = getAllConfigValues();
+    
+    // ฟังก์ชันช่วยสำหรับแปลง sheet เป็น array of teams
+    function processSheet(sheet) {
+      if (!sheet || sheet.getLastRow() <= 1) {
+        return [];
+      }
+      
+      const data = sheet.getDataRange().getDisplayValues();
+      const headers = data[0];
+      const teams = [];
+      
+      // สร้าง mapping สำหรับแปลงชื่อคอลัมน์
+      const fieldMapping = {
+        '# score1': 'score1',
+        '# retry1': 'retry1',
+        '# score2': 'score2',
+        '# retry2': 'retry2',
+        'โรงเรียน': 'school_name',
+        'เขต': 'zone',
+        'ระดับ': 'level',
+        'รายการแข่ง': 'competition',
+        'สนาม': 'field'
+      };
+      
+      for (let i = 1; i < data.length; i++) {
+        const team = {};
+        for (let j = 0; j < headers.length; j++) {
+          const header = headers[j];
+          const key = fieldMapping[header] || header;
+          let value = data[i][j];
+          
+          if (key === 'time1' || key === 'time2') {
+            if (value && value.trim() !== '') {
+              team[key] = value.trim();
+            } else {
+              team[key] = '0:00:00';
+            }
+          } else if (key === 'score1' || key === 'score2' || key === 'retry1' || key === 'retry2') {
+            team[key] = parseInt(value) || 0;
+          } else {
+            team[key] = value;
+          }
+        }
+        teams.push(team);
+      }
+      
+      return teams;
+    }
+    
+    // ประมวลผลทั้งสอง sheet
+    const midTeams = processSheet(sheetMid);
+    const highTeams = processSheet(sheetHigh);
+    
+    // แยก defaultFilter_mid และ defaultFilter_high ออกจาก settings
+    const defaultFilter_mid = settings.defaultFilter_mid || null;
+    const defaultFilter_high = settings.defaultFilter_high || null;
+    
+    return {
+      success: true,
+      data: midTeams,
+      highTeams: highTeams,
+      settings: settings,
+      defaultFilter_mid: defaultFilter_mid,
+      defaultFilter_high: defaultFilter_high
     };
     
   } catch (error) {
@@ -526,12 +891,16 @@ function getAllTeams() {
 function updateScore(params) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName('ข้อมูล');
+    
+    // เลือก sheet ตาม level parameter (default เป็น mid)
+    const level = params.level || 'mid';
+    const sheetName = level === 'high' ? 'ระดับสูง' : 'ระดับกลาง';
+    const sheet = ss.getSheetByName(sheetName);
     
     if (!sheet) {
       return {
         success: false,
-        message: 'ไม่พบชีทข้อมูล'
+        message: 'ไม่พบชีทข้อมูล: ' + sheetName
       };
     }
     
@@ -561,14 +930,14 @@ function updateScore(params) {
         
         return {
           success: true,
-          message: 'อัพเดตคะแนนสำเร็จ'
+          message: 'อัพเดตคะแนนสำเร็จ (' + sheetName + ')'
         };
       }
     }
     
     return {
       success: false,
-      message: 'ไม่พบข้อมูลทีม'
+      message: 'ไม่พบข้อมูลทีมใน ' + sheetName
     };
     
   } catch (error) {
