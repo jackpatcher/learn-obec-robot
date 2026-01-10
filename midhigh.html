@@ -2250,7 +2250,7 @@
                   <div>
                     <div class="d-flex align-center">
                       <v-icon large color="green darken-1" class="mr-3">mdi-trophy</v-icon>
-                      ผลการแข่งขัน (ระดับกลาง)<span v-if="filterCompetition" class="ml-2 text-subtitle-1">({{ filterCompetition }})</span>
+                      ผลการแข่งขัน  ระดับกลาง <span v-if="filterCompetition"  > ( {{ filterLevel }} -  {{ filterCompetition }} )</span>
                     </div>
                     <!-- แสดงค่าตัวกรองที่เลือก -->
                     <div class="text-caption grey--text mt-2 ml-12">
@@ -2288,7 +2288,7 @@
                 <v-card-text>
                   <div v-if="sortedTeams.length > 0">
                     <!-- กราฟแท่งแสดงผลการแข่งขัน -->
-                    <h3 class="text-h5 mb-4">ผลการแข่งขัน หุ่นยนต์ระดับกลาง </h3>
+                  
                     
                     <v-card outlined class="pa-4 mb-6">
                       <canvas id="resultsChart" :style="'height: ' + (sortedTeams.length * 40 + 100) + 'px;'"></canvas>
@@ -3136,7 +3136,7 @@
                   <div>
                     <div class="d-flex align-center">
                       <v-icon large color="orange" class="mr-3">mdi-trophy</v-icon>
-                      ผลการแข่งขัน (ระดับสูง)<span v-if="filterCompetition_high" class="ml-2 text-subtitle-1">({{ filterCompetition_high }})</span>
+                      ผลการแข่งขัน ระดับสูง<span v-if="filterCompetition_high" >({{ filterLevel_high }}-{{ filterCompetition_high }})</span>
                     </div>
                     <!-- แสดงค่าตัวกรองที่เลือก -->
                     <div class="text-caption grey--text mt-2 ml-12">
@@ -3174,7 +3174,7 @@
                 <v-card-text>
                   <div v-if="sortedTeams_high.length > 0">
                     <!-- กราฟแท่งแสดงผลการแข่งขัน -->
-                    <h3 class="text-h5 mb-4">ผลการแข่งขัน หุ่นยนต์ระดับสูง </h3>
+                   
                     
                     <v-card outlined class="pa-4 mb-6">
                       <canvas id="resultsChartHigh" :style="'height: ' + (sortedTeams_high.length * 40 + 100) + 'px;'"></canvas>
@@ -5861,42 +5861,54 @@
           this.showSnackbar('ออกจากระบบสำเร็จ', 'info');
         },
         
-        // Team Score Methods
+        // Team Score Methods - หารอบที่ดีที่สุดตามลำดับความสำคัญ
+        getBestRound(team) {
+          if (!team) return null;
+          
+          const score1 = team.score1 || 0;
+          const score2 = team.score2 || 0;
+          const retry1 = team.retry1 || 0;
+          const retry2 = team.retry2 || 0;
+          const time1 = team.time1 || '0:00:00';
+          const time2 = team.time2 || '0:00:00';
+          
+          // 1. เปรียบเทียบคะแนนก่อน (สูงกว่าดีกว่า)
+          if (score1 > score2) {
+            return { score: score1, retry: retry1, time: time1 };
+          } else if (score2 > score1) {
+            return { score: score2, retry: retry2, time: time2 };
+          }
+          
+          // 2. คะแนนเท่ากัน เปรียบเทียบ retry (น้อยกว่าดีกว่า)
+          if (retry1 < retry2) {
+            return { score: score1, retry: retry1, time: time1 };
+          } else if (retry2 < retry1) {
+            return { score: score2, retry: retry2, time: time2 };
+          }
+          
+          // 3. คะแนนและ retry เท่ากัน เปรียบเทียบเวลา (น้อยกว่าดีกว่า)
+          const time1Sec = this.timeToSeconds(time1);
+          const time2Sec = this.timeToSeconds(time2);
+          if (time1Sec < time2Sec) {
+            return { score: score1, retry: retry1, time: time1 };
+          } else {
+            return { score: score2, retry: retry2, time: time2 };
+          }
+        },
+        
         getBestScore(team) {
-          if (!team) return 0;
-          return Math.max(team.score1 || 0, team.score2 || 0);
+          const best = this.getBestRound(team);
+          return best ? best.score : 0;
         },
         
         getBestRetry(team) {
-          if (!team) return 0;
-          const score1 = team.score1 || 0;
-          const score2 = team.score2 || 0;
-          
-          if (score1 > score2) {
-            return team.retry1 || 0;
-          } else if (score2 > score1) {
-            return team.retry2 || 0;
-          } else {
-            // คะแนนเท่ากัน เลือก retry ที่น้อยกว่า
-            return Math.min(team.retry1 || 0, team.retry2 || 0);
-          }
+          const best = this.getBestRound(team);
+          return best ? best.retry : 0;
         },
         
         getBestTime(team) {
-          if (!team) return '0:00:00';
-          const score1 = team.score1 || 0;
-          const score2 = team.score2 || 0;
-          
-          if (score1 > score2) {
-            return team.time1 || '0:00:00';
-          } else if (score2 > score1) {
-            return team.time2 || '0:00:00';
-          } else {
-            // คะแนนเท่ากัน เลือกเวลาที่น้อยกว่า
-            const time1Sec = this.timeToSeconds(team.time1 || '0:00:00');
-            const time2Sec = this.timeToSeconds(team.time2 || '0:00:00');
-            return time1Sec < time2Sec ? team.time1 : team.time2;
-          }
+          const best = this.getBestRound(team);
+          return best ? best.time : '0:00:00';
         },
         
         timeToSeconds(timeStr) {
@@ -6098,25 +6110,43 @@
           const canvas = document.getElementById('resultsChart');
           if (!canvas || !this.sortedTeams || this.sortedTeams.length === 0) return;
           
-          // ทำลายกราฟเก่าถ้ามี
+          // ทำลายกราฟเก่าถ้ามีอย่างสมบูรณ์
           if (this.resultsChartInstance) {
             try {
               this.resultsChartInstance.destroy();
-              this.resultsChartInstance = null;
             } catch (e) {
               console.warn('Error destroying chart:', e);
             }
+            this.resultsChartInstance = null;
           }
           
           // ลบ Chart instance เก่าที่อาจติดค้างใน canvas
-          if (canvas.chart) {
-            try {
-              canvas.chart.destroy();
-            } catch (e) {}
+          const existingChart = Chart.getChart(canvas);
+          if (existingChart) {
+            existingChart.destroy();
           }
           
+          // Clear canvas ให้สะอาด
           const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
           const teams = this.sortedTeams; // แสดงทุกทีมตามตัวกรอง
+          const self = this; // เก็บ reference ของ Vue instance
+          
+          // สร้างอาเรย์สีที่หลากหลายสำหรับแต่ละทีม
+          const colors = [
+            '#4CAF50', '#2196F3', '#FF9800', '#9C27B0', '#F44336',
+            '#00BCD4', '#FFEB3B', '#E91E63', '#3F51B5', '#8BC34A',
+            '#FF5722', '#009688', '#FFC107', '#673AB7', '#CDDC39',
+            '#795548', '#607D8B', '#03A9F4', '#8BC34A', '#FF6F00'
+          ];
+          const backgroundColors = teams.map((team, index) => colors[index % colors.length]);
+          const borderColors = backgroundColors.map(color => {
+            // ทำให้สีขอบเข้มขึ้นเล็กน้อย
+            return color.replace(/[0-9A-F]{2}$/i, match => {
+              const val = parseInt(match, 16);
+              return Math.max(0, val - 30).toString(16).padStart(2, '0');
+            });
+          });
           
           this.resultsChartInstance = new Chart(ctx, {
             type: 'bar',
@@ -6124,17 +6154,86 @@
               labels: teams.map((team, index) => `${index + 1}. ${team.school_name}`),
               datasets: [{
                 label: 'คะแนน',
-                data: teams.map(team => this.getBestScore(team)),
-                backgroundColor: '#1976D2',
-                borderColor: '#1565C0',
+                data: teams.map(team => self.getBestScore(team)),
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
                 borderWidth: 1
               }]
             },
+            plugins: [{
+              id: 'customLabels',
+              afterDatasetsDraw: (chart) => {
+                const chartCtx = chart.ctx;
+                chart.data.datasets.forEach((dataset, i) => {
+                  const meta = chart.getDatasetMeta(i);
+                  meta.data.forEach((bar, index) => {
+                    const team = teams[index];
+                    const retry = self.getBestRetry(team);
+                    const time = self.getBestTime(team);
+                    const score = self.getBestScore(team);
+                    
+                    chartCtx.save();
+                    
+                    // 0. แสดงลำดับและชื่อโรงเรียนชิดซ้ายของแท่ง
+                    chartCtx.textAlign = 'left';
+                    chartCtx.textBaseline = 'middle';
+                    chartCtx.fillStyle = '#fff';
+                    chartCtx.font = 'bold 13px Roboto';
+                    const schoolNameText = `${index + 1}. ${team.school_name}`;
+                    chartCtx.fillText(schoolNameText, bar.base + 8, bar.y);
+                    
+                    // 1. แสดงเวลาตรงกลางแท่ง (สีขาว)
+                    if (score > 10) {
+                      chartCtx.textAlign = 'center';
+                      chartCtx.textBaseline = 'middle';
+                      chartCtx.fillStyle = '#fff';
+                      chartCtx.font = 'bold 12px Roboto';
+                      const timeXPos = bar.base + (bar.x - bar.base) / 2;
+                      chartCtx.fillText(time, timeXPos, bar.y);
+                    }
+                    
+                    // 2. แสดงคะแนนปลายแท่ง (สีขาว)
+                    if (score > 0) {
+                      chartCtx.textAlign = 'right';
+                      chartCtx.textBaseline = 'middle';
+                      chartCtx.fillStyle = '#fff';
+                      chartCtx.font = 'bold 14px Roboto';
+                      chartCtx.fillText(score, bar.x - 5, bar.y);
+                    }
+                    
+                    // 3. แสดง retry นอกแท่ง (สีส้ม/แดง)
+                    if (retry > 0) {
+                      chartCtx.textAlign = 'left';
+                      chartCtx.textBaseline = 'middle';
+                      chartCtx.fillStyle = '#FF5722';
+                      chartCtx.font = 'bold 13px Roboto';
+                      chartCtx.fillText(retry, bar.x + 5, bar.y);
+                    }
+                    
+                    chartCtx.restore();
+                  });
+                });
+              }
+            }],
             options: {
               indexAxis: 'y',
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
+                title: {
+                  display: true,
+                  text: this.filterCompetition 
+                    ? `ผลการแข่งขัน ระดับกลาง ( ${this.filterLevel} - ${this.filterCompetition} )`
+                    : 'ผลการแข่งขัน ระดับกลาง',
+                  font: {
+                    size: 18,
+                    weight: 'bold'
+                  },
+                  padding: {
+                    top: 10,
+                    bottom: 20
+                  }
+                },
                 legend: {
                   display: false
                 },
@@ -6162,9 +6261,7 @@
                 },
                 y: {
                   ticks: {
-                    font: {
-                      size: 11
-                    }
+                    display: false  // ซ่อนชื่อที่แกน Y เพราะมีในแท่งกราฟแล้ว
                   }
                 }
               }
@@ -6176,25 +6273,43 @@
           const canvas = document.getElementById('resultsChartHigh');
           if (!canvas || !this.sortedTeams_high || this.sortedTeams_high.length === 0) return;
           
-          // ทำลายกราฟเก่าถ้ามี
+          // ทำลายกราฟเก่าถ้ามีอย่างสมบูรณ์
           if (this.resultsChartHighInstance) {
             try {
               this.resultsChartHighInstance.destroy();
-              this.resultsChartHighInstance = null;
             } catch (e) {
               console.warn('Error destroying chart high:', e);
             }
+            this.resultsChartHighInstance = null;
           }
           
           // ลบ Chart instance เก่าที่อาจติดค้างใน canvas
-          if (canvas.chart) {
-            try {
-              canvas.chart.destroy();
-            } catch (e) {}
+          const existingChart = Chart.getChart(canvas);
+          if (existingChart) {
+            existingChart.destroy();
           }
           
+          // Clear canvas ให้สะอาด
           const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
           const teams = this.sortedTeams_high;
+          const self = this; // เก็บ reference ของ Vue instance
+          
+          // สร้างอาเรย์สีที่หลากหลายสำหรับแต่ละทีม
+          const colors = [
+            '#4CAF50', '#2196F3', '#FF9800', '#9C27B0', '#F44336',
+            '#00BCD4', '#FFEB3B', '#E91E63', '#3F51B5', '#8BC34A',
+            '#FF5722', '#009688', '#FFC107', '#673AB7', '#CDDC39',
+            '#795548', '#607D8B', '#03A9F4', '#8BC34A', '#FF6F00'
+          ];
+          const backgroundColors = teams.map((team, index) => colors[index % colors.length]);
+          const borderColors = backgroundColors.map(color => {
+            // ทำให้สีขอบเข้มขึ้นเล็กน้อย
+            return color.replace(/[0-9A-F]{2}$/i, match => {
+              const val = parseInt(match, 16);
+              return Math.max(0, val - 30).toString(16).padStart(2, '0');
+            });
+          });
           
           this.resultsChartHighInstance = new Chart(ctx, {
             type: 'bar',
@@ -6202,17 +6317,86 @@
               labels: teams.map((team, index) => `${index + 1}. ${team.school_name}`),
               datasets: [{
                 label: 'คะแนน',
-                data: teams.map(team => this.getBestScore(team)),
-                backgroundColor: '#FF9800',
-                borderColor: '#F57C00',
+                data: teams.map(team => self.getBestScore(team)),
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
                 borderWidth: 1
               }]
             },
+            plugins: [{
+              id: 'customLabelsHigh',
+              afterDatasetsDraw: (chart) => {
+                const chartCtx = chart.ctx;
+                chart.data.datasets.forEach((dataset, i) => {
+                  const meta = chart.getDatasetMeta(i);
+                  meta.data.forEach((bar, index) => {
+                    const team = teams[index];
+                    const retry = self.getBestRetry(team);
+                    const time = self.getBestTime(team);
+                    const score = self.getBestScore(team);
+                    
+                    chartCtx.save();
+                    
+                    // 0. แสดงลำดับและชื่อโรงเรียนชิดซ้ายของแท่ง
+                    chartCtx.textAlign = 'left';
+                    chartCtx.textBaseline = 'middle';
+                    chartCtx.fillStyle = '#fff';
+                    chartCtx.font = 'bold 13px Roboto';
+                    const schoolNameText = `${index + 1}. ${team.school_name}`;
+                    chartCtx.fillText(schoolNameText, bar.base + 8, bar.y);
+                    
+                    // 1. แสดงเวลาตรงกลางแท่ง (สีขาว)
+                    if (score > 10) {
+                      chartCtx.textAlign = 'center';
+                      chartCtx.textBaseline = 'middle';
+                      chartCtx.fillStyle = '#fff';
+                      chartCtx.font = 'bold 12px Roboto';
+                      const timeXPos = bar.base + (bar.x - bar.base) / 2;
+                      chartCtx.fillText(time, timeXPos, bar.y);
+                    }
+                    
+                    // 2. แสดงคะแนนปลายแท่ง (สีขาว)
+                    if (score > 0) {
+                      chartCtx.textAlign = 'right';
+                      chartCtx.textBaseline = 'middle';
+                      chartCtx.fillStyle = '#fff';
+                      chartCtx.font = 'bold 14px Roboto';
+                      chartCtx.fillText(score, bar.x - 5, bar.y);
+                    }
+                    
+                    // 3. แสดง retry นอกแท่ง (สีส้ม/แดง)
+                    if (retry > 0) {
+                      chartCtx.textAlign = 'left';
+                      chartCtx.textBaseline = 'middle';
+                      chartCtx.fillStyle = '#FF5722';
+                      chartCtx.font = 'bold 13px Roboto';
+                      chartCtx.fillText(retry, bar.x + 5, bar.y);
+                    }
+                    
+                    chartCtx.restore();
+                  });
+                });
+              }
+            }],
             options: {
               indexAxis: 'y',
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
+                title: {
+                  display: true,
+                  text: this.filterCompetition 
+                    ? `ผลการแข่งขัน ระดับสูง ( ${this.filterLevel_high} - ${this.filterCompetition_high} )`
+                    : 'ผลการแข่งขัน ระดับสูง',
+                  font: {
+                    size: 18,
+                    weight: 'bold'
+                  },
+                  padding: {
+                    top: 10,
+                    bottom: 20
+                  }
+                },
                 legend: {
                   display: false
                 },
@@ -6240,9 +6424,7 @@
                 },
                 y: {
                   ticks: {
-                    font: {
-                      size: 11
-                    }
+                    display: false  // ซ่อนชื่อที่แกน Y เพราะมีในแท่งกราฟแล้ว
                   }
                 }
               }
@@ -6575,7 +6757,7 @@
             if (e.code === "Space") {
               e.preventDefault();
               this.toggleTimer();
-            } else if (e.code === "Digit0") {
+            } else if (e.code === "Digit0" || e.code === "Numpad0") {
               this.resetTimer();
             } else if (e.code === "NumpadAdd") {
               this.toggleFullscreen();
@@ -6588,14 +6770,14 @@
               } else if (this.midTimerRunning) {
                 this.pauseMidTimer();
               }
-            } else if (e.code === "Digit0") {
+            } else if (e.code === "Digit0" || e.code === "Numpad0") {
               // กด 0 เพื่อรีเซต
               this.resetMidTimer();
-            } else if (e.code === "Digit1" && !this.midTimerRunning && !this.midTimerIsPreparing) {
+            } else if ((e.code === "Digit1" || e.code === "Numpad1") && !this.midTimerRunning && !this.midTimerIsPreparing) {
               // กด 1 เพื่อเริ่มจับเวลา 1 นาทีสำหรับซ้อม
               e.preventDefault();
               this.startMidTimerPractice();
-            } else if (e.code === "Digit3" && !this.midTimerRunning && !this.midTimerIsPreparing) {
+            } else if ((e.code === "Digit3" || e.code === "Numpad3") && !this.midTimerRunning && !this.midTimerIsPreparing) {
               // กด 3 เพื่อจับเวลาจริงบนระดับกลาง
               e.preventDefault();
               this.startMidTimer();
@@ -6608,14 +6790,14 @@
               } else if (this.highTimerRunning) {
                 this.pauseHighTimer();
               }
-            } else if (e.code === "Digit0") {
+            } else if (e.code === "Digit0" || e.code === "Numpad0") {
               // กด 0 เพื่อรีเซต
               this.resetHighTimer();
-            } else if (e.code === "Digit1" && !this.highTimerRunning && !this.highTimerIsPreparing) {
+            } else if ((e.code === "Digit1" || e.code === "Numpad1") && !this.highTimerRunning && !this.highTimerIsPreparing) {
               // กด 1 เพื่อเริ่มจับเวลา 1 นาทีสำหรับซ้อม
               e.preventDefault();
               this.startHighTimerPractice();
-            } else if (e.code === "Digit5" && !this.highTimerRunning && !this.highTimerIsPreparing) {
+            } else if ((e.code === "Digit5" || e.code === "Numpad5") && !this.highTimerRunning && !this.highTimerIsPreparing) {
               // กด 5 เพื่อจับเวลาจริงบนระดับสูง
               e.preventDefault();
               this.startHighTimer();
@@ -6718,14 +6900,14 @@
             });
           }
           
-          // เมื่อเปลี่ยนไปหน้าผลการแข่งขันระดับกลาง ให้สร้างกราฟ
+          // เมื่อเปลี่ยนไปหน้าผลการแข่งขันระดับกลาง ให้สร้างกราฟใหม่ทุกครั้ง
           if (newTab === 'mid-results') {
             this.$nextTick(() => {
               this.renderResultsChart();
             });
           }
           
-          // เมื่อเปลี่ยนไปหน้าผลการแข่งขันระดับสูง ให้สร้างกราฟ
+          // เมื่อเปลี่ยนไปหน้าผลการแข่งขันระดับสูง ให้สร้างกราฟใหม่ทุกครั้ง
           if (newTab === 'high-results') {
             this.$nextTick(() => {
               this.renderResultsChartHigh();
