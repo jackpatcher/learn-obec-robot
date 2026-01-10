@@ -619,7 +619,7 @@
 <body>
   <div id="app">
     <v-app>
-      <v-app-bar app color="primary" dark>
+      <v-app-bar app :color="appBarColor" dark>
         <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
         <v-toolbar-title>เรียนรู้หุ่นยนต์ สพฐ ระดับกลางและระดับสูง </v-toolbar-title>
         <v-spacer></v-spacer> จิรัฎฐ์ สุดใจ :
@@ -937,7 +937,8 @@
                 </v-btn>
               </v-btn-group>
               <p class="font-weight-thin" style="margin-top:20px">
-                กด SPACE BAR เพื่อเริ่ม หรือ หยุด<br>กด 0 เพื่อรีเซ็ต
+                <v-icon x-small color="white">mdi-keyboard</v-icon>
+                  <strong>Space</strong>: เริ่ม/หยุด | <strong>1</strong>: 1 นาที | <strong>3</strong>: 3 นาที | <strong>0</strong>: รีเซ็ต
               </p>
             </div>
           </v-sheet>
@@ -1488,107 +1489,101 @@
           </v-sheet>
 
           <!-- จับเวลา 3 นาทีระดับกลาง -->
-          <v-sheet v-if="tab === 'mid-timer'" class="d-flex flex-column align-center justify-center fill-height pa-4" style="position: relative;">
-            <v-container>
-               
-                <v-card-title class="text-h4 justify-center mb-2">
-                  <v-icon large color="primary" class="mr-3">mdi-timer</v-icon>
-                  จับเวลา 3 นาที (ระดับกลาง)
-                </v-card-title>
+          <v-sheet v-if="tab === 'mid-timer'" dark class="d-flex flex-column align-center justify-center fill-height" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #000000; padding: 0; margin: 0; padding-top: 64px; z-index: 1;">
+            <v-container fluid class="fill-height d-flex flex-column align-center justify-center" style="max-width: 100%;">
+              
+              <!-- ตัวเลขหลัก กลางจอ -->
+              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 
-                <!-- เวลาที่ใช้ไป - แสดงทั้ง 2 รูปแบบ ใช้ v-show และ transition -->
-                <v-card-subtitle v-show="!midTimerIsPreparing && midTimerRunning" class="text-center pb-0" style="transition: all 0.5s ease-in-out;">
-                  <span class="text-h5" style="color: #1976D2; font-weight: bold;">
-                    เวลาที่ใช้ไป: {{ String(midTimerElapsedMinutes).padStart(2, '0') }}:{{ String(midTimerElapsedSeconds).padStart(2, '0') }}.{{ String(midTimerElapsedMilliseconds).padStart(2, '0') }}
-                  </span>
-                </v-card-subtitle>
-                
-                <!-- เวลาที่ใช้ไป (ใหญ่) - แสดงตอนหยุด ใช้ v-show -->
-                <v-card-text v-show="!midTimerIsPreparing && !midTimerRunning" class="text-center pt-2 pb-0">
-                  <p class="timer-text-label grey--text mb-2" 
-                     :style="isFullScreen ? 'font-weight: 300; font-size: 3rem;' : 'font-weight: 300; font-size: 1.5rem;'">
-                    เวลาที่ใช้ไป
-                  </p>
-                  <br />
-                  <div :class="['timer-box', 'timer-box-green', isFullScreen ? 'timer-box-fullscreen' : '']">
-                    <div :class="['fixed-number', isFullScreen ? 'fullscreen-time' : '']"
-                         :style="isFullScreen ? { color: '#4CAF50' } : { fontSize: '8rem', lineHeight: '1', color: '#4CAF50' }">
-                      {{ String(midTimerElapsedMinutes).padStart(2, '0') }}:{{ String(midTimerElapsedSeconds).padStart(2, '0') }}<span class="fixed-number" :class="isFullScreen ? 'fullscreen-millisecond' : ''" :style="isFullScreen ? {} : { fontSize: '5rem' }">.{{ String(midTimerElapsedMilliseconds).padStart(2, '0') }}</span>
-                    </div>
+                <!-- การนับถอยหลัง 5 วินาที -->
+                <div v-if="midTimerIsPreparing" class="text-center">
+                  <p class="text-h6 mb-4" style="color: #FFA726; opacity: 0.7;">เตรียมพร้อม...</p>
+                  <div class="fixed-number" 
+                       :style="isFullScreen ? 'font-size: 35vh; color: #FFA726; font-weight: bold; line-height: 1;' : 'font-size: 20rem; color: #FFA726; font-weight: bold; line-height: 1;'">
+                    {{ midTimerPrepareCountdown }}
                   </div>
-                </v-card-text>
-                
-                <!-- การนับถอยหลัง 5 วินาที (แสดงทับบนเวลา) -->
-                <v-card-text v-if="midTimerIsPreparing" class="text-center pt-8">
-                  <p class="text-h5" style="color: orange;">
-                    เตรียมพร้อม... <span :class="['fixed-number', isFullScreen ? 'display-1' : 'headline']" 
-                       :style="isFullScreen ? 'font-size: 20vh;' : 'font-size: 8rem;'"
-                       style="color: orange; font-weight: bold;">{{ midTimerPrepareCountdown }}</span>
-                  </p>
-                </v-card-text>
+                </div>
 
-                <!-- เวลาคงเหลือ (นับถอยหลัง) - ใหญ่ตอนกำลังนับ, เล็กตอนหยุด -->
-                <v-card-text class="text-center" :style="midTimerRunning || midTimerIsPreparing ? 'padding-top: 2rem;' : 'padding-top: 1rem; padding-bottom: 0.5rem;'">
-                  <div :class="['timer-box', isFullScreen && (midTimerRunning || midTimerIsPreparing) ? 'timer-box-fullscreen' : '']">
-                    <div :class="['fixed-number', isFullScreen && (midTimerRunning || midTimerIsPreparing) ? 'fullscreen-time' : '']" 
-                         class="mb-2" 
-                         :style="midTimerRunning || midTimerIsPreparing ? (isFullScreen ? {fontSize: '25vh'} : {fontSize: '8rem'}) : {fontSize: '3rem'}">
-                      {{ String(midTimerMinutes).padStart(2, '0') }}:{{ String(midTimerSeconds).padStart(2, '0') }}<span :class="['fixed-number', (midTimerRunning || midTimerIsPreparing) && isFullScreen ? 'fullscreen-millisecond' : '']" :style="midTimerRunning || midTimerIsPreparing ? (isFullScreen ? {} : {fontSize: '5rem'}) : {fontSize: '2rem'}">.{{ String(midTimerMilliseconds).padStart(2, '0') }}</span>
-                    </div>
+                <!-- เวลาที่ใช้ไป (ตัวใหญ่) - แสดงตอนหยุด -->
+                <div v-if="!midTimerIsPreparing && !midTimerRunning" class="text-center">
+                  <div class="fixed-number" 
+                       :style="isFullScreen ? 'font-size: 35vh; color: #4CAF50; font-weight: 300; line-height: 1;' : 'font-size: 20rem; color: #4CAF50; font-weight: 300; line-height: 1;'">
+                    {{ String(midTimerElapsedMinutes).padStart(2, '0') }}:{{ String(midTimerElapsedSeconds).padStart(2, '0') }}<span :style="isFullScreen ? 'font-size: 20vh; opacity: 0.7;' : 'font-size: 12rem; opacity: 0.7;'">.{{ String(midTimerElapsedMilliseconds).padStart(2, '0') }}</span>
                   </div>
-                  <p :class="['timer-text-label', midTimerRunning || midTimerIsPreparing ? 'text-h6' : 'body-2']" class="grey--text">เวลาคงเหลือ</p>
-                </v-card-text>
+                </div>
 
-                <!-- ปุ่มควบคุม -->
-                <v-card-actions class="justify-center mb-4">
-                  <v-btn
-                    v-if="!midTimerRunning && !midTimerIsPreparing"
-                    color="success"
-                    x-large
-                    @click="startMidTimer"
-                  >
-                    <v-icon left>mdi-play</v-icon>
-                    เริ่ม
-                  </v-btn>
-                  <v-btn
-                    v-if="midTimerRunning"
-                    color="warning"
-                    x-large
-                    @click="pauseMidTimer"
-                  >
-                    <v-icon left>mdi-pause</v-icon>
-                    หยุดชั่วคราว
-                  </v-btn>
-                  <v-btn
-                    color="error"
-                    x-large
-                    @click="resetMidTimer"
-                    class="ml-4"
-                    :disabled="midTimerIsPreparing"
-                  >
-                    <v-icon left>mdi-refresh</v-icon>
-                    รีเซ็ต
-                  </v-btn>
-                </v-card-actions>
+                <!-- เวลาคงเหลือ (ตัวใหญ่) - แสดงตอนรัน -->
+                <div v-if="!midTimerIsPreparing && midTimerRunning" class="text-center">
+                  <div class="fixed-number" 
+                       :style="isFullScreen ? 'font-size: 35vh; color: #FFFFFF; font-weight: 300; line-height: 1;' : 'font-size: 20rem; color: #FFFFFF; font-weight: 300; line-height: 1;'">
+                    {{ String(midTimerMinutes).padStart(2, '0') }}:{{ String(midTimerSeconds).padStart(2, '0') }}<span :style="isFullScreen ? 'font-size: 20vh; opacity: 0.7;' : 'font-size: 12rem; opacity: 0.7;'">.{{ String(midTimerMilliseconds).padStart(2, '0') }}</span>
+                  </div>
+                </div>
 
-                <!-- คีย์ลัด -->
-                <v-divider v-if="!midTimerIsPreparing" class="my-4"></v-divider>
-                <v-card-text v-if="!midTimerIsPreparing" class="text-center">
-                  <p class="caption grey--text">
-                    <v-icon small>mdi-keyboard</v-icon>
-                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>1</strong> เพื่อซ้อม 1 นาที | <strong>3</strong> เพื่อจับเวลาจริง | <strong>0</strong> เพื่อรีเซ็ต
-                  </p>
-                </v-card-text>
-               
+                <!-- Badges ด้านล่าง - แสดงตลอดเวลา -->
+                <div v-if="!midTimerIsPreparing" class="text-center mt-4" style="position: absolute; bottom: 120px; left: 0; right: 0;">
+                  <v-chip color="green darken-2" dark small class="mx-1">
+                    <v-icon left x-small>mdi-clock-check</v-icon>
+                    ใช้ไป: {{ String(midTimerElapsedMinutes).padStart(2, '0') }}:{{ String(midTimerElapsedSeconds).padStart(2, '0') }}.{{ String(midTimerElapsedMilliseconds).padStart(2, '0') }}
+                  </v-chip>
+                  <v-chip color="orange darken-2" dark small class="mx-1">
+                    <v-icon left x-small>mdi-timer-sand</v-icon>
+                    เหลือ: {{ String(midTimerMinutes).padStart(2, '0') }}:{{ String(midTimerSeconds).padStart(2, '0') }}.{{ String(midTimerMilliseconds).padStart(2, '0') }}
+                  </v-chip>
+                  <v-chip color="grey darken-3" dark class="mx-1">
+                    <v-icon left small>mdi-keyboard</v-icon>
+                    <strong>Space</strong>: เริ่ม/หยุด | <strong>1</strong>: ซ้อม 1 นาที | <strong>3</strong>: จับเวลา 3 นาที | <strong>0</strong>: รีเซ็ต
+                  </v-chip>
+                </div>
+
+              </div>
+
+              <!-- ปุ่มควบคุม ด้านล่าง (แค่ไอคอน) -->
+              <div style="position: absolute; bottom: 60px; left: 0; right: 0; text-align: center;">
+                <v-btn
+                  v-if="!midTimerRunning && !midTimerIsPreparing"
+                  fab
+                  color="green"
+                  dark
+                  @click="startMidTimer"
+                >
+                  <v-icon>mdi-play</v-icon>
+                </v-btn>
+                <v-btn
+                  v-if="midTimerRunning"
+                  fab
+                  small
+                  color="orange"
+                  dark
+                  @click="pauseMidTimer"
+                >
+                  <v-icon small>mdi-pause</v-icon>
+                </v-btn>
+                <v-btn
+                  fab
+                  small
+                  color="red"
+                  dark
+                  @click="resetMidTimer"
+                  class="ml-3"
+                  :disabled="midTimerIsPreparing"
+                >
+                  <v-icon small>mdi-refresh</v-icon>
+                </v-btn>
+              </div>
+
+ 
+              
             </v-container>
-            
+
             <!-- Progress Bar - ด้านล่างสุดของจอ -->
             <v-progress-linear
               v-if="!midTimerIsPreparing"
               :value="((midTimerElapsedMinutes * 60 + midTimerElapsedSeconds) / 180) * 100"
-              height="25"
-              :color="midTimerMinutes === 0 && midTimerSeconds <= 10 ? 'red' : 'primary'"
-              style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;"
+              height="6"
+              :color="midTimerMinutes === 0 && midTimerSeconds <= 10 ? 'red' : 'green'"
+              background-color="grey darken-4"
+              style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;"
             ></v-progress-linear>
           </v-sheet>
 
@@ -2764,107 +2759,100 @@
           </v-sheet>
 
           <!-- จับเวลา 5 นาทีระดับสูง -->
-          <v-sheet v-if="tab === 'high-timer'" class="d-flex flex-column align-center justify-center fill-height pa-4" style="position: relative;">
-            <v-container>
-               
-                <v-card-title class="text-h4 justify-center mb-2">
-                  <v-icon large color="orange" class="mr-3">mdi-timer</v-icon>
-                  จับเวลา 5 นาที (ระดับสูง)
-                </v-card-title>
+          <v-sheet v-if="tab === 'high-timer'" dark class="d-flex flex-column align-center justify-center fill-height" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #000000; padding: 0; margin: 0; padding-top: 64px; z-index: 1;">
+            <v-container fluid class="fill-height d-flex flex-column align-center justify-center" style="max-width: 100%;">
+              
+              <!-- ตัวเลขหลัก กลางจอ -->
+              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 
-                <!-- เวลาที่ใช้ไป - แสดงทั้ง 2 รูปแบบ ใช้ v-show และ transition -->
-                <v-card-subtitle v-show="!highTimerIsPreparing && highTimerRunning" class="text-center pb-0" style="transition: all 0.5s ease-in-out;">
-                  <span class="text-h5" style="color: #FF6F00; font-weight: bold;">
-                    เวลาที่ใช้ไป: {{ String(highTimerElapsedMinutes).padStart(2, '0') }}:{{ String(highTimerElapsedSeconds).padStart(2, '0') }}.{{ String(highTimerElapsedMilliseconds).padStart(2, '0') }}
-                  </span>
-                </v-card-subtitle>
-                
-                <!-- เวลาที่ใช้ไป (ใหญ่) - แสดงตอนหยุด ใช้ v-show -->
-                <v-card-text v-show="!highTimerIsPreparing && !highTimerRunning" class="text-center pt-2 pb-0">
-                  <p class="timer-text-label grey--text mb-2" 
-                     :style="isFullScreen ? 'font-weight: 300; font-size: 3rem;' : 'font-weight: 300; font-size: 1.5rem;'">
-                    เวลาที่ใช้ไป
-                  </p>
-                  <br />
-                  <div :class="['timer-box', 'timer-box-green', isFullScreen ? 'timer-box-fullscreen' : '']">
-                    <div :class="['fixed-number', isFullScreen ? 'fullscreen-time' : '']"
-                         :style="isFullScreen ? { color: '#4CAF50' } : { fontSize: '8rem', lineHeight: '1', color: '#4CAF50' }">
-                      {{ String(highTimerElapsedMinutes).padStart(2, '0') }}:{{ String(highTimerElapsedSeconds).padStart(2, '0') }}<span class="fixed-number" :class="isFullScreen ? 'fullscreen-millisecond' : ''" :style="isFullScreen ? {} : { fontSize: '5rem' }">.{{ String(highTimerElapsedMilliseconds).padStart(2, '0') }}</span>
-                    </div>
+                <!-- การนับถอยหลัง 5 วินาที -->
+                <div v-if="highTimerIsPreparing" class="text-center">
+                  <p class="text-h6 mb-4" style="color: #FFA726; opacity: 0.7;">เตรียมพร้อม...</p>
+                  <div class="fixed-number" 
+                       :style="isFullScreen ? 'font-size: 35vh; color: #FFA726; font-weight: bold; line-height: 1;' : 'font-size: 20rem; color: #FFA726; font-weight: bold; line-height: 1;'">
+                    {{ highTimerPrepareCountdown }}
                   </div>
-                </v-card-text>
-                
-                <!-- การนับถอยหลัง 5 วินาที (แสดงทับบนเวลา) -->
-                <v-card-text v-if="highTimerIsPreparing" class="text-center pt-8">
-                  <p class="text-h5" style="color: #FF9800;">
-                    เตรียมพร้อม... <span :class="['fixed-number', isFullScreen ? 'display-1' : 'headline']" 
-                       :style="isFullScreen ? 'font-size: 20vh;' : 'font-size: 8rem;'"
-                       style="color: #FF9800; font-weight: bold;">{{ highTimerPrepareCountdown }}</span>
-                  </p>
-                </v-card-text>
+                </div>
 
-                <!-- เวลาคงเหลือ (นับถอยหลัง) - ใหญ่ตอนกำลังนับ, เล็กตอนหยุด -->
-                <v-card-text class="text-center" :style="highTimerRunning || highTimerIsPreparing ? 'padding-top: 2rem;' : 'padding-top: 1rem; padding-bottom: 0.5rem;'">
-                  <div :class="['timer-box', 'timer-box-orange', isFullScreen && (highTimerRunning || highTimerIsPreparing) ? 'timer-box-fullscreen' : '']">
-                    <div :class="['fixed-number', isFullScreen && (highTimerRunning || highTimerIsPreparing) ? 'fullscreen-time' : '']" 
-                         class="mb-2" 
-                         :style="highTimerRunning || highTimerIsPreparing ? (isFullScreen ? {fontSize: '25vh', color: '#FF9800'} : {fontSize: '8rem', color: '#FF9800'}) : {fontSize: '3rem', color: '#FF9800'}">
-                      {{ String(highTimerMinutes).padStart(2, '0') }}:{{ String(highTimerSeconds).padStart(2, '0') }}<span :class="['fixed-number', (highTimerRunning || highTimerIsPreparing) && isFullScreen ? 'fullscreen-millisecond' : '']" :style="highTimerRunning || highTimerIsPreparing ? (isFullScreen ? {} : {fontSize: '5rem'}) : {fontSize: '2rem'}">.{{ String(highTimerMilliseconds).padStart(2, '0') }}</span>
-                    </div>
+                <!-- เวลาที่ใช้ไป (ตัวใหญ่) - แสดงตอนหยุด -->
+                <div v-if="!highTimerIsPreparing && !highTimerRunning" class="text-center">
+                  <div class="fixed-number" 
+                       :style="isFullScreen ? 'font-size: 35vh; color: #FF9800; font-weight: 300; line-height: 1;' : 'font-size: 20rem; color: #FF9800; font-weight: 300; line-height: 1;'">
+                    {{ String(highTimerElapsedMinutes).padStart(2, '0') }}:{{ String(highTimerElapsedSeconds).padStart(2, '0') }}<span :style="isFullScreen ? 'font-size: 20vh; opacity: 0.7;' : 'font-size: 12rem; opacity: 0.7;'">.{{ String(highTimerElapsedMilliseconds).padStart(2, '0') }}</span>
                   </div>
-                  <p :class="['timer-text-label', highTimerRunning || highTimerIsPreparing ? 'text-h6' : 'body-2']" class="grey--text">เวลาคงเหลือ</p>
-                </v-card-text>
+                </div>
 
-                <!-- ปุ่มควบคุม -->
-                <v-card-actions class="justify-center mb-4">
-                  <v-btn
-                    v-if="!highTimerRunning && !highTimerIsPreparing"
-                    color="orange"
-                    x-large
-                    @click="startHighTimer"
-                  >
-                    <v-icon left>mdi-play</v-icon>
-                    เริ่ม
-                  </v-btn>
-                  <v-btn
-                    v-if="highTimerRunning"
-                    color="warning"
-                    x-large
-                    @click="pauseHighTimer"
-                  >
-                    <v-icon left>mdi-pause</v-icon>
-                    หยุดชั่วคราว
-                  </v-btn>
-                  <v-btn
-                    color="error"
-                    x-large
-                    @click="resetHighTimer"
-                    class="ml-4"
-                    :disabled="highTimerIsPreparing"
-                  >
-                    <v-icon left>mdi-refresh</v-icon>
-                    รีเซ็ต
-                  </v-btn>
-                </v-card-actions>
+                <!-- เวลาคงเหลือ (ตัวใหญ่) - แสดงตอนรัน -->
+                <div v-if="!highTimerIsPreparing && highTimerRunning" class="text-center">
+                  <div class="fixed-number" 
+                       :style="isFullScreen ? 'font-size: 35vh; color: #FFFFFF; font-weight: 300; line-height: 1;' : 'font-size: 20rem; color: #FFFFFF; font-weight: 300; line-height: 1;'">
+                    {{ String(highTimerMinutes).padStart(2, '0') }}:{{ String(highTimerSeconds).padStart(2, '0') }}<span :style="isFullScreen ? 'font-size: 20vh; opacity: 0.7;' : 'font-size: 12rem; opacity: 0.7;'">.{{ String(highTimerMilliseconds).padStart(2, '0') }}</span>
+                  </div>
+                </div>
 
-                <!-- คีย์ลัด -->
-                <v-divider v-if="!highTimerIsPreparing" class="my-4"></v-divider>
-                <v-card-text v-if="!highTimerIsPreparing" class="text-center">
-                  <p class="caption grey--text">
-                    <v-icon small>mdi-keyboard</v-icon>
-                    กด <strong>Space</strong> เพื่อเริ่ม/หยุด | <strong>1</strong> เพื่อซ้อม 1 นาที | <strong>5</strong> เพื่อจับเวลาจริง | <strong>0</strong> เพื่อรีเซ็ต
-                  </p>
-                </v-card-text>
-            
+                <!-- Badges ด้านล่าง - แสดงตลอดเวลา -->
+                <div v-if="!highTimerIsPreparing" class="text-center mt-4" style="position: absolute; bottom: 120px; left: 0; right: 0;">
+                  <v-chip color="orange darken-2" dark small class="mx-1">
+                    <v-icon left x-small>mdi-clock-check</v-icon>
+                    ใช้ไป: {{ String(highTimerElapsedMinutes).padStart(2, '0') }}:{{ String(highTimerElapsedSeconds).padStart(2, '0') }}.{{ String(highTimerElapsedMilliseconds).padStart(2, '0') }}
+                  </v-chip>
+                  <v-chip color="green darken-2" dark small class="mx-1">
+                    <v-icon left x-small>mdi-timer-sand</v-icon>
+                    เหลือ: {{ String(highTimerMinutes).padStart(2, '0') }}:{{ String(highTimerSeconds).padStart(2, '0') }}.{{ String(highTimerMilliseconds).padStart(2, '0') }}
+                  </v-chip>
+                  <v-chip color="grey darken-3" dark class="mx-1">
+                    <v-icon left small>mdi-keyboard</v-icon>
+                    <strong>Space</strong>: เริ่ม/หยุด | <strong>1</strong>: ซ้อม 1 นาที | <strong>5</strong>: จับเวลา 5 นาที | <strong>0</strong>: รีเซ็ต
+                  </v-chip>
+                </div>
+
+              </div>
+
+              <!-- ปุ่มควบคุม ด้านล่าง (แค่ไอคอน) -->
+              <div style="position: absolute; bottom: 60px; left: 0; right: 0; text-align: center;">
+                <v-btn
+                  v-if="!highTimerRunning && !highTimerIsPreparing"
+                  fab
+                  color="orange"
+                  dark
+                  @click="startHighTimer"
+                >
+                  <v-icon>mdi-play</v-icon>
+                </v-btn>
+                <v-btn
+                  v-if="highTimerRunning"
+                  fab
+                  small
+                  color="orange darken-2"
+                  dark
+                  @click="pauseHighTimer"
+                >
+                  <v-icon small>mdi-pause</v-icon>
+                </v-btn>
+                <v-btn
+                  fab
+                  small
+                  color="red"
+                  dark
+                  @click="resetHighTimer"
+                  class="ml-3"
+                  :disabled="highTimerIsPreparing"
+                >
+                  <v-icon small>mdi-refresh</v-icon>
+                </v-btn>
+              </div>
+
+              
             </v-container>
-            
-            <!-- Progress Bar - ด้านล่างสุดของจอ (สีส้ม) -->
+
+            <!-- Progress Bar - ด้านล่างสุดของจอ -->
             <v-progress-linear
               v-if="!highTimerIsPreparing"
               :value="((highTimerElapsedMinutes * 60 + highTimerElapsedSeconds) / 300) * 100"
-              height="25"
+              height="6"
               :color="highTimerMinutes === 0 && highTimerSeconds <= 10 ? 'red' : 'orange'"
-              style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;"
+              background-color="grey darken-4"
+              style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;"
             ></v-progress-linear>
           </v-sheet>
 
@@ -3728,6 +3716,24 @@
           if (this.currentUser.role === 'superadmin') return true;
           // admin สามารถแก้ไขได้เฉพาะระดับของตัวเอง
           return this.currentUser.level === this.currentLevel || this.currentUser.level === 'all';
+        },
+        
+        // กำหนดสี App Bar ตามระดับการแข่งขัน
+        appBarColor() {
+          const routeName = this.$route.name;
+          
+          // ถ้าเป็นเมนูระดับกลาง ให้เป็นสีเขียว
+          if (routeName && routeName.startsWith('mid-')) {
+            return 'green';
+          }
+          
+          // ถ้าเป็นเมนูระดับสูง ให้เป็นสีส้ม
+          if (routeName && routeName.startsWith('high-')) {
+            return 'orange';
+          }
+          
+          // เมนูอื่นๆ ใช้สีเดิม (primary/blue)
+          return 'primary';
         }
       },
       methods: {
@@ -4247,7 +4253,7 @@
         // Mid Timer Methods (3 minutes)
         startMidTimer() {
           this.midTimerIsPreparing = true;
-          this.midTimerPrepareCountdown = 5;
+          this.midTimerPrepareCountdown = 4;
           
           // เปิด fullscreen อัตโนมัติ
           if (!document.fullscreenElement) {
@@ -4446,7 +4452,7 @@
         // High Timer Methods (5 minutes)
         startHighTimer() {
           this.highTimerIsPreparing = true;
-          this.highTimerPrepareCountdown = 5;
+          this.highTimerPrepareCountdown = 4;
           
           // เปิด fullscreen อัตโนมัติ
           if (!document.fullscreenElement) {
@@ -4512,7 +4518,7 @@
         // High Timer Practice (1 minute)
         startHighTimerPractice() {
           this.highTimerIsPreparing = true;
-          this.highTimerPrepareCountdown = 5;
+          this.highTimerPrepareCountdown = 4;
           
           // ตั้งเวลาเป็น 1 นาทีทันทีก่อนนับถอยหลัง
           this.highTimerMinutes = 1;
