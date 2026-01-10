@@ -1599,12 +1599,12 @@
               <div class="d-flex justify-space-between align-center mb-4">
                 <div>
                   <h2 class="text-h5">
-                    <v-icon large color="primary" class="mr-2">mdi-account-group</v-icon>
+                    <v-icon large color="green darken-1" class="mr-2">mdi-account-group</v-icon>
                     จัดการทีม<span v-if="filterCompetition" class="ml-2 text-subtitle-1">({{ filterCompetition }})</span>
                   </h2>
                   <!-- แสดงค่าตัวกรองที่เลือก -->
                   <div class="text-caption grey--text mt-1">
-                    <v-chip x-small class="mr-1" color="primary">{{ filteredTeams.length }}/{{ midTeams.length }} ทีม</v-chip>
+                    <v-chip x-small class="mr-1" color="green darken-1">{{ filteredTeams.length }}/{{ midTeams.length }} ทีม</v-chip>
                     <span v-if="filterZone !== 'ทั้งหมด'">เขต {{ filterZone }}</span>
                     <span v-if="filterLevel !== 'ทั้งหมด'" class="ml-2">{{ filterLevel }}</span>
                     <span v-if="filterField !== 'ทั้งหมด'" class="ml-2">สนาม {{ filterField }}</span>
@@ -1614,9 +1614,9 @@
                 </div>
                 <div>
                   <v-btn
-                    color="primary"
+                    color="green darken-1"
                     outlined
-                    @click="filterDialog = true"
+                    @click="openFilterDialogMid"
                     class="mr-2"
                   >
                     <v-icon left>mdi-filter</v-icon>
@@ -1624,7 +1624,7 @@
                   </v-btn>
                   <v-btn
                     icon
-                    color="primary"
+                    color="green darken-1"
                     @click="openAuthDialog"
                     class="mr-2"
                     v-if="!isAuthenticated"
@@ -1641,7 +1641,7 @@
                     <v-icon>mdi-logout</v-icon>
                   </v-btn>
                   <v-btn
-                    color="primary"
+                    color="green darken-1"
                     @click="openAddTeamDialog"
                     :disabled="!isAuthenticated"
                   >
@@ -1852,7 +1852,7 @@
               <!-- ปุ่มโหลดข้อมูลจาก Google Sheets -->
               <v-btn
                 class="mt-4"
-                color="primary"
+                color="green darken-1"
                 block
                 outlined
                 @click="loadTeamsFromGAS"
@@ -2013,9 +2013,9 @@
             </v-dialog>
 
             <!-- Dialog ตัวกรอง -->
-            <v-dialog v-model="filterDialog" max-width="600px">
+            <v-dialog v-model="filterDialogMid" max-width="600px">
               <v-card>
-                <v-card-title class="text-h5 primary white--text d-flex align-center">
+                <v-card-title class="text-h5 green darken-1 white--text d-flex align-center">
                   <v-icon left color="white">mdi-filter</v-icon>
                   ตัวกรองข้อมูล (ระดับกลาง)
                   <v-spacer></v-spacer>
@@ -2101,7 +2101,7 @@
                   
                   <v-divider class="my-3"></v-divider>
                   <div class="text-center">
-                    <v-chip color="primary" class="px-4">
+                    <v-chip color="green darken-1" class="px-4">
                       แสดง <strong class="mx-1">{{ filteredTeams.length }}</strong> จาก {{ midTeams.length }} ทีม
                     </v-chip>
                   </div>
@@ -2116,8 +2116,8 @@
                   </v-btn>
                   <v-spacer></v-spacer>
                   <v-btn
-                    color="primary"
-                    @click="filterDialog = false"
+                    color="green darken-1"
+                    @click="filterDialogMid = false"
                   >
                     ปิด
                   </v-btn>
@@ -2141,6 +2141,14 @@
                   >
                     <v-icon>mdi-content-save</v-icon>
                   </v-btn>
+                  <v-tooltip v-else bottom>
+                    <template v-slot:activator="{ on }">
+                      <v-btn icon dark disabled v-on="on">
+                        <v-icon>mdi-content-save</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>ต้อง Login ก่อนถึงจะบันทึกได้</span>
+                  </v-tooltip>
                 </v-card-title>
                 <v-card-text class="pt-6">
                   <!-- กรองตามรายการแข่ง -->
@@ -2246,12 +2254,12 @@
                 <v-card-title class="text-h4 d-flex justify-space-between align-center">
                   <div>
                     <div class="d-flex align-center">
-                      <v-icon large color="primary" class="mr-3">mdi-trophy</v-icon>
+                      <v-icon large color="green darken-1" class="mr-3">mdi-trophy</v-icon>
                       ผลการแข่งขัน (ระดับกลาง)<span v-if="filterCompetition" class="ml-2 text-subtitle-1">({{ filterCompetition }})</span>
                     </div>
                     <!-- แสดงค่าตัวกรองที่เลือก -->
                     <div class="text-caption grey--text mt-2 ml-12">
-                      <v-chip x-small class="mr-1" color="primary">{{ sortedTeams.length }}/{{ midTeams.length }} ทีม</v-chip>
+                      <v-chip x-small class="mr-1" color="green darken-1">{{ sortedTeams.length }}/{{ midTeams.length }} ทีม</v-chip>
                       <span v-if="filterZone !== 'ทั้งหมด'">เขต {{ filterZone }}</span>
                       <span v-if="filterLevel !== 'ทั้งหมด'" class="ml-2">{{ filterLevel }}</span>
                       <span v-if="filterField !== 'ทั้งหมด'" class="ml-2">สนาม {{ filterField }}</span>
@@ -2261,16 +2269,16 @@
                   </div>
                   <div>
                     <v-btn
-                      color="primary"
+                      color="green darken-1"
                       outlined
-                      @click="filterDialog = true"
+                      @click="openFilterDialogMid"
                       class="mr-2"
                     >
                       <v-icon left>mdi-filter</v-icon>
                       ตัวกรอง
                     </v-btn>
                     <v-btn
-                      color="primary"
+                      color="green darken-1"
                       outlined
                       @click="loadTeamsFromGAS"
                       :loading="isLoadingTeams"
@@ -2884,7 +2892,7 @@
                   <v-btn
                     color="orange"
                     outlined
-                    @click="currentLevel = 'high'; filterDialog = true"
+                    @click="openFilterDialogHigh"
                     class="mr-2"
                   >
                     <v-icon left>mdi-filter</v-icon>
@@ -3156,7 +3164,7 @@
                     <v-btn
                       color="orange"
                       outlined
-                      @click="filterDialogHigh = true"
+                      @click="openFilterDialogHigh"
                       class="mr-2"
                     >
                       <v-icon left>mdi-filter</v-icon>
@@ -3494,7 +3502,7 @@
           filterCompetition_high: '',
           
           showFilters: [0], // เปิด expansion panel แรก (index 0)
-          filterDialog: false,
+          filterDialogMid: false,
           filterDialogHigh: false,
           availableZones: [],
           availableFields: [],
@@ -5769,22 +5777,7 @@
               level = 'high';
             }
             
-            // 🔍 DEBUG - แสดงข้อมูล settings และการ login
-            console.log('🔍 DEBUG - Settings:', this.settings);
-            console.log('🔍 DEBUG - Login attempt:', {
-              username: username,
-              password: password,
-              level: level,
-              currentLevel: this.currentLevel,
-              tab: this.tab
-            });
-            console.log('🔍 DEBUG - Superadmin check:', {
-              inputUser: username,
-              expectedUser: this.settings.superadmin,
-              inputPass: password,
-              expectedPass: this.settings.superadmin_password,
-              match: (username === this.settings.superadmin && password === this.settings.superadmin_password)
-            });
+
             
             // เช็ค superadmin (เข้าถึงได้ทุกระดับ)
             if (username === String(this.settings.superadmin) && password === String(this.settings.superadmin_password)) {
@@ -5802,14 +5795,6 @@
             
             // เช็ค admin ตามระดับ
             if (level === 'mid') {
-              console.log('🔍 DEBUG - Checking admin_mid:', {
-                admin1_user: this.settings.admin_mid1,
-                admin1_pass: this.settings.admin_mid1_password,
-                admin2_user: this.settings.admin_mid2,
-                admin2_pass: this.settings.admin_mid2_password,
-                match1: (username === String(this.settings.admin_mid1) && password === String(this.settings.admin_mid1_password)),
-                match2: (username === String(this.settings.admin_mid2) && password === String(this.settings.admin_mid2_password))
-              });
               
               // admin_mid1
               if (username === String(this.settings.admin_mid1) && password === String(this.settings.admin_mid1_password)) {
@@ -5830,14 +5815,6 @@
                 return;
               }
             } else if (level === 'high') {
-              console.log('🔍 DEBUG - Checking admin_high:', {
-                admin1_user: this.settings.admin_high1,
-                admin1_pass: this.settings.admin_high1_password,
-                admin2_user: this.settings.admin_high2,
-                admin2_pass: this.settings.admin_high2_password,
-                match1: (username === String(this.settings.admin_high1) && password === String(this.settings.admin_high1_password)),
-                match2: (username === String(this.settings.admin_high2) && password === String(this.settings.admin_high2_password))
-              });
               
               // admin_high1
               if (username === String(this.settings.admin_high1) && password === String(this.settings.admin_high1_password)) {
@@ -5860,7 +5837,6 @@
             }
             
             // ไม่ตรงกับบัญชีใด ๆ
-            console.log('❌ DEBUG - No match found');
             this.authError = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
             this.isAuthenticating = false;
             
@@ -6274,32 +6250,10 @@
           try {
             const data = await this.sendJSONPRequest({ action: 'getAllTeams' });
             
-            console.log('📦 ข้อมูลที่ได้รับ (เฉพาะ settings):', {
-              hasData: !!data.data,
-              dataCount: data.data ? data.data.length : 0,
-              hasHighTeams: !!data.highTeams,
-              highTeamsCount: data.highTeams ? data.highTeams.length : 0,
-              hasSettings: !!data.settings,
-              settings: data.settings
-            });
-            
             if (data.success && data.data) {
               // โหลด settings ทั้งหมด (รวม passwords)
               if (data.settings) {
                 this.settings = data.settings;
-                console.log('✅ โหลด settings สำเร็จ');
-                console.log('🔍 DEBUG - Settings ที่โหลดมา:', {
-                  superadmin: this.settings.superadmin,
-                  superadmin_password: this.settings.superadmin_password,
-                  admin_mid1: this.settings.admin_mid1,
-                  admin_mid1_password: this.settings.admin_mid1_password,
-                  admin_mid2: this.settings.admin_mid2,
-                  admin_mid2_password: this.settings.admin_mid2_password,
-                  admin_high1: this.settings.admin_high1,
-                  admin_high1_password: this.settings.admin_high1_password,
-                  admin_high2: this.settings.admin_high2,
-                  admin_high2_password: this.settings.admin_high2_password
-                });
               } else {
                 console.error('❌ ไม่พบ settings ใน response');
               }
@@ -6398,6 +6352,16 @@
           this.filterCompetition_high = '';
         },
         
+        // เปิด filter dialog ระดับกลาง
+        openFilterDialogMid() {
+          this.filterDialogMid = true;
+        },
+        
+        // เปิด filter dialog ระดับสูง
+        openFilterDialogHigh() {
+          this.filterDialogHigh = true;
+        },
+        
         // บันทึกค่า filter ระดับกลาง ลง localStorage
         saveFiltersToLocalStorage() {
           const filters = {
@@ -6447,6 +6411,8 @@
               filterData: JSON.stringify(defaultFilter)
             });
             
+            await this.loadDefaultFilter();
+            
             if (data.success) {
               this.showSnackbar('✓ บันทึกค่า Default Filter สำเร็จ (' + (level === 'high' ? 'ระดับสูง' : 'ระดับกลาง') + ')', 'success');
             } else {
@@ -6466,11 +6432,42 @@
             const data = await this.sendJSONPRequest({ action: 'getDefaultFilter' });
             
             if (data.success && data.data) {
-              const defaultFilter = JSON.parse(data.data);
-              this.filterZone = defaultFilter.filterZone || 'ทั้งหมด';
-              this.filterLevel = defaultFilter.filterLevel || 'ทั้งหมด';
-              this.filterField = defaultFilter.filterField || 'ทั้งหมด';
-              this.filterCompetition = defaultFilter.filterCompetition || '';
+              // โหลด filter สำหรับ mid
+              if (data.data.mid) {
+                try {
+                  console.log('📥 [LOAD] Loading mid filter:', data.data.mid);
+                  const defaultFilterMid = JSON.parse(data.data.mid);
+                  this.filterZone = defaultFilterMid.filterZone || 'ทั้งหมด';
+                  this.filterLevel = defaultFilterMid.filterLevel || 'ทั้งหมด';
+                  this.filterField = defaultFilterMid.filterField || 'ทั้งหมด';
+                  this.filterCompetition = defaultFilterMid.filterCompetition || '';
+                  console.log('✅ [LOAD] Mid filter loaded successfully');
+                } catch (error) {
+                  console.error('❌ Error parsing defaultFilter_mid:', error);
+                  console.error('Data received:', data.data.mid);
+                }
+              } else {
+                console.log('ℹ️ [LOAD] No mid filter data found');
+              }
+              
+              // โหลด filter สำหรับ high
+              if (data.data.high) {
+                try {
+                  console.log('📥 [LOAD] Loading high filter:', data.data.high);
+                  const defaultFilterHigh = JSON.parse(data.data.high);
+                  this.filterZone_high = defaultFilterHigh.filterZone || 'ทั้งหมด';
+                  this.filterLevel_high = defaultFilterHigh.filterLevel || 'ทั้งหมด';
+                  this.filterField_high = defaultFilterHigh.filterField || 'ทั้งหมด';
+                  this.filterCompetition_high = defaultFilterHigh.filterCompetition || '';
+                  console.log('✅ [LOAD] High filter loaded successfully');
+                } catch (error) {
+                  console.error('❌ Error parsing defaultFilter_high:', error);
+                  console.error('Data received:', data.data.high);
+                  this.showSnackbar('⚠️ รูปแบบข้อมูล defaultFilter_high ใน Google Sheets ผิดพลาด กรุณาตรวจสอบ JSON', 'warning');
+                }
+              } else {
+                console.log('ℹ️ [LOAD] No high filter data found');
+              }
             }
           } catch (error) {
             console.error('Error loading default filter:', error);

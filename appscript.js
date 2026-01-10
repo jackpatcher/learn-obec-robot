@@ -609,11 +609,17 @@ function saveDefaultFilter(params) {
   try {
     const level = params.level || 'mid';
     const key = level === 'mid' ? 'defaultFilter_mid' : 'defaultFilter_high';
+    
+    // เพิ่ม logging เพื่อ debug
+    Logger.log('saveDefaultFilter called with level: ' + level);
+    Logger.log('Using key: ' + key);
+    Logger.log('Filter data: ' + params.filterData);
+    
     setConfigValue(key, params.filterData);
     
     return {
       success: true,
-      message: 'บันทึก Default Filter สำเร็จ'
+      message: 'บันทึก Default Filter สำเร็จ (key: ' + key + ')'
     };
     
   } catch (error) {
@@ -630,13 +636,16 @@ function saveDefaultFilter(params) {
  */
 function getDefaultFilter(params) {
   try {
-    const level = params.level || 'mid';
-    const key = level === 'mid' ? 'defaultFilter_mid' : 'defaultFilter_high';
-    const filterData = getConfigValue(key, null);
+    // อ่านค่าทั้ง mid และ high พร้อมกัน
+    const filterDataMid = getConfigValue('defaultFilter_mid', null);
+    const filterDataHigh = getConfigValue('defaultFilter_high', null);
     
     return {
       success: true,
-      data: filterData
+      data: {
+        mid: filterDataMid,
+        high: filterDataHigh
+      }
     };
     
   } catch (error) {
