@@ -922,6 +922,7 @@
                   {{ formattedTime }}
                 </div>
               </div>
+              <p>
               <v-btn-group>
                 <v-btn 
                   color="green" 
@@ -936,10 +937,8 @@
                   รีเซ็ต
                 </v-btn>
               </v-btn-group>
-              <p class="font-weight-thin" style="margin-top:20px">
-                <v-icon x-small color="white">mdi-keyboard</v-icon>
-                  <strong>Space</strong>: เริ่ม/หยุด | <strong>1</strong>: 1 นาที | <strong>3</strong>: 3 นาที | <strong>0</strong>: รีเซ็ต
               </p>
+
             </div>
           </v-sheet>
 
@@ -1598,13 +1597,31 @@
                     จัดการทีม<span v-if="filterCompetition" class="ml-2 text-subtitle-1">({{ filterCompetition }})</span>
                   </h2>
                   <!-- แสดงค่าตัวกรองที่เลือก -->
-                  <div class="text-caption grey--text mt-1">
-                    <v-chip x-small class="mr-1" color="green darken-1">{{ filteredTeams.length }}/{{ midTeams.length }} ทีม</v-chip>
-                    <span v-if="filterZone !== 'ทั้งหมด'">เขต {{ filterZone }}</span>
-                    <span v-if="filterLevel !== 'ทั้งหมด'" class="ml-2">{{ filterLevel }}</span>
-                    <span v-if="filterField !== 'ทั้งหมด'" class="ml-2">สนาม {{ filterField }}</span>
-                    <span v-if="filterCompetition" class="ml-2">รายการ: {{ filterCompetition }}</span>
-                    <span v-if="filterZone === 'ทั้งหมด' && filterLevel === 'ทั้งหมด' && filterField === 'ทั้งหมด' && !filterCompetition">แสดงทั้งหมด</span>
+                  <div class="mt-2 d-flex flex-wrap align-center" style="gap: 8px;">
+                    <v-chip color="green darken-1" dark>
+                      <v-icon left small>mdi-account-multiple</v-icon>
+                      <strong>{{ filteredTeams.length }}/{{ midTeams.length }}</strong> ทีม
+                    </v-chip>
+                    <v-chip v-if="filterZone !== 'ทั้งหมด'" color="blue darken-1" dark>
+                      <v-icon left small>mdi-map-marker</v-icon>
+                      เขต {{ filterZone }}
+                    </v-chip>
+                    <v-chip v-if="filterLevel !== 'ทั้งหมด'" color="purple darken-1" dark>
+                      <v-icon left small>mdi-school</v-icon>
+                      {{ filterLevel }}
+                    </v-chip>
+                    <v-chip v-if="filterField !== 'ทั้งหมด'" color="teal darken-1" dark>
+                      <v-icon left small>mdi-stadium</v-icon>
+                      สนาม {{ filterField }}
+                    </v-chip>
+                    <v-chip v-if="filterCompetition" color="orange darken-1" dark>
+                      <v-icon left small>mdi-trophy</v-icon>
+                      {{ filterCompetition }}
+                    </v-chip>
+                    <v-chip v-if="filterZone === 'ทั้งหมด' && filterLevel === 'ทั้งหมด' && filterField === 'ทั้งหมด' && !filterCompetition" color="grey" outlined>
+                      <v-icon left small>mdi-filter-off</v-icon>
+                      แสดงทั้งหมด
+                    </v-chip>
                   </div>
                 </div>
                 <div>
@@ -1620,9 +1637,9 @@
                   <v-btn
                     icon
                     color="green darken-1"
-                    @click="openAuthDialog"
+                    @click="currentLevel = 'mid'; openAuthDialog()"
                     class="mr-2"
-                    v-if="!isAuthenticated"
+                    v-if="!isAuthenticated || !canEditMid"
                   >
                     <v-icon>mdi-lock-open</v-icon>
                   </v-btn>
@@ -1638,7 +1655,7 @@
                   <v-btn
                     color="green darken-1"
                     @click="openAddTeamDialog"
-                    :disabled="!isAuthenticated"
+                    :disabled="!canEditMid"
                   >
                     <v-icon left>mdi-plus</v-icon>
                     เพิ่มทีม
@@ -1661,7 +1678,7 @@
                     elevation="2"
                     hover
                     height="100%"
-                    :class="{ 'editable-card': isAuthenticated }"
+                    :class="{ 'editable-card': canEditMid }"
                   >
                     <!-- Header ของการ์ด -->
                     <v-card-title class="pb-2 white--text" :class="getFieldHeaderColor(item.field)" style="padding: 8px 12px !important;">
@@ -1738,7 +1755,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!isAuthenticated"
+                              :readonly="!canEditMid"
                               style="font-size: 0.85rem;"
                             ></v-text-field>
                           </v-col>
@@ -1750,7 +1767,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!isAuthenticated"
+                              :readonly="!canEditMid"
                               style="font-size: 0.85rem;"
                             ></v-text-field>
                           </v-col>
@@ -1761,7 +1778,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!isAuthenticated"
+                              :readonly="!canEditMid"
                               placeholder="0:43:84"
                               @input="formatTimeInput($event, item, 'time1')"
                               @blur="validateTimeFormat(item, 'time1')"
@@ -1786,7 +1803,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!isAuthenticated"
+                              :readonly="!canEditMid"
                               style="font-size: 0.85rem;"
                             ></v-text-field>
                           </v-col>
@@ -1798,7 +1815,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!isAuthenticated"
+                              :readonly="!canEditMid"
                               style="font-size: 0.85rem;"
                             ></v-text-field>
                           </v-col>
@@ -1809,7 +1826,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!isAuthenticated"
+                              :readonly="!canEditMid"
                               placeholder="0:44:27"
                               @input="formatTimeInput($event, item, 'time2')"
                               @blur="validateTimeFormat(item, 'time2')"
@@ -1827,7 +1844,7 @@
                         block
                         x-small
                         @click="updateTeamScore(item)"
-                        :disabled="!isAuthenticated"
+                        :disabled="!canEditMid"
                         :loading="item.updating"
                         style="height: 32px;"
                       >
@@ -2385,110 +2402,7 @@
 
                 <v-divider class="my-6"></v-divider>
 
-                <!-- ทำได้ -->
-                <v-card-text>
-                  <h2 class="text-h5 text-center mb-4 green--text text--darken-2">
-                    <v-icon color="green darken-2" large>mdi-check-circle</v-icon>
-                    ทำได้
-                  </h2>
-                  <v-row>
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=GOOD1" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 1</v-card-text>
-                      </v-card>
-                    </v-col>
-                  
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=GOOD2" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 2</v-card-text>
-                      </v-card>
-                    </v-col>
-                  
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=GOOD3" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 3</v-card-text>
-                      </v-card>
-                    </v-col>
-                  
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=GOOD4" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 4</v-card-text>
-                      </v-card>
-                    </v-col>
-                  
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=GOOD5" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 5</v-card-text>
-                      </v-card>
-                    </v-col>
-                  
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=GOOD6" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 6</v-card-text>
-                      </v-card>
-                    </v-col>
-                  </v-row>
-                </v-card-text>
-
-                <v-divider class="my-6"></v-divider>
-
-                <!-- ทำไม่ได้ -->
-                <v-card-text>
-                  <h2 class="text-h5 text-center mb-4 red--text text--darken-2">
-                    <v-icon color="red darken-2" large>mdi-close-circle</v-icon>
-                    ทำไม่ได้
-                  </h2>
-                  <v-row>
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=BAD1" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 1</v-card-text>
-                      </v-card>
-                    </v-col>
-                  
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=BAD2" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 2</v-card-text>
-                      </v-card>
-                    </v-col>
-                  
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=BAD3" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 3</v-card-text>
-                      </v-card>
-                    </v-col>
-                  
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=BAD4" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 4</v-card-text>
-                      </v-card>
-                    </v-col>
-                  
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=BAD5" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 5</v-card-text>
-                      </v-card>
-                    </v-col>
-                  
-                    <v-col cols="12" sm="4">
-                      <v-card elevation="2">
-                        <v-img src="https://placehold.co/200x150?text=BAD6" aspect-ratio="1.5"></v-img>
-                        <v-card-text>ข้อความการ์ดใบที่ 6</v-card-text>
-                      </v-card>
-                    </v-col>
-                  </v-row>
-                </v-card-text>
-              </v-card>
+                
             </v-container>
           </v-sheet>
 
@@ -2867,13 +2781,31 @@
                     จัดการทีม (ระดับสูง)<span v-if="filterCompetition_high" class="ml-2 text-subtitle-1">({{ filterCompetition_high }})</span>
                   </h2>
                   <!-- แสดงค่าตัวกรองที่เลือก -->
-                  <div class="text-caption grey--text mt-1">
-                    <v-chip x-small class="mr-1" color="orange">{{ filteredTeams_high.length }}/{{ highTeams.length }} ทีม</v-chip>
-                    <span v-if="filterZone_high !== 'ทั้งหมด'">เขต {{ filterZone_high }}</span>
-                    <span v-if="filterLevel_high !== 'ทั้งหมด'" class="ml-2">{{ filterLevel_high }}</span>
-                    <span v-if="filterField_high !== 'ทั้งหมด'" class="ml-2">สนาม {{ filterField_high }}</span>
-                    <span v-if="filterCompetition_high" class="ml-2">รายการ: {{ filterCompetition_high }}</span>
-                    <span v-if="filterZone_high === 'ทั้งหมด' && filterLevel_high === 'ทั้งหมด' && filterField_high === 'ทั้งหมด' && !filterCompetition_high">แสดงทั้งหมด</span>
+                  <div class="mt-2 d-flex flex-wrap align-center" style="gap: 8px;">
+                    <v-chip color="orange darken-1" dark>
+                      <v-icon left small>mdi-account-multiple</v-icon>
+                      <strong>{{ filteredTeams_high.length }}/{{ highTeams.length }}</strong> ทีม
+                    </v-chip>
+                    <v-chip v-if="filterZone_high !== 'ทั้งหมด'" color="blue darken-1" dark>
+                      <v-icon left small>mdi-map-marker</v-icon>
+                      เขต {{ filterZone_high }}
+                    </v-chip>
+                    <v-chip v-if="filterLevel_high !== 'ทั้งหมด'" color="purple darken-1" dark>
+                      <v-icon left small>mdi-school</v-icon>
+                      {{ filterLevel_high }}
+                    </v-chip>
+                    <v-chip v-if="filterField_high !== 'ทั้งหมด'" color="teal darken-1" dark>
+                      <v-icon left small>mdi-stadium</v-icon>
+                      สนาม {{ filterField_high }}
+                    </v-chip>
+                    <v-chip v-if="filterCompetition_high" color="green darken-1" dark>
+                      <v-icon left small>mdi-trophy</v-icon>
+                      {{ filterCompetition_high }}
+                    </v-chip>
+                    <v-chip v-if="filterZone_high === 'ทั้งหมด' && filterLevel_high === 'ทั้งหมด' && filterField_high === 'ทั้งหมด' && !filterCompetition_high" color="grey" outlined>
+                      <v-icon left small>mdi-filter-off</v-icon>
+                      แสดงทั้งหมด
+                    </v-chip>
                   </div>
                 </div>
                 <div>
@@ -2891,7 +2823,7 @@
                     color="orange"
                     @click="currentLevel = 'high'; openAuthDialog()"
                     class="mr-2"
-                    v-if="!isAuthenticated || !canEdit"
+                    v-if="!isAuthenticated || !canEditHigh"
                   >
                     <v-icon>mdi-lock-open</v-icon>
                   </v-btn>
@@ -2907,7 +2839,7 @@
                   <v-btn
                     color="orange"
                     @click="openAddTeamDialog"
-                    :disabled="!canEdit"
+                    :disabled="!canEditHigh"
                   >
                     <v-icon left>mdi-plus</v-icon>
                     เพิ่มทีม
@@ -2930,7 +2862,7 @@
                     elevation="2"
                     hover
                     height="100%"
-                    :class="{ 'editable-card': canEdit }"
+                    :class="{ 'editable-card': canEditHigh }"
                   >
                     <!-- Header ของการ์ด -->
                     <v-card-title class="pb-2 white--text" :class="getFieldHeaderColor(item.field)" style="padding: 8px 12px !important;">
@@ -3006,7 +2938,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!canEdit"
+                              :readonly="!canEditHigh"
                               style="font-size: 0.85rem;"
                             ></v-text-field>
                           </v-col>
@@ -3018,7 +2950,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!canEdit"
+                              :readonly="!canEditHigh"
                               style="font-size: 0.85rem;"
                             ></v-text-field>
                           </v-col>
@@ -3029,7 +2961,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!canEdit"
+                              :readonly="!canEditHigh"
                               placeholder="0:43:84"
                               @input="formatTimeInput($event, item, 'time1')"
                               @blur="validateTimeFormat(item, 'time1')"
@@ -3054,7 +2986,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!canEdit"
+                              :readonly="!canEditHigh"
                               style="font-size: 0.85rem;"
                             ></v-text-field>
                           </v-col>
@@ -3066,7 +2998,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!canEdit"
+                              :readonly="!canEditHigh"
                               style="font-size: 0.85rem;"
                             ></v-text-field>
                           </v-col>
@@ -3077,7 +3009,7 @@
                               outlined
                               dense
                               hide-details
-                              :readonly="!canEdit"
+                              :readonly="!canEditHigh"
                               placeholder="0:44:27"
                               @input="formatTimeInput($event, item, 'time2')"
                               @blur="validateTimeFormat(item, 'time2')"
@@ -3095,7 +3027,7 @@
                         block
                         x-small
                         @click="updateTeamScore(item, 'high')"
-                        :disabled="!canEdit"
+                        :disabled="!canEditHigh"
                         :loading="item.updating"
                         style="height: 32px;"
                       >
@@ -3715,7 +3647,23 @@
           if (!this.isAuthenticated || !this.currentUser) return false;
           if (this.currentUser.role === 'superadmin') return true;
           // admin สามารถแก้ไขได้เฉพาะระดับของตัวเอง
-          return this.currentUser.level === this.currentLevel || this.currentUser.level === 'all';
+          return this.currentUser.level === this.currentLevel;
+        },
+        
+        // ตรวจสอบสิทธิ์การแก้ไขระดับกลาง
+        canEditMid() {
+          if (!this.isAuthenticated || !this.currentUser) return false;
+          if (this.currentUser.role === 'superadmin') return true;
+          // admin สามารถแก้ไขได้เฉพาะถ้าเป็นระดับกลาง
+          return this.currentUser.level === 'mid';
+        },
+        
+        // ตรวจสอบสิทธิ์การแก้ไขระดับสูง
+        canEditHigh() {
+          if (!this.isAuthenticated || !this.currentUser) return false;
+          if (this.currentUser.role === 'superadmin') return true;
+          // admin สามารถแก้ไขได้เฉพาะถ้าเป็นระดับสูง
+          return this.currentUser.level === 'high';
         },
         
         // กำหนดสี App Bar ตามระดับการแข่งขัน
@@ -6182,14 +6130,23 @@
                     const schoolNameText = `${index + 1}. ${team.school_name}`;
                     chartCtx.fillText(schoolNameText, bar.base + 8, bar.y);
                     
-                    // 1. แสดงเวลาตรงกลางแท่ง (สีขาว)
-                    if (score > 10) {
+                    // 1. แสดง Retry และเวลาตรงกลางแท่ง (สีขาว)
+                    if (score > 15) {
                       chartCtx.textAlign = 'center';
                       chartCtx.textBaseline = 'middle';
                       chartCtx.fillStyle = '#fff';
                       chartCtx.font = 'bold 12px Roboto';
-                      const timeXPos = bar.base + (bar.x - bar.base) / 2;
-                      chartCtx.fillText(time, timeXPos, bar.y);
+                      const centerXPos = bar.base + (bar.x - bar.base) / 2;
+                      
+                      // แสดง Retry
+                      if (retry > 0) {
+                        chartCtx.fillStyle = '#FFE082'; // สีเหลืองอ่อน
+                        chartCtx.fillText(`R:${retry}`, centerXPos - 35, bar.y);
+                      }
+                      
+                      // แสดงเวลา
+                      chartCtx.fillStyle = '#fff';
+                      chartCtx.fillText(time, centerXPos + 20, bar.y);
                     }
                     
                     // 2. แสดงคะแนนปลายแท่ง (สีขาว)
@@ -6199,15 +6156,6 @@
                       chartCtx.fillStyle = '#fff';
                       chartCtx.font = 'bold 14px Roboto';
                       chartCtx.fillText(score, bar.x - 5, bar.y);
-                    }
-                    
-                    // 3. แสดง retry นอกแท่ง (สีส้ม/แดง)
-                    if (retry > 0) {
-                      chartCtx.textAlign = 'left';
-                      chartCtx.textBaseline = 'middle';
-                      chartCtx.fillStyle = '#FF5722';
-                      chartCtx.font = 'bold 13px Roboto';
-                      chartCtx.fillText(retry, bar.x + 5, bar.y);
                     }
                     
                     chartCtx.restore();
@@ -6345,14 +6293,23 @@
                     const schoolNameText = `${index + 1}. ${team.school_name}`;
                     chartCtx.fillText(schoolNameText, bar.base + 8, bar.y);
                     
-                    // 1. แสดงเวลาตรงกลางแท่ง (สีขาว)
-                    if (score > 10) {
+                    // 1. แสดง Retry และเวลาตรงกลางแท่ง (สีขาว)
+                    if (score > 15) {
                       chartCtx.textAlign = 'center';
                       chartCtx.textBaseline = 'middle';
                       chartCtx.fillStyle = '#fff';
                       chartCtx.font = 'bold 12px Roboto';
-                      const timeXPos = bar.base + (bar.x - bar.base) / 2;
-                      chartCtx.fillText(time, timeXPos, bar.y);
+                      const centerXPos = bar.base + (bar.x - bar.base) / 2;
+                      
+                      // แสดง Retry
+                      if (retry > 0) {
+                        chartCtx.fillStyle = '#FFE082'; // สีเหลืองอ่อน
+                        chartCtx.fillText(`R:${retry}`, centerXPos - 35, bar.y);
+                      }
+                      
+                      // แสดงเวลา
+                      chartCtx.fillStyle = '#fff';
+                      chartCtx.fillText(time, centerXPos + 20, bar.y);
                     }
                     
                     // 2. แสดงคะแนนปลายแท่ง (สีขาว)
@@ -6362,15 +6319,6 @@
                       chartCtx.fillStyle = '#fff';
                       chartCtx.font = 'bold 14px Roboto';
                       chartCtx.fillText(score, bar.x - 5, bar.y);
-                    }
-                    
-                    // 3. แสดง retry นอกแท่ง (สีส้ม/แดง)
-                    if (retry > 0) {
-                      chartCtx.textAlign = 'left';
-                      chartCtx.textBaseline = 'middle';
-                      chartCtx.fillStyle = '#FF5722';
-                      chartCtx.font = 'bold 13px Roboto';
-                      chartCtx.fillText(retry, bar.x + 5, bar.y);
                     }
                     
                     chartCtx.restore();
