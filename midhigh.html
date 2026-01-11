@@ -625,6 +625,32 @@
     .team-card .v-card__title {
       border-radius: 8px 8px 0 0;
     }
+    /* Make the three metric columns equal-width and centered */
+    .team-metrics {
+      display: flex;
+      width: 100%;
+    }
+    .team-metrics > .v-col {
+      flex: 1 1 33.3333%;
+      max-width: 33.3333%;
+      padding-left: 4px !important;
+      padding-right: 4px !important;
+      box-sizing: border-box;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Team card metric alignment */
+    .team-card .v-card-text .d-flex.dense .v-col,
+    .team-card .v-card-text .v-row .v-col {
+      text-align: center;
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+    .team-card .v-card-text .v-row > .v-col[cols="4"] {
+      width: 33.3333%;
+    }
   </style>
 </head>
 <body>
@@ -1751,8 +1777,8 @@
                         <v-col cols="auto" class="pr-2" style="width: 42px;">
                           <v-icon color="warning" style="font-size: 28px;">mdi-star</v-icon>
                         </v-col>
-                        <v-col>
-                          <v-row dense no-gutters>
+                        <v-col style="padding: 0;">
+                          <v-row dense no-gutters class="team-metrics">
                             <v-col cols="4" class="px-1">
                               <div class="d-flex align-center justify-center">
                                 <v-icon small color="success" class="mr-1">mdi-trophy</v-icon>
@@ -1782,11 +1808,11 @@
                     <v-card-text class="pa-2">
                       <!-- รอบที่ 1 -->
                       <v-row dense no-gutters class="mb-2 align-center">
-                        <v-col cols="auto" class="pr-2">
+                        <v-col cols="auto" class="pr-2" style="width: 42px;">
                           <span class="text-h6 primary--text font-weight-bold">1</span>
                         </v-col>
-                        <v-col>
-                          <v-row dense no-gutters>
+                        <v-col style="padding: 0;">
+                          <v-row dense no-gutters class="team-metrics">
                             <v-col cols="4" class="px-1">
                               <v-text-field
                                 v-model.number="item.score1"
@@ -1840,11 +1866,11 @@
 
                       <!-- รอบที่ 2 -->
                       <v-row dense no-gutters class="mb-1 align-center">
-                        <v-col cols="auto" class="pr-2">
+                        <v-col cols="auto" class="pr-2" style="width: 42px;">
                           <span class="text-h6 primary--text font-weight-bold">2</span>
                         </v-col>
-                        <v-col>
-                          <v-row dense no-gutters>
+                        <v-col style="padding: 0;">
+                          <v-row dense no-gutters class="team-metrics">
                             <v-col cols="4" class="px-1">
                               <v-text-field
                                 v-model.number="item.score2"
