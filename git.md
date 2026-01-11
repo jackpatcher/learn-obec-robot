@@ -1,5 +1,5 @@
 git add .
-git commit -m " ปรับกราฟ แก้บั๊ก login"
+git commit -m " badgeFilter"
 git push origin main
 
 
