@@ -1,5 +1,5 @@
 git add .
-git commit -m " clear interval"
+git commit -m "resize text team"
 git push origin main
 
 

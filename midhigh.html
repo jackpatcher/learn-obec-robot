@@ -651,6 +651,45 @@
     .team-card .v-card-text .v-row > .v-col[cols="4"] {
       width: 33.3333%;
     }
+
+    /* Responsive styles for mobile - ลด padding/margin ของชาร์ตบนมือถือ */
+    @media (max-width: 600px) {
+      /* ลด padding ของ v-sheet หลักในหน้าผลการแข่งขัน */
+      .v-sheet.pa-4 {
+        padding: 8px !important;
+      }
+      
+      /* ลด padding ของ v-card ที่หุ้มชาร์ต */
+      .v-card.pa-4 {
+        padding: 4px !important;
+      }
+      
+      /* ลด margin-bottom ของ card ชาร์ต */
+      .v-card.mb-6 {
+        margin-bottom: 8px !important;
+      }
+      
+      /* ลด margin ของ divider */
+      .v-divider.my-4 {
+        margin-top: 8px !important;
+        margin-bottom: 8px !important;
+      }
+      
+      .v-divider.my-6 {
+        margin-top: 12px !important;
+        margin-bottom: 12px !important;
+      }
+      
+      /* ลดขนาดหัวข้อบนมือถือ */
+      .v-card-title.text-h4 {
+        font-size: 1.25rem !important;
+      }
+      
+      /* ปรับขนาด icon ให้เล็กลงบนมือถือ */
+      .v-card-title .v-icon.large {
+        font-size: 28px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2407,12 +2446,12 @@
                 </v-card-title>
                 <v-divider class="my-4"></v-divider>
                 
-                <v-card-text>
+                
                   <div v-if="sortedTeams.length > 0">
                     <!-- กราฟแท่งแสดงผลการแข่งขัน -->
                   
                     
-                    <v-card outlined class="pa-4 mb-6">
+                    <v-card outlined>
                       <canvas id="resultsChart" :style="'height: ' + (sortedTeams.length * 40 + 100) + 'px;'"></canvas>
                     </v-card>
                     
@@ -2477,7 +2516,7 @@
                       </v-col>
                     </v-row>
                   </v-alert>
-                </v-card-text>
+                
               
             </v-container>
           </v-sheet>
@@ -3275,7 +3314,7 @@
                 </v-card-title>
                 <v-divider class="my-4"></v-divider>
                 
-                <v-card-text>
+                
                   <div v-if="sortedTeams_high.length > 0">
                     <!-- กราฟแท่งแสดงผลการแข่งขัน -->
                    
@@ -3345,7 +3384,7 @@
                       </v-col>
                     </v-row>
                   </v-alert>
-                </v-card-text>
+                
               
             </v-container>
           </v-sheet>
@@ -6304,31 +6343,36 @@
                     
                     chartCtx.save();
                     
+                    const isMobile = window.innerWidth <= 600;
+                    const schoolFontSize = isMobile ? 10 : 13;
+                    const detailFontSize = isMobile ? 9 : 12;
+                    const scoreFontSize = isMobile ? 11 : 14;
+                    
                     // 0. แสดงลำดับและชื่อโรงเรียนชิดซ้ายของแท่ง
                     chartCtx.textAlign = 'left';
                     chartCtx.textBaseline = 'middle';
                     chartCtx.fillStyle = '#fff';
-                    chartCtx.font = 'bold 13px Roboto';
+                    chartCtx.font = `bold ${schoolFontSize}px Roboto`;
                     const schoolNameText = `${index + 1}. ${team.school_name}`;
-                    chartCtx.fillText(schoolNameText, bar.base + 8, bar.y);
+                    chartCtx.fillText(schoolNameText, bar.base + (isMobile ? 4 : 8), bar.y);
                     
                     // 1. แสดง Retry และเวลาตรงกลางแท่ง (สีขาว)
                     if (score > 15) {
                       chartCtx.textAlign = 'center';
                       chartCtx.textBaseline = 'middle';
                       chartCtx.fillStyle = '#fff';
-                      chartCtx.font = 'bold 12px Roboto';
+                      chartCtx.font = `bold ${detailFontSize}px Roboto`;
                       const centerXPos = bar.base + (bar.x - bar.base) / 2;
                       
                       // แสดง Retry
                       if (retry > 0) {
                         chartCtx.fillStyle = '#FFE082'; // สีเหลืองอ่อน
-                        chartCtx.fillText(`R:${retry}`, centerXPos - 35, bar.y);
+                        chartCtx.fillText(`R:${retry}`, centerXPos - (isMobile ? 25 : 35), bar.y);
                       }
                       
                       // แสดงเวลา
                       chartCtx.fillStyle = '#fff';
-                      chartCtx.fillText(time, centerXPos + 20, bar.y);
+                      chartCtx.fillText(time, centerXPos + (isMobile ? 15 : 20), bar.y);
                     }
                     
                     // 2. แสดงคะแนนปลายแท่ง (สีขาว)
@@ -6336,8 +6380,8 @@
                       chartCtx.textAlign = 'right';
                       chartCtx.textBaseline = 'middle';
                       chartCtx.fillStyle = '#fff';
-                      chartCtx.font = 'bold 14px Roboto';
-                      chartCtx.fillText(score, bar.x - 5, bar.y);
+                      chartCtx.font = `bold ${scoreFontSize}px Roboto`;
+                      chartCtx.fillText(score, bar.x - (isMobile ? 3 : 5), bar.y);
                     }
                     
                     chartCtx.restore();
@@ -6349,6 +6393,14 @@
               indexAxis: 'y',
               responsive: true,
               maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  left: window.innerWidth <= 600 ? 2 : 10,
+                  right: window.innerWidth <= 600 ? 2 : 10,
+                  top: window.innerWidth <= 600 ? 5 : 10,
+                  bottom: window.innerWidth <= 600 ? 2 : 10
+                }
+              },
               plugins: {
                 title: {
                   display: true,
@@ -6356,12 +6408,12 @@
                     ? `ผลการแข่งขัน ระดับกลาง ( ${this.filterLevel} - ${this.filterCompetition} )`
                     : 'ผลการแข่งขัน ระดับกลาง',
                   font: {
-                    size: 18,
+                    size: window.innerWidth <= 600 ? 14 : 18,
                     weight: 'bold'
                   },
                   padding: {
-                    top: 10,
-                    bottom: 20
+                    top: window.innerWidth <= 600 ? 5 : 10,
+                    bottom: window.innerWidth <= 600 ? 8 : 20
                   }
                 },
                 legend: {
@@ -6386,7 +6438,15 @@
                   max: 100,
                   title: {
                     display: true,
-                    text: 'คะแนน'
+                    text: 'คะแนน',
+                    font: {
+                      size: window.innerWidth <= 600 ? 10 : 12
+                    }
+                  },
+                  ticks: {
+                    font: {
+                      size: window.innerWidth <= 600 ? 9 : 11
+                    }
                   }
                 },
                 y: {
@@ -6467,31 +6527,36 @@
                     
                     chartCtx.save();
                     
+                    const isMobile = window.innerWidth <= 600;
+                    const schoolFontSize = isMobile ? 10 : 13;
+                    const detailFontSize = isMobile ? 9 : 12;
+                    const scoreFontSize = isMobile ? 11 : 14;
+                    
                     // 0. แสดงลำดับและชื่อโรงเรียนชิดซ้ายของแท่ง
                     chartCtx.textAlign = 'left';
                     chartCtx.textBaseline = 'middle';
                     chartCtx.fillStyle = '#fff';
-                    chartCtx.font = 'bold 13px Roboto';
+                    chartCtx.font = `bold ${schoolFontSize}px Roboto`;
                     const schoolNameText = `${index + 1}. ${team.school_name}`;
-                    chartCtx.fillText(schoolNameText, bar.base + 8, bar.y);
+                    chartCtx.fillText(schoolNameText, bar.base + (isMobile ? 4 : 8), bar.y);
                     
                     // 1. แสดง Retry และเวลาตรงกลางแท่ง (สีขาว)
                     if (score > 15) {
                       chartCtx.textAlign = 'center';
                       chartCtx.textBaseline = 'middle';
                       chartCtx.fillStyle = '#fff';
-                      chartCtx.font = 'bold 12px Roboto';
+                      chartCtx.font = `bold ${detailFontSize}px Roboto`;
                       const centerXPos = bar.base + (bar.x - bar.base) / 2;
                       
                       // แสดง Retry
                       if (retry > 0) {
                         chartCtx.fillStyle = '#FFE082'; // สีเหลืองอ่อน
-                        chartCtx.fillText(`R:${retry}`, centerXPos - 35, bar.y);
+                        chartCtx.fillText(`R:${retry}`, centerXPos - (isMobile ? 25 : 35), bar.y);
                       }
                       
                       // แสดงเวลา
                       chartCtx.fillStyle = '#fff';
-                      chartCtx.fillText(time, centerXPos + 20, bar.y);
+                      chartCtx.fillText(time, centerXPos + (isMobile ? 15 : 20), bar.y);
                     }
                     
                     // 2. แสดงคะแนนปลายแท่ง (สีขาว)
@@ -6499,8 +6564,8 @@
                       chartCtx.textAlign = 'right';
                       chartCtx.textBaseline = 'middle';
                       chartCtx.fillStyle = '#fff';
-                      chartCtx.font = 'bold 14px Roboto';
-                      chartCtx.fillText(score, bar.x - 5, bar.y);
+                      chartCtx.font = `bold ${scoreFontSize}px Roboto`;
+                      chartCtx.fillText(score, bar.x - (isMobile ? 3 : 5), bar.y);
                     }
                     
                     chartCtx.restore();
@@ -6512,6 +6577,14 @@
               indexAxis: 'y',
               responsive: true,
               maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  left: window.innerWidth <= 600 ? 2 : 10,
+                  right: window.innerWidth <= 600 ? 2 : 10,
+                  top: window.innerWidth <= 600 ? 5 : 10,
+                  bottom: window.innerWidth <= 600 ? 2 : 10
+                }
+              },
               plugins: {
                 title: {
                   display: true,
@@ -6519,12 +6592,12 @@
                     ? `ผลการแข่งขัน ระดับสูง ( ${this.filterLevel_high} - ${this.filterCompetition_high} )`
                     : 'ผลการแข่งขัน ระดับสูง',
                   font: {
-                    size: 18,
+                    size: window.innerWidth <= 600 ? 14 : 18,
                     weight: 'bold'
                   },
                   padding: {
-                    top: 10,
-                    bottom: 20
+                    top: window.innerWidth <= 600 ? 5 : 10,
+                    bottom: window.innerWidth <= 600 ? 8 : 20
                   }
                 },
                 legend: {
@@ -6549,7 +6622,15 @@
                   max: 100,
                   title: {
                     display: true,
-                    text: 'คะแนน'
+                    text: 'คะแนน',
+                    font: {
+                      size: window.innerWidth <= 600 ? 10 : 12
+                    }
+                  },
+                  ticks: {
+                    font: {
+                      size: window.innerWidth <= 600 ? 9 : 11
+                    }
                   }
                 },
                 y: {
