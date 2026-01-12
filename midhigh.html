@@ -698,12 +698,31 @@
       <v-app-bar app :color="appBarColor" dark>
         <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
         <v-toolbar-title>เรียนรู้หุ่นยนต์ สพฐ ระดับกลางและระดับสูง </v-toolbar-title>
-        <v-spacer></v-spacer> จิรัฎฐ์ สุดใจ :
-        iam.geradt@gmail.com
+        <v-spacer></v-spacer>
+        <!-- Countdown on AppBar -->
+        <v-btn v-if="isCountdownActive" text style="font-size:1.3rem; font-weight:bold; color:#fff; min-width: 90px;" @click="goToCountdownPage">
+          <v-icon left color="yellow lighten-3">mdi-timer-outline</v-icon>
+          <span style="letter-spacing:1px;">{{ countdownTime }}</span>
+        </v-btn>
+        <span class="ml-2">จิรัฎฐ์ สุดใจ </span>
         <v-btn icon @click="toggleFullscreen">
           <v-icon>mdi-fullscreen</v-icon>
         </v-btn>
       </v-app-bar>
+      computed: {
+        ...mapGetters ? [] : {},
+        // ...existing code...
+        isCountdownActive() {
+          // แสดง countdown เฉพาะถ้ามีการนับถอยหลังและยังไม่หมดเวลา
+          return this.countdown != null && this.totalCountdownSeconds > 0 && !this.isCountdownPreparing && !this.isTimeUp;
+        },
+      },
+      methods: {
+        // ...existing code...
+        goToCountdownPage() {
+          this.$router.push({ name: 'countdown' });
+        },
+        // ...existing code...
 
       <v-navigation-drawer 
         v-model="drawer" 
@@ -880,7 +899,7 @@
         <v-container fluid>
           <!-- หน้าแรก -->
           <v-sheet v-if="tab === 'home'" class="d-flex flex-column align-center justify-center fill-height pa-4">
-            <v-container>
+            
               <v-row justify="center">
                 <v-col cols="12" md="8">
                   <v-card class="pa-8">
@@ -999,7 +1018,7 @@
                 </div>
               </div>
               <p>
-              <v-btn-group>
+              <div class="d-inline-flex">
                 <v-btn 
                   color="green" 
                   @click="toggleTimer"
@@ -1012,7 +1031,7 @@
                 >
                   รีเซ็ต
                 </v-btn>
-              </v-btn-group>
+              </div>
               </p>
 
             </div>
@@ -1099,7 +1118,7 @@
                 </v-col>
               </v-row>
               
-              <v-btn-group v-if="showTimeInputs">
+              <div v-if="showTimeInputs" class="d-inline-flex">
                 <v-btn 
                   color="green" 
                   @click="startCountdownFromInput"
@@ -1116,7 +1135,7 @@
                 >
                   รีเซ็ต
                 </v-btn>
-              </v-btn-group>
+              </div>
             </div>
             
             <!-- Progress Bar ด้านล่าง -->
@@ -1679,8 +1698,8 @@
           </v-sheet>
 
           <!-- ตั้งค่าทีมระดับกลาง -->
-          <v-sheet v-if="tab === 'mid-teams'" class="pa-4">
-            <v-container>
+          <v-sheet v-if="tab === 'mid-teams'" >
+            
               <!-- Header พร้อมปุ่ม -->
               <div class="d-flex justify-space-between align-center mb-4">
                 <div>
@@ -2001,7 +2020,7 @@
                 <v-icon left>mdi-refresh</v-icon>
                 refresh 
               </v-btn>
-            </v-container>
+           
           </v-sheet>
 
           <!-- ผลการแข่งขันระดับกลาง -->
@@ -2389,7 +2408,7 @@
 
           <!-- ผลการแข่งขันระดับกลาง -->
           <v-sheet v-if="tab === 'mid-results'" class="pa-4">
-            <v-container>
+           
               
                 <v-card-title class="text-h4 d-flex justify-space-between align-center">
                   <div>
@@ -2518,7 +2537,7 @@
                   </v-alert>
                 
               
-            </v-container>
+           
           </v-sheet>
 
           <!-- กติการะดับสูง -->
@@ -2932,7 +2951,7 @@
 
           <!-- ตั้งค่าทีมระดับสูง -->
           <v-sheet v-if="tab === 'high-teams'" class="pa-4">
-            <v-container>
+           
               <!-- Header พร้อมปุ่ม -->
               <div class="d-flex justify-space-between align-center mb-4">
                 <div>
@@ -3257,13 +3276,13 @@
                 <v-icon left>mdi-refresh</v-icon>
                 โหลดข้อมูลจาก Google Sheets
               </v-btn>
-            </v-container>
+            
           </v-sheet>
 
           <!-- ผลการแข่งขันระดับสูง -->
           <!-- ผลการแข่งขันระดับสูง -->
           <v-sheet v-if="tab === 'high-results'" class="pa-4">
-            <v-container>
+           
               
                 <v-card-title class="text-h4 d-flex justify-space-between align-center">
                   <div>
@@ -3392,7 +3411,7 @@
                   </v-alert>
                 
               
-            </v-container>
+           
           </v-sheet>
         </v-container>
       </v-main>
@@ -3708,6 +3727,10 @@
           const centiseconds = String(this.time % 100).padStart(2, "0");
           return `${minutes}:${seconds}:${centiseconds}`;
         },
+        isCountdownActive() {
+          // แสดง countdown เฉพาะถ้ามีการนับถอยหลังและยังไม่หมดเวลา
+          return this.countdown != null && this.totalCountdownSeconds > 0 && !this.isCountdownPreparing && !this.isTimeUp;
+        },
         countdownTime() {
           const hours = String(Math.floor(this.countdownValue / 3600)).padStart(2, "0");
           const minutes = String(Math.floor((this.countdownValue % 3600) / 60)).padStart(2, "0");
@@ -3902,6 +3925,9 @@
         }
       },
       methods: {
+                goToCountdownPage() {
+                  this.$router.push({ name: 'countdown' });
+                },
         getRouletteColor(cell) {
           if (this.selectedNumbers.includes(cell)) return 'red lighten-1';
           return 'grey lighten-3';
@@ -6308,20 +6334,8 @@
           const self = this; // เก็บ reference ของ Vue instance
           
           // สร้างอาเรย์สีที่หลากหลายสำหรับแต่ละทีม
-          const colors = [
-            '#4CAF50', '#2196F3', '#FF9800', '#9C27B0', '#F44336',
-            '#00BCD4', '#FFEB3B', '#E91E63', '#3F51B5', '#8BC34A',
-            '#FF5722', '#009688', '#FFC107', '#673AB7', '#CDDC39',
-            '#795548', '#607D8B', '#03A9F4', '#8BC34A', '#FF6F00'
-          ];
-          const backgroundColors = teams.map((team, index) => colors[index % colors.length]);
-          const borderColors = backgroundColors.map(color => {
-            // ทำให้สีขอบเข้มขึ้นเล็กน้อย
-            return color.replace(/[0-9A-F]{2}$/i, match => {
-              const val = parseInt(match, 16);
-              return Math.max(0, val - 30).toString(16).padStart(2, '0');
-            });
-          });
+          const backgroundColors = teams.map(() => '#4CAF50'); // สีเดียวกับ appbar ระดับกลาง
+          const borderColors = teams.map(() => '#388E3C'); // ขอบเขียวเข้ม
           
           this.resultsChartInstance = new Chart(ctx, {
             type: 'bar',
@@ -6346,42 +6360,20 @@
                     const retry = self.getBestRetry(team);
                     const time = self.getBestTime(team);
                     const score = self.getBestScore(team);
-                    
                     chartCtx.save();
-                    
                     const isMobile = window.innerWidth <= 600;
                     const schoolFontSize = isMobile ? 10 : 13;
                     const detailFontSize = isMobile ? 9 : 12;
                     const scoreFontSize = isMobile ? 11 : 14;
-                    
-                    // 0. แสดงลำดับและชื่อโรงเรียนชิดซ้ายของแท่ง
+                    // 0. ชื่อโรงเรียนและลำดับอยู่ชิดซ้ายสุดนอกแท่งเท่านั้น
+                    // 0. ชื่อโรงเรียนและลำดับอยู่ชิดซ้ายสุดนอกแท่ง (ปรับระยะให้ไม่ถูกตัด)
                     chartCtx.textAlign = 'left';
                     chartCtx.textBaseline = 'middle';
-                    chartCtx.fillStyle = '#fff';
+                    chartCtx.fillStyle = '#333';
                     chartCtx.font = `bold ${schoolFontSize}px Roboto`;
                     const schoolNameText = `${index + 1}. ${team.school_name}`;
-                    chartCtx.fillText(schoolNameText, bar.base + (isMobile ? 4 : 8), bar.y);
-                    
-                    // 1. แสดง Retry และเวลาตรงกลางแท่ง (สีขาว)
-                    if (score > 15) {
-                      chartCtx.textAlign = 'center';
-                      chartCtx.textBaseline = 'middle';
-                      chartCtx.fillStyle = '#fff';
-                      chartCtx.font = `bold ${detailFontSize}px Roboto`;
-                      const centerXPos = bar.base + (bar.x - bar.base) / 2;
-                      
-                      // แสดง Retry
-                      if (retry > 0) {
-                        chartCtx.fillStyle = '#FFE082'; // สีเหลืองอ่อน
-                        chartCtx.fillText(`R:${retry}`, centerXPos - (isMobile ? 25 : 35), bar.y);
-                      }
-                      
-                      // แสดงเวลา
-                      chartCtx.fillStyle = '#fff';
-                      chartCtx.fillText(time, centerXPos + (isMobile ? 15 : 20), bar.y);
-                    }
-                    
-                    // 2. แสดงคะแนนปลายแท่ง (สีขาว)
+                    chartCtx.fillText(schoolNameText, chart.chartArea.left + 4, bar.y);
+                    // 1. คะแนนปลายแท่ง (สีขาว)
                     if (score > 0) {
                       chartCtx.textAlign = 'right';
                       chartCtx.textBaseline = 'middle';
@@ -6389,7 +6381,34 @@
                       chartCtx.font = `bold ${scoreFontSize}px Roboto`;
                       chartCtx.fillText(score, bar.x - (isMobile ? 3 : 5), bar.y);
                     }
-                    
+                    // 2. Retry เป็น stack สีแดงทางขวา
+                    // stack ขนาดเดียวกับแท่ง (โชว์เลข 0 ด้วย)
+                    const stackHeight = bar.height;
+                    const stackWidth = 18;  // 18px
+                    const stackX = bar.x + 2;
+                    const stackY = bar.y - stackHeight/2;
+                    chartCtx.beginPath();
+                    chartCtx.fillStyle = '#e53935';
+                    chartCtx.strokeStyle = '#fff';
+                    chartCtx.lineWidth = 1;
+                    chartCtx.rect(stackX, stackY, stackWidth, stackHeight);
+                    chartCtx.fill();
+                    chartCtx.stroke();
+                    // วาดเลข retry สีขาว ถ้า retry > 1 สีเหลือง
+                    chartCtx.font = `bold ${detailFontSize}px Roboto`;
+                    chartCtx.textAlign = 'center';
+                    chartCtx.textBaseline = 'middle';
+                    chartCtx.fillStyle = '#fff' ;
+                    chartCtx.fillText(retry, stackX + stackWidth/2, bar.y);
+                    // 3. Label เวลาต่อข้างนอกแท่งด้านขวา (หลัง retry)
+                    // เวลาอยู่ด้านขวาสุดหลัง retry
+                    // เวลาอยู่ชิดขอบขวาสุดของ chartArea
+                    let timeLabelX = chart.chartArea.right - 4;
+                    chartCtx.textAlign = 'right';
+                    chartCtx.textBaseline = 'middle';
+                    chartCtx.font = `bold ${detailFontSize}px Roboto`;
+                    chartCtx.fillStyle = '#1976D2';
+                    chartCtx.fillText(time, timeLabelX, bar.y);
                     chartCtx.restore();
                   });
                 });
@@ -6441,7 +6460,7 @@
               scales: {
                 x: {
                   beginAtZero: true,
-                  max: 100,
+                  max: 120,
                   title: {
                     display: true,
                     text: 'คะแนน',
@@ -6491,21 +6510,9 @@
           const teams = this.sortedTeams_high;
           const self = this; // เก็บ reference ของ Vue instance
           
-          // สร้างอาเรย์สีที่หลากหลายสำหรับแต่ละทีม
-          const colors = [
-            '#4CAF50', '#2196F3', '#FF9800', '#9C27B0', '#F44336',
-            '#00BCD4', '#FFEB3B', '#E91E63', '#3F51B5', '#8BC34A',
-            '#FF5722', '#009688', '#FFC107', '#673AB7', '#CDDC39',
-            '#795548', '#607D8B', '#03A9F4', '#8BC34A', '#FF6F00'
-          ];
-          const backgroundColors = teams.map((team, index) => colors[index % colors.length]);
-          const borderColors = backgroundColors.map(color => {
-            // ทำให้สีขอบเข้มขึ้นเล็กน้อย
-            return color.replace(/[0-9A-F]{2}$/i, match => {
-              const val = parseInt(match, 16);
-              return Math.max(0, val - 30).toString(16).padStart(2, '0');
-            });
-          });
+          // ใช้สีส้มทุกแท่งและขอบส้มเข้ม
+          const backgroundColors = teams.map(() => '#FF9800');
+          const borderColors = teams.map(() => '#F57C00');
           
           this.resultsChartHighInstance = new Chart(ctx, {
             type: 'bar',
@@ -6530,42 +6537,19 @@
                     const retry = self.getBestRetry(team);
                     const time = self.getBestTime(team);
                     const score = self.getBestScore(team);
-                    
                     chartCtx.save();
-                    
                     const isMobile = window.innerWidth <= 600;
                     const schoolFontSize = isMobile ? 10 : 13;
                     const detailFontSize = isMobile ? 9 : 12;
                     const scoreFontSize = isMobile ? 11 : 14;
-                    
-                    // 0. แสดงลำดับและชื่อโรงเรียนชิดซ้ายของแท่ง
+                    // 0. ชื่อโรงเรียนและลำดับอยู่ชิดซ้ายสุดนอกแท่ง
                     chartCtx.textAlign = 'left';
                     chartCtx.textBaseline = 'middle';
-                    chartCtx.fillStyle = '#fff';
+                    chartCtx.fillStyle = '#333';
                     chartCtx.font = `bold ${schoolFontSize}px Roboto`;
                     const schoolNameText = `${index + 1}. ${team.school_name}`;
-                    chartCtx.fillText(schoolNameText, bar.base + (isMobile ? 4 : 8), bar.y);
-                    
-                    // 1. แสดง Retry และเวลาตรงกลางแท่ง (สีขาว)
-                    if (score > 15) {
-                      chartCtx.textAlign = 'center';
-                      chartCtx.textBaseline = 'middle';
-                      chartCtx.fillStyle = '#fff';
-                      chartCtx.font = `bold ${detailFontSize}px Roboto`;
-                      const centerXPos = bar.base + (bar.x - bar.base) / 2;
-                      
-                      // แสดง Retry
-                      if (retry > 0) {
-                        chartCtx.fillStyle = '#FFE082'; // สีเหลืองอ่อน
-                        chartCtx.fillText(`R:${retry}`, centerXPos - (isMobile ? 25 : 35), bar.y);
-                      }
-                      
-                      // แสดงเวลา
-                      chartCtx.fillStyle = '#fff';
-                      chartCtx.fillText(time, centerXPos + (isMobile ? 15 : 20), bar.y);
-                    }
-                    
-                    // 2. แสดงคะแนนปลายแท่ง (สีขาว)
+                    chartCtx.fillText(schoolNameText, chart.chartArea.left + 4, bar.y);
+                    // 1. คะแนนปลายแท่ง (สีขาว)
                     if (score > 0) {
                       chartCtx.textAlign = 'right';
                       chartCtx.textBaseline = 'middle';
@@ -6573,7 +6557,34 @@
                       chartCtx.font = `bold ${scoreFontSize}px Roboto`;
                       chartCtx.fillText(score, bar.x - (isMobile ? 3 : 5), bar.y);
                     }
-                    
+                    // 2. Retry เป็น stack สีแดงทางขวา
+                    // stack ขนาดเดียวกับแท่ง (โชว์เลข 0 ด้วย)
+                    const stackHeight = bar.height;
+                    const stackWidth = 18;  // 18px
+                    const stackX = bar.x + 2;
+                    const stackY = bar.y - stackHeight/2;
+                    chartCtx.beginPath();
+                    chartCtx.fillStyle = '#e53935';
+                    chartCtx.strokeStyle = '#fff';
+                    chartCtx.lineWidth = 1;
+                    chartCtx.rect(stackX, stackY, stackWidth, stackHeight);
+                    chartCtx.fill();
+                    chartCtx.stroke();
+                    // วาดเลข retry สีขาว ถ้า retry > 1 สีเหลือง
+                    chartCtx.font = `bold ${detailFontSize}px Roboto`;
+                    chartCtx.textAlign = 'center';
+                    chartCtx.textBaseline = 'middle';
+                    chartCtx.fillStyle = '#fff';
+                    chartCtx.fillText(retry, stackX + stackWidth/2, bar.y);
+                    // 3. Label เวลาต่อข้างนอกแท่งด้านขวา (หลัง retry)
+                    // เวลาอยู่ด้านขวาสุดหลัง retry
+                    // เวลาอยู่ชิดขอบขวาสุดของ chartArea
+                    let timeLabelX = chart.chartArea.right - 4;
+                    chartCtx.textAlign = 'right';
+                    chartCtx.textBaseline = 'middle';
+                    chartCtx.font = `bold ${detailFontSize}px Roboto`;
+                    chartCtx.fillStyle = '#1976D2';
+                    chartCtx.fillText(time, timeLabelX, bar.y);
                     chartCtx.restore();
                   });
                 });
@@ -6625,7 +6636,7 @@
               scales: {
                 x: {
                   beginAtZero: true,
-                  max: 100,
+                  max: 130,
                   title: {
                     display: true,
                     text: 'คะแนน',
