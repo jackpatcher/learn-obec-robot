@@ -709,20 +709,6 @@
           <v-icon>mdi-fullscreen</v-icon>
         </v-btn>
       </v-app-bar>
-      computed: {
-        ...mapGetters ? [] : {},
-        // ...existing code...
-        isCountdownActive() {
-          // แสดง countdown เฉพาะถ้ามีการนับถอยหลังและยังไม่หมดเวลา
-          return this.countdown != null && this.totalCountdownSeconds > 0 && !this.isCountdownPreparing && !this.isTimeUp;
-        },
-      },
-      methods: {
-        // ...existing code...
-        goToCountdownPage() {
-          this.$router.push({ name: 'countdown' });
-        },
-        // ...existing code...
 
       <v-navigation-drawer 
         v-model="drawer" 
@@ -2410,55 +2396,32 @@
           <v-sheet v-if="tab === 'mid-results'" class="pa-4">
            
               
-                <v-card-title class="text-h4 d-flex justify-space-between align-center">
-                  <div>
-                    <div class="d-flex align-center">
-                      <v-icon large color="green darken-1" class="mr-3">mdi-trophy</v-icon>
-                      ผลการแข่งขัน  ระดับกลาง <span v-if="filterCompetition"  > ( {{ filterLevel }} -  {{ filterCompetition }} )</span>
-                    </div>
-                    <!-- แสดงค่าตัวกรองที่เลือก -->
-                    <div class="text-caption grey--text mt-2 ml-12 d-flex flex-wrap align-center" style="gap: 4px;">
-                      <v-chip x-small class="mr-1" color="green darken-1" dark>{{ sortedTeams.length }}/{{ midTeams.length }} ทีม</v-chip>
-                      <v-chip v-if="filterZone !== 'ทั้งหมด'" x-small color="blue darken-1" dark>เขต {{ filterZone }}</v-chip>
-                      <v-chip 
-                        @click="toggleFilterLevel" 
-                        x-small 
-                        color="purple darken-1" 
-                        dark
-                        style="cursor: pointer;"
-                      >
-                        {{ filterLevel }}
-                        <v-icon right x-small>mdi-chevron-down</v-icon>
-                      </v-chip>
-                      <v-chip 
-                        @click="toggleFilterField" 
-                        x-small 
-                        color="teal darken-1" 
-                        dark
-                        style="cursor: pointer;"
-                      >
-                        สนาม {{ filterField }}
-                        <v-icon right x-small>mdi-chevron-down</v-icon>
-                      </v-chip>
-                      <v-chip v-if="filterCompetition" x-small color="orange darken-1" dark>รายการ: {{ filterCompetition }}</v-chip>
-                      <span v-if="filterZone === 'ทั้งหมด' && filterLevel === 'ทั้งหมด' && filterField === 'ทั้งหมด' && !filterCompetition">แสดงทั้งหมด</span>
-                    </div>
+                <v-card-title class="d-flex flex-wrap flex-row align-center justify-space-between py-2 px-1" style="gap: 8px; min-height: unset;">
+                  <div class="d-flex align-center flex-grow-1 min-width-0" style="gap: 8px;">
+                    <v-icon color="green darken-1" class="mr-2" :size="$vuetify.breakpoint.smAndDown ? 28 : 44">mdi-trophy</v-icon>
+                    <span class="font-weight-bold text-truncate"
+                          :style="$vuetify.breakpoint.smAndDown ? 'font-size: 1.1rem; max-width: 70vw;' : 'font-size: 2.1rem; max-width: 70vw;'">
+                      ผลการแข่งขันระดับกลาง
+                      <span v-if="filterCompetition"> ({{ filterLevel }} - {{ filterCompetition }})</span>
+                    </span>
                   </div>
-                  <div>
-                    <v-btn
-                      icon
-                      color="green darken-1"
-                      @click="openFilterDialogMid"
-                      class="mr-2"
-                    >
+                  <div class="d-flex align-center flex-wrap" style="gap: 4px;">
+                    <v-chip x-small class="mr-1" color="green darken-1" dark>{{ sortedTeams.length }}/{{ midTeams.length }} ทีม</v-chip>
+                    <v-chip v-if="filterZone !== 'ทั้งหมด'" x-small color="blue darken-1" dark>เขต {{ filterZone }}</v-chip>
+                    <v-chip @click="toggleFilterLevel" x-small color="purple darken-1" dark style="cursor: pointer;">
+                      {{ filterLevel }}
+                      <v-icon right x-small>mdi-chevron-down</v-icon>
+                    </v-chip>
+                    <v-chip @click="toggleFilterField" x-small color="teal darken-1" dark style="cursor: pointer;">
+                      สนาม {{ filterField }}
+                      <v-icon right x-small>mdi-chevron-down</v-icon>
+                    </v-chip>
+                    <v-chip v-if="filterCompetition" x-small color="orange darken-1" dark>รายการ: {{ filterCompetition }}</v-chip>
+                    <span v-if="filterZone === 'ทั้งหมด' && filterLevel === 'ทั้งหมด' && filterField === 'ทั้งหมด' && !filterCompetition">แสดงทั้งหมด</span>
+                    <v-btn icon color="green darken-1" @click="openFilterDialogMid" class="ml-1">
                       <v-icon>mdi-filter</v-icon>
                     </v-btn>
-                    <v-btn
-                      icon
-                      color="green darken-1"
-                      @click="loadTeamsFromGAS"
-                      :loading="isLoadingTeams"
-                    >
+                    <v-btn icon color="green darken-1" @click="loadTeamsFromGAS" :loading="isLoadingTeams">
                       <v-icon>mdi-refresh</v-icon>
                     </v-btn>
                   </div>
@@ -3284,55 +3247,32 @@
           <v-sheet v-if="tab === 'high-results'" class="pa-4">
            
               
-                <v-card-title class="text-h4 d-flex justify-space-between align-center">
-                  <div>
-                    <div class="d-flex align-center">
-                      <v-icon large color="orange" class="mr-3">mdi-trophy</v-icon>
-                      ผลการแข่งขัน ระดับสูง<span v-if="filterCompetition_high" >({{ filterLevel_high }}-{{ filterCompetition_high }})</span>
-                    </div>
-                    <!-- แสดงค่าตัวกรองที่เลือก -->
-                    <div class="text-caption grey--text mt-2 ml-12 d-flex flex-wrap align-center" style="gap: 4px;">
-                      <v-chip x-small class="mr-1" color="orange" dark>{{ sortedTeams_high.length }}/{{ highTeams.length }} ทีม</v-chip>
-                      <v-chip v-if="filterZone_high !== 'ทั้งหมด'" x-small color="blue darken-1" dark>เขต {{ filterZone_high }}</v-chip>
-                      <v-chip 
-                        @click="toggleFilterLevel_high" 
-                        x-small 
-                        color="purple darken-1" 
-                        dark
-                        style="cursor: pointer;"
-                      >
-                        {{ filterLevel_high }}
-                        <v-icon right x-small>mdi-chevron-down</v-icon>
-                      </v-chip>
-                      <v-chip 
-                        @click="toggleFilterField_high" 
-                        x-small 
-                        color="teal darken-1" 
-                        dark
-                        style="cursor: pointer;"
-                      >
-                        สนาม {{ filterField_high }}
-                        <v-icon right x-small>mdi-chevron-down</v-icon>
-                      </v-chip>
-                      <v-chip v-if="filterCompetition_high" x-small color="green darken-1" dark>รายการ: {{ filterCompetition_high }}</v-chip>
-                      <span v-if="filterZone_high === 'ทั้งหมด' && filterLevel_high === 'ทั้งหมด' && filterField_high === 'ทั้งหมด' && !filterCompetition_high">แสดงทั้งหมด</span>
-                    </div>
+                <v-card-title class="d-flex flex-wrap flex-row align-center justify-space-between py-2 px-1" style="gap: 8px; min-height: unset;">
+                  <div class="d-flex align-center flex-grow-1 min-width-0" style="gap: 8px;">
+                    <v-icon color="orange" class="mr-2" :size="$vuetify.breakpoint.smAndDown ? 28 : 44">mdi-trophy</v-icon>
+                    <span class="font-weight-bold text-truncate"
+                          :style="$vuetify.breakpoint.smAndDown ? 'font-size: 1.1rem; max-width: 70vw;' : 'font-size: 2.1rem; max-width: 70vw;'">
+                      ผลการแข่งขันระดับสูง
+                      <span v-if="filterCompetition_high"> ({{ filterLevel_high }} - {{ filterCompetition_high }})</span>
+                    </span>
                   </div>
-                  <div>
-                    <v-btn
-                      icon
-                      color="orange"
-                      @click="openFilterDialogHigh"
-                      class="mr-2"
-                    >
+                  <div class="d-flex align-center flex-wrap" style="gap: 4px;">
+                    <v-chip x-small class="mr-1" color="orange" dark>{{ sortedTeams_high.length }}/{{ highTeams.length }} ทีม</v-chip>
+                    <v-chip v-if="filterZone_high !== 'ทั้งหมด'" x-small color="blue darken-1" dark>เขต {{ filterZone_high }}</v-chip>
+                    <v-chip @click="toggleFilterLevel_high" x-small color="purple darken-1" dark style="cursor: pointer;">
+                      {{ filterLevel_high }}
+                      <v-icon right x-small>mdi-chevron-down</v-icon>
+                    </v-chip>
+                    <v-chip @click="toggleFilterField_high" x-small color="teal darken-1" dark style="cursor: pointer;">
+                      สนาม {{ filterField_high }}
+                      <v-icon right x-small>mdi-chevron-down</v-icon>
+                    </v-chip>
+                    <v-chip v-if="filterCompetition_high" x-small color="green darken-1" dark>รายการ: {{ filterCompetition_high }}</v-chip>
+                    <span v-if="filterZone_high === 'ทั้งหมด' && filterLevel_high === 'ทั้งหมด' && filterField_high === 'ทั้งหมด' && !filterCompetition_high">แสดงทั้งหมด</span>
+                    <v-btn icon color="orange" @click="openFilterDialogHigh" class="ml-1">
                       <v-icon>mdi-filter</v-icon>
                     </v-btn>
-                    <v-btn
-                      icon
-                      color="orange"
-                      @click="loadTeamsFromGAS"
-                      :loading="isLoadingTeams"
-                    >
+                    <v-btn icon color="orange" @click="loadTeamsFromGAS" :loading="isLoadingTeams">
                       <v-icon>mdi-refresh</v-icon>
                     </v-btn>
                   </div>
@@ -6460,7 +6400,7 @@
               scales: {
                 x: {
                   beginAtZero: true,
-                  max: 120,
+                  max: 130,
                   title: {
                     display: true,
                     text: 'คะแนน',
@@ -6472,11 +6412,17 @@
                     font: {
                       size: window.innerWidth <= 600 ? 9 : 11
                     }
+                  },
+                  grid: {
+                    display: false
                   }
                 },
                 y: {
                   ticks: {
                     display: false  // ซ่อนชื่อที่แกน Y เพราะมีในแท่งกราฟแล้ว
+                  },
+                  grid: {
+                    display: false
                   }
                 }
               }
@@ -6648,11 +6594,17 @@
                     font: {
                       size: window.innerWidth <= 600 ? 9 : 11
                     }
+                  },
+                  grid: {
+                    display: false
                   }
                 },
                 y: {
                   ticks: {
                     display: false  // ซ่อนชื่อที่แกน Y เพราะมีในแท่งกราฟแล้ว
+                  },
+                  grid: {
+                    display: false
                   }
                 }
               }
