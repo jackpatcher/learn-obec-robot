@@ -1,5 +1,5 @@
 git add .
-git commit -m " fix save button"
+git commit -m " clear interval"
 git push origin main
 
 
