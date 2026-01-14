@@ -1,5 +1,5 @@
 git add .
-git commit -m "del grid chart"
+git commit -m "fixtime minustime"
 git push origin main
 
 

@@ -1601,18 +1601,18 @@
                 <!-- เวลาคงเหลือ (ตัวใหญ่) - แสดงตอนรัน -->
                 <div v-if="!midTimerIsPreparing && midTimerRunning" class="text-center">
                   <div style="margin-bottom: 12px;">
-                    <v-chip v-if="midTimerMinutes === 1" color="purple darken-2" dark large>
+                    <v-chip v-if="midTimerIsPractice" color="purple darken-2" dark large>
                       <v-icon left small>mdi-timer-sand</v-icon>
                       กำลังจับเวลาซ้อม
                     </v-chip>
-                    <v-chip v-else color="white" text-color="black" large>
-                      <v-icon left small color="black">mdi-timer-sand</v-icon>
-                      กำลังจับเวลาจริง
+                    <v-chip v-else color="green darken-2" dark large>
+                      <v-icon left small>mdi-trophy</v-icon>
+                      กำลังจับเวลาแข่ง ระดับกลาง
                     </v-chip>
                   </div>
                   <div class="fixed-number" 
-                       :style="isFullScreen ? 'font-size: 35vh; color: #FFFFFF; font-weight: 300; line-height: 1;' : 'font-size: 20rem; color: #FFFFFF; font-weight: 300; line-height: 1;'">
-                    {{ String(midTimerMinutes).padStart(2, '0') }}:{{ String(midTimerSeconds).padStart(2, '0') }}<span :style="isFullScreen ? 'font-size: 20vh; opacity: 0.7;' : 'font-size: 12rem; opacity: 0.7;'">.{{ String(midTimerMilliseconds).padStart(2, '0') }}</span>
+                       :style="isFullScreen ? 'font-size: 35vh; color: ' + (midTimerIsOvertime ? '#FF0000' : '#FFFFFF') + '; font-weight: 300; line-height: 1;' : 'font-size: 20rem; color: ' + (midTimerIsOvertime ? '#FF0000' : '#FFFFFF') + '; font-weight: 300; line-height: 1;'">
+                    <span v-if="midTimerIsOvertime">-</span>{{ String(midTimerMinutes).padStart(2, '0') }}:{{ String(midTimerSeconds).padStart(2, '0') }}<span :style="isFullScreen ? 'font-size: 20vh; opacity: 0.7;' : 'font-size: 12rem; opacity: 0.7;'">.{{ String(midTimerMilliseconds).padStart(2, '0') }}</span>
                   </div>
                 </div>
 
@@ -2831,18 +2831,18 @@
                 <!-- เวลาคงเหลือ (ตัวใหญ่) - แสดงตอนรัน -->
                 <div v-if="!highTimerIsPreparing && highTimerRunning" class="text-center">
                   <div style="margin-bottom: 12px;">
-                    <v-chip v-if="highTimerMinutes === 1" color="purple darken-2" dark large>
+                    <v-chip v-if="highTimerIsPractice" color="purple darken-2" dark large>
                       <v-icon left small>mdi-timer-sand</v-icon>
                       กำลังจับเวลาซ้อม
                     </v-chip>
-                    <v-chip v-else color="white" text-color="black" large>
-                      <v-icon left small color="black">mdi-timer-sand</v-icon>
-                      กำลังจับเวลาจริง
+                    <v-chip v-else color="orange darken-2" dark large>
+                      <v-icon left small>mdi-trophy</v-icon>
+                      กำลังจับเวลาแข่ง ระดับสูง
                     </v-chip>
                   </div>
                   <div class="fixed-number" 
-                       :style="isFullScreen ? 'font-size: 35vh; color: #FFFFFF; font-weight: 300; line-height: 1;' : 'font-size: 20rem; color: #FFFFFF; font-weight: 300; line-height: 1;'">
-                    {{ String(highTimerMinutes).padStart(2, '0') }}:{{ String(highTimerSeconds).padStart(2, '0') }}<span :style="isFullScreen ? 'font-size: 20vh; opacity: 0.7;' : 'font-size: 12rem; opacity: 0.7;'">.{{ String(highTimerMilliseconds).padStart(2, '0') }}</span>
+                       :style="isFullScreen ? 'font-size: 35vh; color: ' + (highTimerIsOvertime ? '#FF0000' : '#FFFFFF') + '; font-weight: 300; line-height: 1;' : 'font-size: 20rem; color: ' + (highTimerIsOvertime ? '#FF0000' : '#FFFFFF') + '; font-weight: 300; line-height: 1;'">
+                    <span v-if="highTimerIsOvertime">-</span>{{ String(highTimerMinutes).padStart(2, '0') }}:{{ String(highTimerSeconds).padStart(2, '0') }}<span :style="isFullScreen ? 'font-size: 20vh; opacity: 0.7;' : 'font-size: 12rem; opacity: 0.7;'">.{{ String(highTimerMilliseconds).padStart(2, '0') }}</span>
                   </div>
                 </div>
 
@@ -3458,6 +3458,8 @@
           midTimerInterval: null,
           midTimerPrepareCountdown: 0,
           midTimerIsPreparing: false,
+          midTimerIsPractice: false, // flag สำหรับเช็คว่าเป็นโหมดซ้อมหรือไม่
+          midTimerIsOvertime: false, // flag สำหรับเช็คว่าหมดเวลาแล้ว (ติดลบ)
           
           // High Timer (5 minutes)
           highTimerRunning: false,
@@ -3470,6 +3472,8 @@
           highTimerInterval: null,
           highTimerPrepareCountdown: 0,
           highTimerIsPreparing: false,
+          highTimerIsPractice: false, // flag สำหรับเช็คว่าเป็นโหมดซ้อมหรือไม่
+          highTimerIsOvertime: false, // flag สำหรับเช็คว่าหมดเวลาแล้ว (ติดลบ)
           
           // Field Grid Data - แยกระดับกลางและระดับสูง
           // ระดับกลาง (Mid Level)
@@ -4064,12 +4068,13 @@
           if (this.timerRunning || this.isPreparing) {
             // หยุดจับเวลาหรือยกเลิกการเตรียม
             clearInterval(this.timer);
+            cancelAnimationFrame(this.timer);
             this.timerRunning = false;
             this.isPreparing = false;
           } else {
-            // เริ่มนับถอยหลัง 5 วินาที
+            // เริ่มนับถอยหลัง 4 วินาที
             this.isPreparing = true;
-            this.timerPrepareCountdown = 5;
+            this.timerPrepareCountdown = 4;
             
             // เปิด fullscreen อัตโนมัติ
             if (!document.fullscreenElement) {
@@ -4077,29 +4082,56 @@
               this.isFullScreen = true;
             }
             
-            // นับถอยหลัง 5 วินาที
-            this.timer = setInterval(() => {
-              if (this.timerPrepareCountdown > 0) {
-                this.timerPrepareCountdown--;
+            // ใช้ performance.now() สำหรับความแม่นยำสูงในการนับถอยหลัง 4 วินาที
+            const prepareStartTime = performance.now();
+            let lastPrepareSecond = 4;
+            
+            const updatePrepareTimer = () => {
+              const now = performance.now();
+              const elapsed = now - prepareStartTime;
+              const remainingMs = 4000 - elapsed;
+              
+              if (remainingMs > 0) {
+                const remainingSeconds = Math.ceil(remainingMs / 1000);
+                this.timerPrepareCountdown = remainingSeconds;
                 
-                if (this.timerPrepareCountdown > 0) {
-                  this.playCountdownBeep(); // เสียง beep ที่ 4, 3, 2, 1
-                } else {
-                  // เมื่อเป็น 0 แล้ว เล่นเสียงสูงและเริ่มจับเวลาเลย
-                  this.playStartBeep();
-                  clearInterval(this.timer);
-                  this.isPreparing = false;
-                  this.timerRunning = true;
-                  this.timer = setInterval(() => {
-                    this.time++;
-                  }, 10);
+                // เล่นเสียง beep เมื่อเปลี่ยนวินาที
+                if (remainingSeconds !== lastPrepareSecond && remainingSeconds > 0) {
+                  this.playCountdownBeep();
+                  lastPrepareSecond = remainingSeconds;
                 }
+                
+                this.timer = requestAnimationFrame(updatePrepareTimer);
+              } else {
+                // เมื่อเป็น 0 แล้ว เล่นเสียงสูงและเริ่มจับเวลาเลย
+                this.playStartBeep();
+                if (this.timer) {
+                  cancelAnimationFrame(this.timer);
+                }
+                this.timerPrepareCountdown = 0;
+                this.isPreparing = false;
+                this.timerRunning = true;
+                
+                // เริ่มจับเวลาด้วย requestAnimationFrame
+                const timerStartTime = performance.now();
+                const updateStopwatch = () => {
+                  if (!this.timerRunning) return;
+                  const now = performance.now();
+                  const elapsed = now - timerStartTime;
+                  this.time = Math.floor(elapsed / 10); // แปลงเป็น centiseconds (1/100 วินาที)
+                  this.timer = requestAnimationFrame(updateStopwatch);
+                };
+                this.timer = requestAnimationFrame(updateStopwatch);
               }
-            }, 1000);
+            };
+            
+            // เริ่มนับถอยหลัง prepare
+            this.timer = requestAnimationFrame(updatePrepareTimer);
           }
         },
         resetTimer() {
           clearInterval(this.timer);
+          cancelAnimationFrame(this.timer);
           this.time = 0;
           this.timerRunning = false;
           this.isPreparing = false;
@@ -4125,16 +4157,22 @@
           this.totalCountdownSeconds = seconds;
           this.isTimeUp = false;
           this.isBlinking = false;
-          // บันทึกเวลาเริ่มต้นจริงๆ
-          const startTime = Date.now();
-          const endTime = startTime + (seconds * 1000);
+          
+          // ใช้ performance.now() สำหรับความแม่นยำสูง
+          const startTime = performance.now();
+          const durationMs = seconds * 1000;
           let lastSecond = seconds;
-          this.countdown = setInterval(() => {
-            const now = Date.now();
-            const remainingMs = endTime - now;
+          let hasPlayedAlarm = false;
+          
+          const updateTimer = () => {
+            const now = performance.now();
+            const elapsed = now - startTime;
+            const remainingMs = durationMs - elapsed;
+            
             if (remainingMs > 0) {
               const remainingSeconds = Math.ceil(remainingMs / 1000);
               this.countdownValue = remainingSeconds;
+              
               // ตรวจจับการเปลี่ยนวินาที
               if (remainingSeconds !== lastSecond) {
                 // เสียงนับถอยหลัง 5 วินาทีแรก (5, 4, 3, 2, 1)
@@ -4147,16 +4185,29 @@
                 }
                 lastSecond = remainingSeconds;
               }
-            } else if (!this.isTimeUp) {
-              // หมดเวลา
-              this.countdownValue = 0;
-              clearInterval(this.countdown);
-              this.countdown = null;
-              this.isTimeUp = true;
-              // เล่นเสียงเตือนเมื่อหมดเวลา
-              this.playAlarmSound();
+              
+              // ใช้ requestAnimationFrame สำหรับความแม่นยำสูงสุด
+              this.countdown = requestAnimationFrame(updateTimer);
+            } else {
+              // หมดเวลาแล้ว - นับต่อเป็นติดลบ
+              const overtimeMs = Math.abs(remainingMs);
+              const overtimeSeconds = Math.floor(overtimeMs / 1000);
+              this.countdownValue = -overtimeSeconds; // ติดลบ
+              
+              // เล่นเสียงเตือนครั้งเดียวเมื่อหมดเวลา
+              if (!hasPlayedAlarm) {
+                this.isTimeUp = true;
+                this.playAlarmSound();
+                hasPlayedAlarm = true;
+              }
+              
+              // นับต่อไปเรื่อยๆ
+              this.countdown = requestAnimationFrame(updateTimer);
             }
-          }, 100); // เช็คทุก 100ms เพื่อความแม่นยำ
+          };
+          
+          // เริ่มจับเวลา
+          this.countdown = requestAnimationFrame(updateTimer);
         },
         playCountdownBeep() {
           // เสียง beep สั้นๆ สำหรับนับถอยหลัง
@@ -4292,32 +4343,53 @@
           // ป้องกัน interval ซ้อน
           if (this.countdown) {
             clearInterval(this.countdown);
+            cancelAnimationFrame(this.countdown);
             this.countdown = null;
           }
-          // เริ่มนับถอยหลัง 5 วินาที
+          // เริ่มนับถอยหลัง 4 วินาที
           this.isCountdownPreparing = true;
-          this.countdownPrepareCountdown = 5;
+          this.countdownPrepareCountdown = 4;
           // เปิดโหมด fullscreen อัตโนมัติ
           if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen();
             this.isFullScreen = true;
           }
-          // นับถอยหลัง 5 วินาที
-          this.countdown = setInterval(() => {
-            if (this.countdownPrepareCountdown > 0) {
-              this.countdownPrepareCountdown--;
-              if (this.countdownPrepareCountdown > 0) {
-                this.playCountdownBeep(); // เสียง beep ที่ 4, 3, 2, 1
-              } else {
-                // เมื่อเป็น 0 แล้ว เล่นเสียงสูงและเริ่มนับถอยหลังจริง
-                this.playStartBeep();
-                clearInterval(this.countdown);
-                this.countdown = null;
-                this.isCountdownPreparing = false;
-                this.startCountdown(totalSeconds);
+          
+          // ใช้ performance.now() สำหรับความแม่นยำสูงในการนับถอยหลัง 4 วินาที
+          const prepareStartTime = performance.now();
+          let lastPrepareSecond = 4;
+          
+          const updatePrepareCountdown = () => {
+            const now = performance.now();
+            const elapsed = now - prepareStartTime;
+            const remainingMs = 4000 - elapsed;
+            
+            if (remainingMs > 0) {
+              const remainingSeconds = Math.ceil(remainingMs / 1000);
+              this.countdownPrepareCountdown = remainingSeconds;
+              
+              // เล่นเสียง beep เมื่อเปลี่ยนวินาที
+              if (remainingSeconds !== lastPrepareSecond && remainingSeconds > 0) {
+                this.playCountdownBeep();
+                lastPrepareSecond = remainingSeconds;
               }
+              
+              this.countdown = requestAnimationFrame(updatePrepareCountdown);
+            } else {
+              // เมื่อเป็น 0 แล้ว เล่นเสียงสูงและเริ่มนับถอยหลังจริง
+              this.playStartBeep();
+              if (this.countdown) {
+                cancelAnimationFrame(this.countdown);
+                this.countdown = null;
+              }
+              this.countdownPrepareCountdown = 0;
+              this.isCountdownPreparing = false;
+              this.startCountdown(totalSeconds);
             }
-          }, 1000);
+          };
+          
+          // เริ่มนับถอยหลัง prepare
+          this.countdown = requestAnimationFrame(updatePrepareCountdown);
         },
         resetCountdown() {
           // เคลียร์สถานะก่อน
@@ -4325,9 +4397,11 @@
           this.isBlinking = false;
           this.isCountdownPreparing = false;
           
-          // หยุด interval
+          // หยุด interval/animation frame
           if (this.countdown) {
+            // ลองทั้งสองวิธีเผื่อมีทั้ง interval และ animation frame
             clearInterval(this.countdown);
+            cancelAnimationFrame(this.countdown);
             this.countdown = null;
           }
           
@@ -4383,11 +4457,13 @@
         
         // Mid Timer Methods (3 minutes)
         startMidTimer() {
+          this.midTimerIsPractice = false; // โหมดแข่ง (3 นาที)
           this.midTimerIsPreparing = true;
           this.midTimerPrepareCountdown = 4;
           // ป้องกัน interval ซ้อน
           if (this.midTimerPrepareInterval) {
             clearInterval(this.midTimerPrepareInterval);
+            cancelAnimationFrame(this.midTimerPrepareInterval);
             this.midTimerPrepareInterval = null;
           }
           // เปิด fullscreen อัตโนมัติ
@@ -4395,70 +4471,119 @@
             document.documentElement.requestFullscreen();
             this.isFullScreen = true;
           }
-          // นับถอยหลัง 5 วินาที
-          this.midTimerPrepareInterval = setInterval(() => {
-            if (this.midTimerPrepareCountdown > 0) {
-              this.midTimerPrepareCountdown--;
-              if (this.midTimerPrepareCountdown > 0) {
+          
+          // ใช้ performance.now() สำหรับนับถอยหลัง prepare
+          const prepareStartTime = performance.now();
+          let lastPrepareSecond = 4;
+          
+          const updatePrepare = () => {
+            const now = performance.now();
+            const elapsed = now - prepareStartTime;
+            const remainingMs = 4000 - elapsed;
+            
+            if (remainingMs > 0) {
+              const remainingSeconds = Math.ceil(remainingMs / 1000);
+              this.midTimerPrepareCountdown = remainingSeconds;
+              
+              if (remainingSeconds !== lastPrepareSecond && remainingSeconds > 0) {
                 this.playCountdownBeep();
-              } else {
-                this.playStartBeep();
-                clearInterval(this.midTimerPrepareInterval);
+                lastPrepareSecond = remainingSeconds;
+              }
+              
+              this.midTimerPrepareInterval = requestAnimationFrame(updatePrepare);
+            } else {
+              this.playStartBeep();
+              if (this.midTimerPrepareInterval) {
+                cancelAnimationFrame(this.midTimerPrepareInterval);
                 this.midTimerPrepareInterval = null;
-                this.midTimerIsPreparing = false;
-                this.midTimerRunning = true;
-                this.midTimerInterval = setInterval(() => {
-                  if (this.midTimerMilliseconds === 0) {
-                    if (this.midTimerSeconds === 0) {
-                      if (this.midTimerMinutes === 0) {
-                        // หมดเวลา
-                        this.pauseMidTimer();
-                        this.playBeepSound(3); // เสียงเตือน 3 ครั้ง
-                        return;
-                      }
-                      this.midTimerMinutes--;
-                      this.midTimerSeconds = 59;
-                      this.midTimerMilliseconds = 99;
-                      
-                      // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
-                      if (this.midTimerMinutes === 0 && this.midTimerSeconds < 10) {
-                        this.playCountdownBeep();
-                      }
-                    } else {
-                      this.midTimerSeconds--;
-                      this.midTimerMilliseconds = 99;
-                      
-                      // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
-                      if (this.midTimerMinutes === 0 && this.midTimerSeconds < 10) {
-                        this.playCountdownBeep();
-                      }
-                    }
-                  } else {
-                    this.midTimerMilliseconds--;
+              }
+              this.midTimerPrepareCountdown = 0;
+              this.midTimerIsPreparing = false;
+              this.midTimerRunning = true;
+              
+              // เริ่มจับเวลาจริงด้วย performance.now()
+              const timerStartTime = performance.now();
+              const totalDuration = (this.midTimerMinutes * 60 + this.midTimerSeconds) * 1000 + this.midTimerMilliseconds * 10;
+              let hasPlayedLastTenSeconds = false;
+              let hasPlayedAlarm = false;
+              
+              const updateTimer = () => {
+                if (!this.midTimerRunning) return;
+                
+                const now = performance.now();
+                const elapsed = now - timerStartTime;
+                const remaining = totalDuration - elapsed;
+                
+                if (remaining > 0) {
+                  // คำนวณเวลาที่เหลือ
+                  this.midTimerIsOvertime = false; // ยังไม่หมดเวลา
+                  const totalCentiseconds = Math.ceil(remaining / 10);
+                  this.midTimerMilliseconds = totalCentiseconds % 100;
+                  const totalSeconds = Math.floor(totalCentiseconds / 100);
+                  this.midTimerSeconds = totalSeconds % 60;
+                  this.midTimerMinutes = Math.floor(totalSeconds / 60);
+                  
+                  // คำนวณเวลาที่ใช้ไป
+                  const elapsedCentiseconds = Math.floor(elapsed / 10);
+                  this.midTimerElapsedMilliseconds = elapsedCentiseconds % 100;
+                  const elapsedSeconds = Math.floor(elapsedCentiseconds / 100);
+                  this.midTimerElapsedSeconds = elapsedSeconds % 60;
+                  this.midTimerElapsedMinutes = Math.floor(elapsedSeconds / 60);
+                  
+                  // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
+                  if (!hasPlayedLastTenSeconds && this.midTimerMinutes === 0 && this.midTimerSeconds <= 10 && this.midTimerSeconds > 0) {
+                    this.playCountdownBeep();
+                    hasPlayedLastTenSeconds = true;
+                  }
+                  // รีเซ็ต flag เมื่อข้ามช่วงเวลา
+                  if (this.midTimerSeconds > 10 || this.midTimerMinutes > 0) {
+                    hasPlayedLastTenSeconds = false;
                   }
                   
-                  // นับเพิ่ม (เวลาที่ใช้ไป)
-                  this.midTimerElapsedMilliseconds++;
-                  if (this.midTimerElapsedMilliseconds >= 100) {
-                    this.midTimerElapsedMilliseconds = 0;
-                    this.midTimerElapsedSeconds++;
-                    if (this.midTimerElapsedSeconds >= 60) {
-                      this.midTimerElapsedSeconds = 0;
-                      this.midTimerElapsedMinutes++;
-                    }
+                  this.midTimerInterval = requestAnimationFrame(updateTimer);
+                } else {
+                  // หมดเวลา - นับต่อเป็นติดลบ
+                  this.midTimerIsOvertime = true; // หมดเวลาแล้ว
+                  const overtimeMs = Math.abs(remaining);
+                  const totalCentiseconds = Math.floor(overtimeMs / 10);
+                  this.midTimerMilliseconds = totalCentiseconds % 100;
+                  const totalSeconds = Math.floor(totalCentiseconds / 100);
+                  this.midTimerSeconds = totalSeconds % 60;
+                  this.midTimerMinutes = Math.floor(totalSeconds / 60);
+                  
+                  // คำนวณเวลาที่ใช้ไปต่อ
+                  const elapsedCentiseconds = Math.floor(elapsed / 10);
+                  this.midTimerElapsedMilliseconds = elapsedCentiseconds % 100;
+                  const elapsedSeconds = Math.floor(elapsedCentiseconds / 100);
+                  this.midTimerElapsedSeconds = elapsedSeconds % 60;
+                  this.midTimerElapsedMinutes = Math.floor(elapsedSeconds / 60);
+                  
+                  // เล่นเสียงเตือนครั้งเดียว
+                  if (!hasPlayedAlarm) {
+                    this.playBeepSound(3);
+                    hasPlayedAlarm = true;
                   }
-                }, 10); // 10ms = 1 centisecond
-              }
+                  
+                  // นับต่อไปเรื่อยๆ
+                  this.midTimerInterval = requestAnimationFrame(updateTimer);
+                }
+              };
+              
+              this.midTimerInterval = requestAnimationFrame(updateTimer);
             }
-          }, 1000);
+          };
+          
+          this.midTimerPrepareInterval = requestAnimationFrame(updatePrepare);
         },
         // Mid Timer Practice (1 minute)
         startMidTimerPractice() {
+          this.midTimerIsPractice = true; // โหมดซ้อม (1 นาที)
           this.midTimerIsPreparing = true;
-          this.midTimerPrepareCountdown = 5;
+          this.midTimerPrepareCountdown = 4;
           // ป้องกัน interval ซ้อน
           if (this.midTimerPrepareInterval) {
             clearInterval(this.midTimerPrepareInterval);
+            cancelAnimationFrame(this.midTimerPrepareInterval);
             this.midTimerPrepareInterval = null;
           }
           // ตั้งเวลาเป็น 1 นาทีทันทีก่อนนับถอยหลัง
@@ -4473,67 +4598,114 @@
             document.documentElement.requestFullscreen();
             this.isFullScreen = true;
           }
-          // นับถอยหลัง 5 วินาที
-          this.midTimerPrepareInterval = setInterval(() => {
-            if (this.midTimerPrepareCountdown > 0) {
-              this.midTimerPrepareCountdown--;
-              if (this.midTimerPrepareCountdown > 0) {
+          
+          // ใช้ performance.now() สำหรับนับถอยหลัง prepare
+          const prepareStartTime = performance.now();
+          let lastPrepareSecond = 4;
+          
+          const updatePrepare = () => {
+            const now = performance.now();
+            const elapsed = now - prepareStartTime;
+            const remainingMs = 4000 - elapsed;
+            
+            if (remainingMs > 0) {
+              const remainingSeconds = Math.ceil(remainingMs / 1000);
+              this.midTimerPrepareCountdown = remainingSeconds;
+              
+              if (remainingSeconds !== lastPrepareSecond && remainingSeconds > 0) {
                 this.playCountdownBeep();
-              } else {
-                this.playStartBeep();
-                clearInterval(this.midTimerPrepareInterval);
+                lastPrepareSecond = remainingSeconds;
+              }
+              
+              this.midTimerPrepareInterval = requestAnimationFrame(updatePrepare);
+            } else {
+              this.playStartBeep();
+              if (this.midTimerPrepareInterval) {
+                cancelAnimationFrame(this.midTimerPrepareInterval);
                 this.midTimerPrepareInterval = null;
-                this.midTimerIsPreparing = false;
-                this.midTimerRunning = true;
-                this.midTimerInterval = setInterval(() => {
-                  if (this.midTimerMilliseconds === 0) {
-                    if (this.midTimerSeconds === 0) {
-                      if (this.midTimerMinutes === 0) {
-                        // หมดเวลา
-                        this.pauseMidTimer();
-                        this.playBeepSound(3); // เสียงเตือน 3 ครั้ง
-                        return;
-                      }
-                      this.midTimerMinutes--;
-                      this.midTimerSeconds = 59;
-                      this.midTimerMilliseconds = 99;
-                      
-                      // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
-                      if (this.midTimerMinutes === 0 && this.midTimerSeconds < 10) {
-                        this.playCountdownBeep();
-                      }
-                    } else {
-                      this.midTimerSeconds--;
-                      this.midTimerMilliseconds = 99;
-                      
-                      // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
-                      if (this.midTimerMinutes === 0 && this.midTimerSeconds < 10) {
-                        this.playCountdownBeep();
-                      }
-                    }
-                  } else {
-                    this.midTimerMilliseconds--;
+              }
+              this.midTimerPrepareCountdown = 0;
+              this.midTimerIsPreparing = false;
+              this.midTimerRunning = true;
+              
+              // เริ่มจับเวลาจริงด้วย performance.now()
+              const timerStartTime = performance.now();
+              const totalDuration = 60 * 1000; // 1 นาที
+              let hasPlayedLastTenSeconds = false;
+              let hasPlayedAlarm = false;
+              
+              const updateTimer = () => {
+                if (!this.midTimerRunning) return;
+                
+                const now = performance.now();
+                const elapsed = now - timerStartTime;
+                const remaining = totalDuration - elapsed;
+                
+                if (remaining > 0) {
+                  // คำนวณเวลาที่เหลือ
+                  this.midTimerIsOvertime = false; // ยังไม่หมดเวลา
+                  const totalCentiseconds = Math.ceil(remaining / 10);
+                  this.midTimerMilliseconds = totalCentiseconds % 100;
+                  const totalSeconds = Math.floor(totalCentiseconds / 100);
+                  this.midTimerSeconds = totalSeconds % 60;
+                  this.midTimerMinutes = Math.floor(totalSeconds / 60);
+                  
+                  // คำนวณเวลาที่ใช้ไป
+                  const elapsedCentiseconds = Math.floor(elapsed / 10);
+                  this.midTimerElapsedMilliseconds = elapsedCentiseconds % 100;
+                  const elapsedSeconds = Math.floor(elapsedCentiseconds / 100);
+                  this.midTimerElapsedSeconds = elapsedSeconds % 60;
+                  this.midTimerElapsedMinutes = Math.floor(elapsedSeconds / 60);
+                  
+                  // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
+                  if (!hasPlayedLastTenSeconds && this.midTimerMinutes === 0 && this.midTimerSeconds <= 10 && this.midTimerSeconds > 0) {
+                    this.playCountdownBeep();
+                    hasPlayedLastTenSeconds = true;
+                  }
+                  if (this.midTimerSeconds > 10 || this.midTimerMinutes > 0) {
+                    hasPlayedLastTenSeconds = false;
                   }
                   
-                  // นับเพิ่ม (เวลาที่ใช้ไป)
-                  this.midTimerElapsedMilliseconds++;
-                  if (this.midTimerElapsedMilliseconds >= 100) {
-                    this.midTimerElapsedMilliseconds = 0;
-                    this.midTimerElapsedSeconds++;
-                    if (this.midTimerElapsedSeconds >= 60) {
-                      this.midTimerElapsedSeconds = 0;
-                      this.midTimerElapsedMinutes++;
-                    }
+                  this.midTimerInterval = requestAnimationFrame(updateTimer);
+                } else {
+                  // หมดเวลา - นับต่อเป็นติดลบ
+                  this.midTimerIsOvertime = true; // หมดเวลาแล้ว
+                  const overtimeMs = Math.abs(remaining);
+                  const totalCentiseconds = Math.floor(overtimeMs / 10);
+                  this.midTimerMilliseconds = totalCentiseconds % 100;
+                  const totalSeconds = Math.floor(totalCentiseconds / 100);
+                  this.midTimerSeconds = totalSeconds % 60;
+                  this.midTimerMinutes = Math.floor(totalSeconds / 60);
+                  
+                  // คำนวณเวลาที่ใช้ไปต่อ
+                  const elapsedCentiseconds = Math.floor(elapsed / 10);
+                  this.midTimerElapsedMilliseconds = elapsedCentiseconds % 100;
+                  const elapsedSeconds = Math.floor(elapsedCentiseconds / 100);
+                  this.midTimerElapsedSeconds = elapsedSeconds % 60;
+                  this.midTimerElapsedMinutes = Math.floor(elapsedSeconds / 60);
+                  
+                  // เล่นเสียงเตือนครั้งเดียว
+                  if (!hasPlayedAlarm) {
+                    this.playBeepSound(3);
+                    hasPlayedAlarm = true;
                   }
-                }, 10); // 10ms = 1 centisecond
-              }
+                  
+                  // นับต่อไปเรื่อยๆ
+                  this.midTimerInterval = requestAnimationFrame(updateTimer);
+                }
+              };
+              
+              this.midTimerInterval = requestAnimationFrame(updateTimer);
             }
-          }, 1000);
+          };
+          
+          this.midTimerPrepareInterval = requestAnimationFrame(updatePrepare);
         },
         pauseMidTimer() {
           this.midTimerRunning = false;
           if (this.midTimerInterval) {
             clearInterval(this.midTimerInterval);
+            cancelAnimationFrame(this.midTimerInterval);
             this.midTimerInterval = null;
           }
         },
@@ -4547,6 +4719,8 @@
           this.midTimerElapsedMilliseconds = 0;
           this.midTimerIsPreparing = false;
           this.midTimerPrepareCountdown = 0;
+          this.midTimerIsPractice = false; // reset flag
+          this.midTimerIsOvertime = false; // reset flag
         },
         getTimerDisplayStyle() {
           const isTimeUp = this.midTimerMinutes === 0 && this.midTimerSeconds === 0;
@@ -4580,11 +4754,13 @@
         
         // High Timer Methods (5 minutes)
         startHighTimer() {
+          this.highTimerIsPractice = false; // โหมดแข่ง (5 นาที)
           this.highTimerIsPreparing = true;
           this.highTimerPrepareCountdown = 4;
           // ป้องกัน interval ซ้อน
           if (this.highTimerPrepareInterval) {
             clearInterval(this.highTimerPrepareInterval);
+            cancelAnimationFrame(this.highTimerPrepareInterval);
             this.highTimerPrepareInterval = null;
           }
           // เปิด fullscreen อัตโนมัติ
@@ -4592,66 +4768,118 @@
             document.documentElement.requestFullscreen();
             this.isFullScreen = true;
           }
-          // นับถอยหลัง 5 วินาที
-          this.highTimerPrepareInterval = setInterval(() => {
-            if (this.highTimerPrepareCountdown > 0) {
-              this.highTimerPrepareCountdown--;
-              if (this.highTimerPrepareCountdown > 0) {
+          
+          // ใช้ performance.now() สำหรับนับถอยหลัง prepare
+          const prepareStartTime = performance.now();
+          let lastPrepareSecond = 4;
+          
+          const updatePrepare = () => {
+            const now = performance.now();
+            const elapsed = now - prepareStartTime;
+            const remainingMs = 4000 - elapsed;
+            
+            if (remainingMs > 0) {
+              const remainingSeconds = Math.ceil(remainingMs / 1000);
+              this.highTimerPrepareCountdown = remainingSeconds;
+              
+              if (remainingSeconds !== lastPrepareSecond && remainingSeconds > 0) {
                 this.playCountdownBeep();
-              } else {
-                this.playStartBeep();
-                clearInterval(this.highTimerPrepareInterval);
+                lastPrepareSecond = remainingSeconds;
+              }
+              
+              this.highTimerPrepareInterval = requestAnimationFrame(updatePrepare);
+            } else {
+              this.playStartBeep();
+              if (this.highTimerPrepareInterval) {
+                cancelAnimationFrame(this.highTimerPrepareInterval);
                 this.highTimerPrepareInterval = null;
-                this.highTimerIsPreparing = false;
-                this.highTimerRunning = true;
-                this.highTimerInterval = setInterval(() => {
-                  if (this.highTimerMilliseconds === 0) {
-                    if (this.highTimerSeconds === 0) {
-                      if (this.highTimerMinutes === 0) {
-                        this.pauseHighTimer();
-                        this.playBeepSound(3);
-                        return;
-                      }
-                      this.highTimerMinutes--;
-                      this.highTimerSeconds = 59;
-                      this.highTimerMilliseconds = 99;
-                      
-                      if (this.highTimerMinutes === 0 && this.highTimerSeconds < 10) {
-                        this.playCountdownBeep();
-                      }
-                    } else {
-                      this.highTimerSeconds--;
-                      this.highTimerMilliseconds = 99;
-                      
-                      if (this.highTimerMinutes === 0 && this.highTimerSeconds < 10) {
-                        this.playCountdownBeep();
-                      }
-                    }
-                  } else {
-                    this.highTimerMilliseconds--;
+              }
+              this.highTimerPrepareCountdown = 0;
+              this.highTimerIsPreparing = false;
+              this.highTimerRunning = true;
+              
+              // เริ่มจับเวลาจริงด้วย performance.now()
+              const timerStartTime = performance.now();
+              const totalDuration = (this.highTimerMinutes * 60 + this.highTimerSeconds) * 1000 + this.highTimerMilliseconds * 10;
+              let hasPlayedLastTenSeconds = false;
+              let hasPlayedAlarm = false;
+              
+              const updateTimer = () => {
+                if (!this.highTimerRunning) return;
+                
+                const now = performance.now();
+                const elapsed = now - timerStartTime;
+                const remaining = totalDuration - elapsed;
+                
+                if (remaining > 0) {
+                  // คำนวณเวลาที่เหลือ
+                  this.highTimerIsOvertime = false; // ยังไม่หมดเวลา
+                  const totalCentiseconds = Math.ceil(remaining / 10);
+                  this.highTimerMilliseconds = totalCentiseconds % 100;
+                  const totalSeconds = Math.floor(totalCentiseconds / 100);
+                  this.highTimerSeconds = totalSeconds % 60;
+                  this.highTimerMinutes = Math.floor(totalSeconds / 60);
+                  
+                  // คำนวณเวลาที่ใช้ไป
+                  const elapsedCentiseconds = Math.floor(elapsed / 10);
+                  this.highTimerElapsedMilliseconds = elapsedCentiseconds % 100;
+                  const elapsedSeconds = Math.floor(elapsedCentiseconds / 100);
+                  this.highTimerElapsedSeconds = elapsedSeconds % 60;
+                  this.highTimerElapsedMinutes = Math.floor(elapsedSeconds / 60);
+                  
+                  // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
+                  if (!hasPlayedLastTenSeconds && this.highTimerMinutes === 0 && this.highTimerSeconds <= 10 && this.highTimerSeconds > 0) {
+                    this.playCountdownBeep();
+                    hasPlayedLastTenSeconds = true;
+                  }
+                  if (this.highTimerSeconds > 10 || this.highTimerMinutes > 0) {
+                    hasPlayedLastTenSeconds = false;
                   }
                   
-                  this.highTimerElapsedMilliseconds++;
-                  if (this.highTimerElapsedMilliseconds >= 100) {
-                    this.highTimerElapsedMilliseconds = 0;
-                    this.highTimerElapsedSeconds++;
-                    if (this.highTimerElapsedSeconds >= 60) {
-                      this.highTimerElapsedSeconds = 0;
-                      this.highTimerElapsedMinutes++;
-                    }
+                  this.highTimerInterval = requestAnimationFrame(updateTimer);
+                } else {
+                  // หมดเวลา - นับต่อเป็นติดลบ
+                  this.highTimerIsOvertime = true; // หมดเวลาแล้ว
+                  const overtimeMs = Math.abs(remaining);
+                  const totalCentiseconds = Math.floor(overtimeMs / 10);
+                  this.highTimerMilliseconds = totalCentiseconds % 100;
+                  const totalSeconds = Math.floor(totalCentiseconds / 100);
+                  this.highTimerSeconds = totalSeconds % 60;
+                  this.highTimerMinutes = Math.floor(totalSeconds / 60);
+                  
+                  // คำนวณเวลาที่ใช้ไปต่อ
+                  const elapsedCentiseconds = Math.floor(elapsed / 10);
+                  this.highTimerElapsedMilliseconds = elapsedCentiseconds % 100;
+                  const elapsedSeconds = Math.floor(elapsedCentiseconds / 100);
+                  this.highTimerElapsedSeconds = elapsedSeconds % 60;
+                  this.highTimerElapsedMinutes = Math.floor(elapsedSeconds / 60);
+                  
+                  // เล่นเสียงเตือนครั้งเดียว
+                  if (!hasPlayedAlarm) {
+                    this.playBeepSound(3);
+                    hasPlayedAlarm = true;
                   }
-                }, 10);
-              }
+                  
+                  // นับต่อไปเรื่อยๆ
+                  this.highTimerInterval = requestAnimationFrame(updateTimer);
+                }
+              };
+              
+              this.highTimerInterval = requestAnimationFrame(updateTimer);
             }
-          }, 1000);
+          };
+          
+          this.highTimerPrepareInterval = requestAnimationFrame(updatePrepare);
         },
         // High Timer Practice (1 minute)
         startHighTimerPractice() {
+          this.highTimerIsPractice = true; // โหมดซ้อม (1 นาที)
           this.highTimerIsPreparing = true;
           this.highTimerPrepareCountdown = 4;
           // ป้องกัน interval ซ้อน
           if (this.highTimerPrepareInterval) {
             clearInterval(this.highTimerPrepareInterval);
+            cancelAnimationFrame(this.highTimerPrepareInterval);
             this.highTimerPrepareInterval = null;
           }
           // ตั้งเวลาเป็น 1 นาทีทันทีก่อนนับถอยหลัง
@@ -4666,63 +4894,114 @@
             document.documentElement.requestFullscreen();
             this.isFullScreen = true;
           }
-          // นับถอยหลัง 5 วินาที
-          this.highTimerPrepareInterval = setInterval(() => {
-            if (this.highTimerPrepareCountdown > 0) {
-              this.highTimerPrepareCountdown--;
-              if (this.highTimerPrepareCountdown > 0) {
+          
+          // ใช้ performance.now() สำหรับนับถอยหลัง prepare
+          const prepareStartTime = performance.now();
+          let lastPrepareSecond = 4;
+          
+          const updatePrepare = () => {
+            const now = performance.now();
+            const elapsed = now - prepareStartTime;
+            const remainingMs = 4000 - elapsed;
+            
+            if (remainingMs > 0) {
+              const remainingSeconds = Math.ceil(remainingMs / 1000);
+              this.highTimerPrepareCountdown = remainingSeconds;
+              
+              if (remainingSeconds !== lastPrepareSecond && remainingSeconds > 0) {
                 this.playCountdownBeep();
-              } else {
-                this.playStartBeep();
-                clearInterval(this.highTimerPrepareInterval);
+                lastPrepareSecond = remainingSeconds;
+              }
+              
+              this.highTimerPrepareInterval = requestAnimationFrame(updatePrepare);
+            } else {
+              this.playStartBeep();
+              if (this.highTimerPrepareInterval) {
+                cancelAnimationFrame(this.highTimerPrepareInterval);
                 this.highTimerPrepareInterval = null;
-                this.highTimerIsPreparing = false;
-                this.highTimerRunning = true;
-                this.highTimerInterval = setInterval(() => {
-                  if (this.highTimerMilliseconds === 0) {
-                    if (this.highTimerSeconds === 0) {
-                      if (this.highTimerMinutes === 0) {
-                        this.pauseHighTimer();
-                        this.playBeepSound(3);
-                        return;
-                      }
-                      this.highTimerMinutes--;
-                      this.highTimerSeconds = 59;
-                      this.highTimerMilliseconds = 99;
-                      
-                      if (this.highTimerMinutes === 0 && this.highTimerSeconds < 10) {
-                        this.playCountdownBeep();
-                      }
-                    } else {
-                      this.highTimerSeconds--;
-                      this.highTimerMilliseconds = 99;
-                      
-                      if (this.highTimerMinutes === 0 && this.highTimerSeconds < 10) {
-                        this.playCountdownBeep();
-                      }
-                    }
-                  } else {
-                    this.highTimerMilliseconds--;
+              }
+              this.highTimerPrepareCountdown = 0;
+              this.highTimerIsPreparing = false;
+              this.highTimerRunning = true;
+              
+              // เริ่มจับเวลาจริงด้วย performance.now()
+              const timerStartTime = performance.now();
+              const totalDuration = 60 * 1000; // 1 นาที
+              let hasPlayedLastTenSeconds = false;
+              let hasPlayedAlarm = false;
+              
+              const updateTimer = () => {
+                if (!this.highTimerRunning) return;
+                
+                const now = performance.now();
+                const elapsed = now - timerStartTime;
+                const remaining = totalDuration - elapsed;
+                
+                if (remaining > 0) {
+                  // คำนวณเวลาที่เหลือ
+                  this.highTimerIsOvertime = false; // ยังไม่หมดเวลา
+                  const totalCentiseconds = Math.ceil(remaining / 10);
+                  this.highTimerMilliseconds = totalCentiseconds % 100;
+                  const totalSeconds = Math.floor(totalCentiseconds / 100);
+                  this.highTimerSeconds = totalSeconds % 60;
+                  this.highTimerMinutes = Math.floor(totalSeconds / 60);
+                  
+                  // คำนวณเวลาที่ใช้ไป
+                  const elapsedCentiseconds = Math.floor(elapsed / 10);
+                  this.highTimerElapsedMilliseconds = elapsedCentiseconds % 100;
+                  const elapsedSeconds = Math.floor(elapsedCentiseconds / 100);
+                  this.highTimerElapsedSeconds = elapsedSeconds % 60;
+                  this.highTimerElapsedMinutes = Math.floor(elapsedSeconds / 60);
+                  
+                  // เล่นเสียงเมื่อเหลือ 10 วินาทีสุดท้าย
+                  if (!hasPlayedLastTenSeconds && this.highTimerMinutes === 0 && this.highTimerSeconds <= 10 && this.highTimerSeconds > 0) {
+                    this.playCountdownBeep();
+                    hasPlayedLastTenSeconds = true;
+                  }
+                  if (this.highTimerSeconds > 10 || this.highTimerMinutes > 0) {
+                    hasPlayedLastTenSeconds = false;
                   }
                   
-                  this.highTimerElapsedMilliseconds++;
-                  if (this.highTimerElapsedMilliseconds >= 100) {
-                    this.highTimerElapsedMilliseconds = 0;
-                    this.highTimerElapsedSeconds++;
-                    if (this.highTimerElapsedSeconds >= 60) {
-                      this.highTimerElapsedSeconds = 0;
-                      this.highTimerElapsedMinutes++;
-                    }
+                  this.highTimerInterval = requestAnimationFrame(updateTimer);
+                } else {
+                  // หมดเวลา - นับต่อเป็นติดลบ
+                  this.highTimerIsOvertime = true; // หมดเวลาแล้ว
+                  const overtimeMs = Math.abs(remaining);
+                  const totalCentiseconds = Math.floor(overtimeMs / 10);
+                  this.highTimerMilliseconds = totalCentiseconds % 100;
+                  const totalSeconds = Math.floor(totalCentiseconds / 100);
+                  this.highTimerSeconds = totalSeconds % 60;
+                  this.highTimerMinutes = Math.floor(totalSeconds / 60);
+                  
+                  // คำนวณเวลาที่ใช้ไปต่อ
+                  const elapsedCentiseconds = Math.floor(elapsed / 10);
+                  this.highTimerElapsedMilliseconds = elapsedCentiseconds % 100;
+                  const elapsedSeconds = Math.floor(elapsedCentiseconds / 100);
+                  this.highTimerElapsedSeconds = elapsedSeconds % 60;
+                  this.highTimerElapsedMinutes = Math.floor(elapsedSeconds / 60);
+                  
+                  // เล่นเสียงเตือนครั้งเดียว
+                  if (!hasPlayedAlarm) {
+                    this.playBeepSound(3);
+                    hasPlayedAlarm = true;
                   }
-                }, 10);
-              }
+                  
+                  // นับต่อไปเรื่อยๆ
+                  this.highTimerInterval = requestAnimationFrame(updateTimer);
+                }
+              };
+              
+              this.highTimerInterval = requestAnimationFrame(updateTimer);
             }
-          }, 1000);
+          };
+          
+          this.highTimerPrepareInterval = requestAnimationFrame(updatePrepare);
         },
         pauseHighTimer() {
           this.highTimerRunning = false;
           if (this.highTimerInterval) {
             clearInterval(this.highTimerInterval);
+            cancelAnimationFrame(this.highTimerInterval);
             this.highTimerInterval = null;
           }
         },
@@ -4736,6 +5015,8 @@
           this.highTimerElapsedMilliseconds = 0;
           this.highTimerIsPreparing = false;
           this.highTimerPrepareCountdown = 0;
+          this.highTimerIsPractice = false; // reset flag
+          this.highTimerIsOvertime = false; // reset flag
         },
         getHighTimerDisplayStyle() {
           const isTimeUp = this.highTimerMinutes === 0 && this.highTimerSeconds === 0;
